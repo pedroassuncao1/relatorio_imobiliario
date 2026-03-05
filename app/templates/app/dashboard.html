@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>BI Imobiliário - CORE Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root { --bi-dark-blue: #000040; --bi-sidebar-blue: #00008b; --bi-bg: #e5e5e5; }
+        body { background-color: var(--bi-bg); font-family: 'Segoe UI', sans-serif; }
+        
+        /* Barra Lateral de Filtros */
+        .sidebar { background-color: var(--bi-sidebar-blue); color: white; min-height: 100vh; padding: 15px; }
+        .sidebar h6 { font-size: 0.75rem; font-weight: bold; margin-bottom: 5px; color: #fff; }
+        .form-select-sm, .form-control-sm { background-color: #000040; color: white; border: 1px solid #ffffff50; font-size: 0.8rem; }
+        .range-label { font-size: 0.7rem; color: #ccc; }
+
+        /* Cards Superiores (KPIs) */
+        .kpi-card { background: white; border: none; text-align: center; padding: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); height: 80px; }
+        .kpi-value { font-size: 1.4rem; font-weight: bold; color: #000; display: block; }
+        .kpi-label { font-size: 0.65rem; color: #00008b; font-weight: bold; }
+
+        /* Mapa e Gráficos */
+        .chart-card { background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 10px; }
+        #map { height: 400px; border-radius: 4px; width: 100%; }
+        .insight-box { border: 2px solid #ffd700; background-color: #fff; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <div class="col-md-2 sidebar">
+            <div class="text-center mb-3">
+                <h4 style="font-weight: 900; letter-spacing: -1px;">CORE <span style="font-size: 1rem;">🔍</span></h4>
+            </div>
+
+            <form method="GET" id="filterForm">
+                <h6>Nº de Quartos</h6>
+                <select name="quartos" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for q in lista_quartos %}
+                        <option value="{{ q }}" {% if request.GET.quartos == q|stringformat:"i" %}selected{% endif %}>{{ q }} Quartos</option>
+                    {% endfor %}
+                </select>
+
+                <h6>Empreendedor</h6>
+                <select name="construtora" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for c in lista_construtoras %}
+                        <option value="{{ c }}" {% if request.GET.construtora == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+
+                <h6>Data de Entrega</h6>
+                <div class="d-flex gap-1 mb-2">
+                    <input type="date" name="data_inicio" class="form-control form-control-sm" value="{{ request.GET.data_inicio }}" onchange="this.form.submit()">
+                    <input type="date" name="data_fim" class="form-control form-control-sm" value="{{ request.GET.data_fim }}" onchange="this.form.submit()">
+                </div>
+
+                <h6>Bairro</h6>
+                <select name="bairro" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for b in lista_bairros %}
+                        <option value="{{ b }}" {% if request.GET.bairro == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+
+                <h6>Fase da Obra</h6>
+                <select name="fase" class="form-select form-select-sm mb-2" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for f in lista_fases %}
+                        <option value="{{ f }}" {% if request.GET.fase == f %}selected{% endif %}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+
+                <h6>Preço Médio da Unidade m²</h6>
+                <input type="range" name="preco_m2_max" class="form-range" min="0" max="30000" step="500" value="{{ request.GET.preco_m2_max|default:30000 }}" onchange="this.form.submit()">
+                
+                <div class="mt-3">
+                    <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-light w-100 mb-1">Limpar Filtros</a>
+                    <a href="{% url 'upload_planilha' %}" class="btn btn-sm btn-light w-100">Novo Upload</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-10 p-3">
+            <div class="row g-2 mb-2">
+                <div class="col">
+                    <div class="kpi-card"><span class="kpi-value">{{ total_unidades }}</span><span class="kpi-label">Total de Unidades</span></div>
+                </div>
+                <div class="col">
+                    <div class="kpi-card"><span class="kpi-value">{{ total_estoque }}</span><span class="kpi-label">Estoque</span></div>
+                </div>
+                <div class="col">
+                    <div class="kpi-card"><span class="kpi-value">{{ total_vendidas }}</span><span class="kpi-label">Unidades Vendidas</span></div>
+                </div>
+                <div class="col">
+                    <div class="kpi-card"><span class="kpi-value">{{ media_area|floatformat:1 }}</span><span class="kpi-label">Área da Unidade M²</span></div>
+                </div>
+                <div class="col">
+                    <div class="kpi-card"><span class="kpi-value">{{ media_m2|floatformat:2 }}</span><span class="kpi-label">Preço Médio m²</span></div>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <strong>✨ Insights da IA (Gemini):</strong><br>
+                {{ insight|linebreaks }}
+            </div>
+
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <div class="chart-card">
+                        <div id="map"></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="chart-card text-center">
+                        <h6 class="kpi-label">Estoque vs Unidades Vendidas</h6>
+                        <canvas id="chartDoughnut" height="150"></canvas>
+                    </div>
+                    <div class="chart-card text-center">
+                        <h6 class="kpi-label">Nº de Unidades por Bairro</h6>
+                        <canvas id="chartBairros" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    // Configuração do Gráfico Rosca
+    new Chart(document.getElementById('chartDoughnut'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Estoque', 'Vendido'],
+            datasets: [{
+                data: [{{ total_estoque }}, {{ total_vendidas }}],
+                backgroundColor: ['#3498db', '#00008b']
+            }]
+        }
+    });
+
+    // Configuração do Gráfico de Bairros
+    new Chart(document.getElementById('chartBairros'), {
+        type: 'pie',
+        data: {
+            labels: [{% for b in lista_bairros %}"{{ b }}",{% endfor %}],
+            datasets: [{
+                data: [{% for count in lista_contagem_bairros %}{{ count }},{% endfor %}],
+                backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#2ecc71']
+            }]
+        }
+    });
+
+    // Mapa
+    var map = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    var markers = L.featureGroup();
+
+    {% for item in dados %}
+    {% if item.latitude and item.longitude %}
+    L.circleMarker([{{ item.latitude|stringformat:"f" }}, {{ item.longitude|stringformat:"f" }}], {
+        radius: 7, fillColor: "#ff4500", color: "#fff", weight: 2, fillOpacity: 0.9
+    }).bindPopup("<b>{{ item.nome }}</b><br>Bairro: {{ item.bairro }}").addTo(markers);
+    {% endif %}
+    {% endfor %}
+
+    markers.addTo(map);
+    if (markers.getLayers().length > 0) map.fitBounds(markers.getBounds());
+    else map.setView([-8.05, -34.9], 12);
+</script>
+</body>
+</html>
