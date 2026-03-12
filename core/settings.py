@@ -26,6 +26,9 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
 ]
 
+#formatação
+USE_L10N = False
+
 # ==============================
 # APPS
 # ==============================
