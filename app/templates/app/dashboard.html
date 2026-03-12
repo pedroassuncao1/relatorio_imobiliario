@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!item.latitude || !item.longitude) return;
 
         const circle = L.circleMarker([item.latitude, item.longitude], {
-            radius: 9,
+            radius: 14,
             fillColor: coresBairros[item.bairro] || '#3498db',
             color: "#fff",
             weight: 2,
