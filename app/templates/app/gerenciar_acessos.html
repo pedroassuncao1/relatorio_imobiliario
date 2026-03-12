@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>CORE — Acessos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --dark-blue: #000040; --mid-blue: #00008b; }
+        * { box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: #e5e5e5;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--dark-blue), var(--mid-blue));
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navbar-brand {
+            color: white; font-size: 1.4rem; font-weight: 900;
+            letter-spacing: -1px; text-decoration: none;
+        }
+        .navbar-right { display: flex; align-items: center; gap: 12px; }
+        .navbar-user { color: rgba(255,255,255,0.7); font-size: 0.8rem; }
+        .navbar-user strong { color: #ffd700; }
+        .btn-nav {
+            font-size: 0.75rem; padding: 5px 14px; border-radius: 4px;
+            text-decoration: none; font-weight: 600; transition: all 0.2s;
+        }
+        .btn-nav-outline { border: 1px solid rgba(255,255,255,0.4); color: white; }
+        .btn-nav-outline:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        .page-content { max-width: 1000px; margin: 0 auto; padding: 32px 16px; }
+
+        .page-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 24px;
+        }
+        .page-header a { font-size: 0.8rem; color: #888; text-decoration: none; }
+        .page-header a:hover { color: var(--mid-blue); }
+        .page-header h2 {
+            font-size: 1.1rem; font-weight: 700;
+            color: var(--dark-blue); margin: 0;
+        }
+
+        /* ── Cards de usuário ── */
+        .usuario-card {
+            background: white; border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--mid-blue);
+            padding: 20px 24px; margin-bottom: 16px;
+        }
+
+        .usuario-card-header {
+            display: flex; align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .usuario-nome {
+            font-size: 0.95rem; font-weight: 700;
+            color: var(--dark-blue);
+        }
+
+        .badge-count {
+            background: #e8f0fe; color: var(--mid-blue);
+            padding: 3px 12px; border-radius: 20px;
+            font-size: 0.72rem; font-weight: 700;
+        }
+
+        /* ── Grid de dashboards (checkboxes) ── */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .dash-check-item {
+            display: flex; align-items: center; gap: 8px;
+            background: #f8f9ff; border: 2px solid #e8eaf0;
+            border-radius: 6px; padding: 8px 12px;
+            cursor: pointer; transition: all 0.2s;
+        }
+
+        .dash-check-item:hover {
+            border-color: var(--mid-blue);
+            background: #f0f4ff;
+        }
+
+        .dash-check-item.checked {
+            border-color: var(--mid-blue);
+            background: #e8f0fe;
+        }
+
+        .dash-check-item input[type="checkbox"] {
+            accent-color: var(--mid-blue);
+            width: 16px; height: 16px;
+            cursor: pointer;
+        }
+
+        .dash-check-label {
+            font-size: 0.8rem; font-weight: 600;
+            color: var(--dark-blue); cursor: pointer;
+            line-height: 1.3;
+        }
+
+        .dash-check-meta {
+            font-size: 0.68rem; color: #888;
+            font-weight: 400;
+        }
+
+        .btn-salvar {
+            background: linear-gradient(135deg, var(--dark-blue), var(--mid-blue));
+            color: white; border: none; border-radius: 6px;
+            padding: 8px 24px; font-size: 0.8rem;
+            font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; transition: opacity 0.2s;
+            cursor: pointer;
+        }
+        .btn-salvar:hover { opacity: 0.9; }
+
+        /* ── Empty ── */
+        .empty-viewers {
+            text-align: center; padding: 48px;
+            color: #aaa; background: white;
+            border-radius: 8px;
+        }
+
+        .messages-box { margin-bottom: 16px; }
+
+        /* Selecionar todos */
+        .btn-select-all {
+            font-size: 0.72rem; color: var(--mid-blue);
+            background: none; border: none;
+            cursor: pointer; padding: 0;
+            text-decoration: underline;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="navbar-brand" href="{% url 'lista_dashboards' %}">CORE 🔍</a>
+    <div class="navbar-right">
+        <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav btn-nav-outline">← Voltar</a>
+    </div>
+</nav>
+
+<div class="page-content">
+
+    <div class="page-header">
+        <a href="{% url 'lista_dashboards' %}">Home</a>
+        <span style="color:#ccc;">›</span>
+        <h2>🔑 Gerenciar Acessos</h2>
+    </div>
+
+    {% if messages %}
+        <div class="messages-box">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}
+                    alert-dismissible fade show" role="alert" style="font-size:0.85rem;">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if usuarios_com_acessos %}
+        {% for item in usuarios_com_acessos %}
+        <div class="usuario-card">
+            <div class="usuario-card-header">
+                <span class="usuario-nome">👤 {{ item.usuario.username }}</span>
+                <span class="badge-count" id="count-{{ item.usuario.id }}">
+                    {{ item.ids_liberados|length }} acesso(s)
+                </span>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="usuario_id" value="{{ item.usuario.id }}">
+
+                <button type="button" class="btn-select-all"
+                    onclick="toggleAll({{ item.usuario.id }})">
+                    Marcar / desmarcar todos
+                </button>
+
+                <div class="dash-grid" id="grid-{{ item.usuario.id }}">
+                    {% for dash in dashboards %}
+                        <label class="dash-check-item {% if dash.id in item.ids_liberados %}checked{% endif %}"
+                            id="label-{{ item.usuario.id }}-{{ dash.id }}">
+                            <input
+                                type="checkbox"
+                                name="dashboards"
+                                value="{{ dash.id }}"
+                                {% if dash.id in item.ids_liberados %}checked{% endif %}
+                                onchange="updateCard({{ item.usuario.id }})"
+                            >
+                            <div>
+                                <div class="dash-check-label">{{ dash.nome }}</div>
+                                <div class="dash-check-meta">
+                                    {{ dash.criado_em|date:"d/m/Y" }}
+                                </div>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn-salvar">
+                    💾 Salvar acessos de {{ item.usuario.username }}
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+
+    {% else %}
+        <div class="empty-viewers">
+            <h3>Nenhum viewer cadastrado</h3>
+            <p>Crie usuários com perfil <b>Viewer</b> primeiro.</p>
+            <a href="{% url 'gerenciar_usuarios' %}"
+            style="color: var(--mid-blue); font-weight:600;">
+                → Ir para Usuários
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Atualiza o badge de contagem ao marcar/desmarcar
+    function updateCard(userId) {
+        const grid     = document.getElementById('grid-' + userId);
+        const checks   = grid.querySelectorAll('input[type="checkbox"]');
+        const count    = document.getElementById('count-' + userId);
+        let marcados   = 0;
+
+        checks.forEach(cb => {
+            const label = cb.closest('.dash-check-item');
+            if (cb.checked) {
+                label.classList.add('checked');
+                marcados++;
+            } else {
+                label.classList.remove('checked');
+            }
+        });
+
+        count.textContent = marcados + ' acesso(s)';
+    }
+
+    // Marcar / desmarcar todos
+    function toggleAll(userId) {
+        const grid   = document.getElementById('grid-' + userId);
+        const checks = grid.querySelectorAll('input[type="checkbox"]');
+        const todos  = Array.from(checks).every(cb => cb.checked);
+
+        checks.forEach(cb => { cb.checked = !todos; });
+        updateCard(userId);
+    }
+
+    // Inicializa contagens ao carregar
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('[id^="grid-"]').forEach(grid => {
+            const userId = grid.id.replace('grid-', '');
+            updateCard(userId);
+        });
+    });
+</script>
+</body>
+</html>

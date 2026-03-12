@@ -32,8 +32,16 @@ except Exception as e:
 # CONFIGURAÇÃO DO GEOCODER
 # ==============================
 
-geolocator = Nominatim(user_agent="meu_app_imobiliario_final")
-geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+geolocator = Nominatim(
+    user_agent="meu_app_imobiliario_final",
+    timeout=10  
+)
+geocode = RateLimiter(
+    geolocator.geocode,
+    min_delay_seconds=1,
+    max_retries=2,
+    error_wait_seconds=3
+)
 
 # ==============================
 # FUNÇÕES
@@ -52,7 +60,7 @@ def buscar_coordenadas(rua, bairro, cidade):
         # Remove possíveis siglas duplicadas tipo Recife/PE ou Recife-PE
         cidade = cidade.replace("/", " ").replace("-", " ")
 
-        endereco_formatado = f"{rua}, {bairro}, {cidade}, Brasil"
+        endereco_formatado = f"{rua}, {bairro}, {cidade}"
 
         print("GEOCODING:", endereco_formatado)
 
@@ -63,7 +71,7 @@ def buscar_coordenadas(rua, bairro, cidade):
             return location.latitude, location.longitude
 
         # 🔁 Fallback inteligente
-        endereco_fallback = f"{bairro}, {cidade}, Brasil"
+        endereco_fallback = f"{bairro}, {cidade}"
         print("FALLBACK:", endereco_fallback)
 
         location = geocode(endereco_fallback)
@@ -104,6 +112,9 @@ def mapear_colunas_com_ia(colunas):
     - nome, categoria, construtora, endereco, bairro, cidade
     - unidades_totais, unidades_vendidas, preco_m2, preco_unidade
     - area_unidade, estoque, quartos, vagas_garagem, fase_obra, data_entrega
+
+    IMPORTANTE: Na coluna de 'quartos', podem existir valores como 'STUDIO'. 
+    Apenas identifique a coluna correta.
     
     REGRAS CRÍTICAS:
     1. Retorne APENAS o objeto JSON puro.
