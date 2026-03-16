@@ -88,9 +88,14 @@
         /* ── Overlay (mobile) ── */
         .sidebar-overlay {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            z-index: 150; backdrop-filter: blur(2px);
+            z-index: 1500; backdrop-filter: blur(2px);
         }
         .sidebar-overlay.active { display: block; }
+
+        /* Força o Leaflet a ficar abaixo da sidebar e overlay */
+        .leaflet-pane,
+        .leaflet-top,
+        .leaflet-bottom { z-index: 400 !important; }
 
         /* ── Sidebar ── */
         .sidebar {
@@ -108,6 +113,7 @@
                 width: min(var(--sidebar-w), 88vw);
                 transform: translateX(-110%);
                 box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+                z-index: 1600;
             }
             .sidebar.open { transform: translateX(0); }
         }
