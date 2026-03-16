@@ -1,174 +1,176 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CORE — Acessos</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --dark-blue: #000040; --mid-blue: #00008b; }
-        * { box-sizing: border-box; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            min-height: 100vh;
-            background: #e5e5e5;
-            font-family: 'Segoe UI', sans-serif;
+        :root {
+            --navy: #0a0e27;
+            --blue-deep: #1a237e;
+            --blue-mid: #1565c0;
+            --blue-bright: #1976d2;
+            --gold: #fbbf24;
+            --border: #e2e8f4;
+            --text-primary: #0f1535;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --surface-2: #f8faff;
+            --surface-3: #f0f4ff;
         }
+
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #eef2f9; min-height: 100vh; }
 
         .navbar {
-            background: linear-gradient(135deg, var(--dark-blue), var(--mid-blue));
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%);
+            padding: 0 24px; height: 60px; display: flex; align-items: center;
+            justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: sticky; top: 0; z-index: 100;
         }
-        .navbar-brand {
-            color: white; font-size: 1.4rem; font-weight: 900;
-            letter-spacing: -1px; text-decoration: none;
+
+        .navbar-brand img {
+            height: clamp(28px, 4vw, 44px); /* mín 28px · flui com a tela · máx 44px */
+            width: auto;
+            max-width: 160px;
+            object-fit: contain;
+            display: block;
         }
+ 
+        .navbar-badge { font-size: 0.62rem; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); font-weight: 500; }
         .navbar-right { display: flex; align-items: center; gap: 12px; }
-        .navbar-user { color: rgba(255,255,255,0.7); font-size: 0.8rem; }
-        .navbar-user strong { color: #ffd700; }
-        .btn-nav {
-            font-size: 0.75rem; padding: 5px 14px; border-radius: 4px;
-            text-decoration: none; font-weight: 600; transition: all 0.2s;
-        }
-        .btn-nav-outline { border: 1px solid rgba(255,255,255,0.4); color: white; }
-        .btn-nav-outline:hover { background: rgba(255,255,255,0.15); color: white; }
+        .navbar-user { font-size: 0.8rem; color: rgba(255,255,255,0.65); }
+        .navbar-user strong { color: var(--gold); }
+        .btn-nav-outline { font-size: 0.75rem; padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); background: transparent; font-family: 'Inter', sans-serif; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+        .btn-nav-outline:hover { background: rgba(255,255,255,0.12); }
 
-        .page-content { max-width: 1000px; margin: 0 auto; padding: 32px 16px; }
+        .page-content { max-width: 1000px; margin: 0 auto; padding: 28px 20px; }
 
-        .page-header {
-            display: flex; align-items: center; gap: 12px;
-            margin-bottom: 24px;
-        }
-        .page-header a { font-size: 0.8rem; color: #888; text-decoration: none; }
-        .page-header a:hover { color: var(--mid-blue); }
-        .page-header h2 {
-            font-size: 1.1rem; font-weight: 700;
-            color: var(--dark-blue); margin: 0;
-        }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; font-size: 0.8rem; }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; font-weight: 500; }
+        .breadcrumb a:hover { color: var(--blue-bright); }
+        .breadcrumb-sep { color: var(--border); font-size: 1rem; }
+        .breadcrumb-current { color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 6px; }
 
-        /* ── Cards de usuário ── */
-        .usuario-card {
-            background: white; border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--mid-blue);
-            padding: 20px 24px; margin-bottom: 16px;
+        .messages-box { margin-bottom: 16px; }
+        .alert { padding: 12px 16px; border-radius: 8px; font-size: 0.82rem; margin-bottom: 10px; }
+        .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .alert-danger  { background: #fff5f5; color: #dc2626; border: 1px solid #fecaca; }
+
+        /* ── User access card ── */
+        .user-card {
+            background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 16px;
         }
 
-        .usuario-card-header {
-            display: flex; align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
+        .user-card-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
         }
 
-        .usuario-nome {
-            font-size: 0.95rem; font-weight: 700;
-            color: var(--dark-blue);
+        .user-card-name { display: flex; align-items: center; gap: 12px; }
+
+        .user-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--blue-bright), #42a5f5);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
         }
+
+        .user-username { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+        .user-role { font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; }
 
         .badge-count {
-            background: #e8f0fe; color: var(--mid-blue);
-            padding: 3px 12px; border-radius: 20px;
-            font-size: 0.72rem; font-weight: 700;
+            background: var(--surface-3); color: var(--blue-mid);
+            padding: 4px 14px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
         }
 
-        /* ── Grid de dashboards (checkboxes) ── */
+        .btn-select-all {
+            font-size: 0.72rem; color: var(--blue-bright); background: none; border: none;
+            cursor: pointer; font-family: 'Inter', sans-serif; text-decoration: underline;
+            margin-bottom: 12px; padding: 0; display: block;
+        }
+
+        /* ── Dash checkboxes ── */
         .dash-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
             gap: 8px;
             margin-bottom: 16px;
         }
 
-        .dash-check-item {
-            display: flex; align-items: center; gap: 8px;
-            background: #f8f9ff; border: 2px solid #e8eaf0;
-            border-radius: 6px; padding: 8px 12px;
-            cursor: pointer; transition: all 0.2s;
+        .dash-item {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--surface-2); border: 2px solid var(--border);
+            border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.2s;
+            user-select: none;
         }
+        .dash-item:hover { border-color: var(--blue-bright); background: var(--surface-3); }
+        .dash-item.checked { border-color: var(--blue-bright); background: #eff6ff; }
 
-        .dash-check-item:hover {
-            border-color: var(--mid-blue);
-            background: #f0f4ff;
+        .dash-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue-bright); flex-shrink: 0; cursor: pointer; }
+
+        .dash-item-label { font-size: 0.78rem; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+        .dash-item-meta { font-size: 0.65rem; color: var(--text-muted); margin-top: 1px; }
+
+        .btn-save {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 22px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid));
+            color: white; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 0.5px; text-transform: uppercase; cursor: pointer;
+            font-family: 'Inter', sans-serif; box-shadow: 0 2px 8px rgba(21,101,192,0.25); transition: all 0.2s;
         }
+        .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(21,101,192,0.35); }
 
-        .dash-check-item.checked {
-            border-color: var(--mid-blue);
-            background: #e8f0fe;
-        }
-
-        .dash-check-item input[type="checkbox"] {
-            accent-color: var(--mid-blue);
-            width: 16px; height: 16px;
-            cursor: pointer;
-        }
-
-        .dash-check-label {
-            font-size: 0.8rem; font-weight: 600;
-            color: var(--dark-blue); cursor: pointer;
-            line-height: 1.3;
-        }
-
-        .dash-check-meta {
-            font-size: 0.68rem; color: #888;
-            font-weight: 400;
-        }
-
-        .btn-salvar {
-            background: linear-gradient(135deg, var(--dark-blue), var(--mid-blue));
-            color: white; border: none; border-radius: 6px;
-            padding: 8px 24px; font-size: 0.8rem;
-            font-weight: 700; letter-spacing: 1px;
-            text-transform: uppercase; transition: opacity 0.2s;
-            cursor: pointer;
-        }
-        .btn-salvar:hover { opacity: 0.9; }
-
-        /* ── Empty ── */
+        /* ── Empty state ── */
         .empty-viewers {
-            text-align: center; padding: 48px;
-            color: #aaa; background: white;
-            border-radius: 8px;
+            text-align: center; padding: 60px 20px; background: white; border-radius: 12px;
+            border: 2px dashed var(--border); color: var(--text-muted);
         }
-
-        .messages-box { margin-bottom: 16px; }
-
-        /* Selecionar todos */
-        .btn-select-all {
-            font-size: 0.72rem; color: var(--mid-blue);
-            background: none; border: none;
-            cursor: pointer; padding: 0;
-            text-decoration: underline;
-            margin-bottom: 10px;
-        }
+        .empty-viewers h3 { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .empty-viewers a { color: var(--blue-bright); font-weight: 600; }
     </style>
 </head>
 <body>
 
 <nav class="navbar">
-    <a class="navbar-brand" href="{% url 'lista_dashboards' %}">CORE 🔍</a>
+    <div class="navbar-left">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="../../static/img/logo.png" alt="CORE">
+        </a>
+       
+    </div>
     <div class="navbar-right">
-        <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
-        <a href="{% url 'lista_dashboards' %}" class="btn-nav btn-nav-outline">← Voltar</a>
+        {% if usuario %}
+            <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
+        {% endif %}
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline">← Voltar</a>
     </div>
 </nav>
 
 <div class="page-content">
 
-    <div class="page-header">
+    <div class="breadcrumb">
         <a href="{% url 'lista_dashboards' %}">Home</a>
-        <span style="color:#ccc;">›</span>
-        <h2>🔑 Gerenciar Acessos</h2>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+            Gerenciar Acessos
+        </span>
     </div>
 
     {% if messages %}
         <div class="messages-box">
             {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}
-                    alert-dismissible fade show" role="alert" style="font-size:0.85rem;">
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
         </div>
@@ -176,9 +178,15 @@
 
     {% if usuarios_com_acessos %}
         {% for item in usuarios_com_acessos %}
-        <div class="usuario-card">
-            <div class="usuario-card-header">
-                <span class="usuario-nome">👤 {{ item.usuario.username }}</span>
+        <div class="user-card">
+            <div class="user-card-header">
+                <div class="user-card-name">
+                    <div class="user-avatar">{{ item.usuario.username|slice:":2"|upper }}</div>
+                    <div>
+                        <div class="user-username">{{ item.usuario.username }}</div>
+                        <div class="user-role">Viewer</div>
+                    </div>
+                </div>
                 <span class="badge-count" id="count-{{ item.usuario.id }}">
                     {{ item.ids_liberados|length }} acesso(s)
                 </span>
@@ -188,14 +196,13 @@
                 {% csrf_token %}
                 <input type="hidden" name="usuario_id" value="{{ item.usuario.id }}">
 
-                <button type="button" class="btn-select-all"
-                    onclick="toggleAll({{ item.usuario.id }})">
+                <button type="button" class="btn-select-all" onclick="toggleAll({{ item.usuario.id }})">
                     Marcar / desmarcar todos
                 </button>
 
                 <div class="dash-grid" id="grid-{{ item.usuario.id }}">
                     {% for dash in dashboards %}
-                        <label class="dash-check-item {% if dash.id in item.ids_liberados %}checked{% endif %}"
+                        <label class="dash-item {% if dash.id in item.ids_liberados %}checked{% endif %}"
                             id="label-{{ item.usuario.id }}-{{ dash.id }}">
                             <input
                                 type="checkbox"
@@ -205,17 +212,19 @@
                                 onchange="updateCard({{ item.usuario.id }})"
                             >
                             <div>
-                                <div class="dash-check-label">{{ dash.nome }}</div>
-                                <div class="dash-check-meta">
-                                    {{ dash.criado_em|date:"d/m/Y" }}
-                                </div>
+                                <div class="dash-item-label">{{ dash.nome }}</div>
+                                <div class="dash-item-meta">{{ dash.criado_em|date:"d/m/Y" }}</div>
                             </div>
                         </label>
                     {% endfor %}
                 </div>
 
-                <button type="submit" class="btn-salvar">
-                    💾 Salvar acessos de {{ item.usuario.username }}
+                <button type="submit" class="btn-save">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/>
+                        <path d="M17 21v-8H7v8M7 3v5h8"/>
+                    </svg>
+                    Salvar acessos de {{ item.usuario.username }}
                 </button>
             </form>
         </div>
@@ -225,54 +234,41 @@
         <div class="empty-viewers">
             <h3>Nenhum viewer cadastrado</h3>
             <p>Crie usuários com perfil <b>Viewer</b> primeiro.</p>
-            <a href="{% url 'gerenciar_usuarios' %}"
-            style="color: var(--mid-blue); font-weight:600;">
-                → Ir para Usuários
-            </a>
+            <a href="{% url 'gerenciar_usuarios' %}">→ Ir para Usuários</a>
         </div>
     {% endif %}
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Atualiza o badge de contagem ao marcar/desmarcar
-    function updateCard(userId) {
-        const grid     = document.getElementById('grid-' + userId);
-        const checks   = grid.querySelectorAll('input[type="checkbox"]');
-        const count    = document.getElementById('count-' + userId);
-        let marcados   = 0;
-
-        checks.forEach(cb => {
-            const label = cb.closest('.dash-check-item');
-            if (cb.checked) {
-                label.classList.add('checked');
-                marcados++;
-            } else {
-                label.classList.remove('checked');
-            }
-        });
-
-        count.textContent = marcados + ' acesso(s)';
-    }
-
-    // Marcar / desmarcar todos
-    function toggleAll(userId) {
-        const grid   = document.getElementById('grid-' + userId);
-        const checks = grid.querySelectorAll('input[type="checkbox"]');
-        const todos  = Array.from(checks).every(cb => cb.checked);
-
-        checks.forEach(cb => { cb.checked = !todos; });
-        updateCard(userId);
-    }
-
-    // Inicializa contagens ao carregar
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('[id^="grid-"]').forEach(grid => {
-            const userId = grid.id.replace('grid-', '');
-            updateCard(userId);
-        });
+function updateCard(userId) {
+    const grid   = document.getElementById('grid-' + userId);
+    const checks = grid.querySelectorAll('input[type="checkbox"]');
+    const count  = document.getElementById('count-' + userId);
+    let marcados = 0;
+    checks.forEach(cb => {
+        const label = cb.closest('.dash-item');
+        if (cb.checked) { label.classList.add('checked'); marcados++; }
+        else { label.classList.remove('checked'); }
     });
+    count.textContent = marcados + ' acesso(s)';
+}
+
+function toggleAll(userId) {
+    const grid   = document.getElementById('grid-' + userId);
+    const checks = grid.querySelectorAll('input[type="checkbox"]');
+    const todos  = Array.from(checks).every(cb => cb.checked);
+    checks.forEach(cb => { cb.checked = !todos; });
+    updateCard(userId);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[id^="grid-"]').forEach(grid => {
+        const userId = grid.id.replace('grid-', '');
+        updateCard(userId);
+    });
+});
 </script>
+
 </body>
 </html>
