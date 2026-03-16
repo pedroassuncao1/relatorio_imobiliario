@@ -34,35 +34,96 @@
         /* ── Navbar ── */
         .navbar {
             background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%);
-            padding: 0 24px; height: 60px; display: flex; align-items: center;
+            padding: 0 16px; height: 56px; display: flex; align-items: center;
             justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            position: sticky; top: 0; z-index: 100;
+            position: sticky; top: 0; z-index: 200;
         }
-
+        .navbar-left { display: flex; align-items: center; gap: 10px; }
+        .navbar-brand { display: flex; align-items: center; text-decoration: none; }
         .navbar-brand img {
-            height: clamp(28px, 4vw, 44px); /* mín 28px · flui com a tela · máx 44px */
-            width: auto;
-            max-width: 160px;
-            object-fit: contain;
-            display: block;
+            height: clamp(26px, 4vw, 40px);
+            width: auto; max-width: 140px;
+            object-fit: contain; display: block;
         }
- 
-        .navbar-badge { font-size: 0.62rem; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 2px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); font-weight: 500; }
-        .navbar-right { display: flex; align-items: center; gap: 12px; }
-        .navbar-user { font-size: 0.8rem; color: rgba(255,255,255,0.65); }
+        .navbar-badge {
+            font-size: 0.6rem; background: rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.15); font-weight: 500;
+            display: none; /* esconde no mobile para economizar espaço */
+        }
+        @media (min-width: 640px) { .navbar-badge { display: inline-block; } }
+
+        .navbar-right { display: flex; align-items: center; gap: 8px; }
+        .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); white-space: nowrap; }
         .navbar-user strong { color: var(--gold); }
-        .btn-nav { font-size: 0.72rem; padding: 5px 12px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+        /* Ocultar nome do usuário no mobile pequeno */
+        @media (max-width: 479px) { .navbar-user { display: none; } }
+
+        .btn-nav { font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
         .btn-nav-outline { border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); background: transparent; }
         .btn-nav-outline:hover { background: rgba(255,255,255,0.1); color: white; }
 
+        /* ── Botão filtros mobile ── */
+        .btn-filter-toggle {
+            display: none;
+            align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white; font-size: 0.75rem; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-filter-toggle:hover { background: rgba(255,255,255,0.2); }
+        .btn-filter-toggle .filter-count {
+            background: var(--gold); color: var(--navy);
+            border-radius: 10px; padding: 1px 6px;
+            font-size: 0.62rem; font-weight: 800; display: none;
+        }
+        .btn-filter-toggle .filter-count.has-filters { display: inline-block; }
+        @media (max-width: 767px) { .btn-filter-toggle { display: flex; } }
+
         /* ── Layout ── */
-        .body-wrap { display: flex; height: calc(100vh - 52px); }
+        .body-wrap { display: flex; height: calc(100vh - 56px); position: relative; }
+
+        /* ── Overlay (mobile) ── */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 150; backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.active { display: block; }
 
         /* ── Sidebar ── */
         .sidebar {
             width: var(--sidebar-w);
             background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%);
-            display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; padding: 16px 12px;
+            display: flex; flex-direction: column; overflow-y: auto;
+            flex-shrink: 0; padding: 16px 12px; z-index: 160;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Mobile: sidebar vira drawer da esquerda */
+        @media (max-width: 767px) {
+            .sidebar {
+                position: fixed; top: 56px; left: 0; bottom: 0;
+                width: min(var(--sidebar-w), 88vw);
+                transform: translateX(-110%);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+            }
+            .sidebar.open { transform: translateX(0); }
+        }
+
+        .sidebar-header-mobile {
+            display: none; align-items: center; justify-content: space-between;
+            margin-bottom: 16px; padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        @media (max-width: 767px) { .sidebar-header-mobile { display: flex; } }
+        .sidebar-header-title { font-size: 0.9rem; font-weight: 700; color: white; }
+        .btn-close-sidebar {
+            width: 28px; height: 28px; border-radius: 6px;
+            background: rgba(255,255,255,0.1); border: none;
+            color: white; font-size: 1rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
         }
 
         .sidebar-user {
@@ -81,30 +142,26 @@
 
         .filter-section-title {
             font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px;
-            color: rgba(255,255,255,0.3); font-weight: 600; margin-bottom: 8px; margin-top: 12px; padding: 0 2px;
+            color: rgba(255,255,255,0.3); font-weight: 600;
+            margin-bottom: 8px; margin-top: 12px; padding: 0 2px;
         }
-
         .filter-group { margin-bottom: 10px; }
         .filter-label { font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
-
         .filter-select, .filter-input, .filter-date {
-            width: 100%; padding: 6px 8px;
+            width: 100%; padding: 7px 9px;
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.75rem;
+            border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem;
             font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;
         }
         .filter-select:focus, .filter-input:focus, .filter-date:focus {
             border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
         }
         .filter-select option { background: var(--navy-mid); color: white; }
-
         .filter-range { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .filter-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-
         .sidebar-actions { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-
         .btn-sidebar {
-            padding: 7px 10px; border-radius: 6px; font-size: 0.72rem;
+            padding: 8px 10px; border-radius: 6px; font-size: 0.72rem;
             font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer;
             text-align: center; text-decoration: none; display: block; transition: all 0.2s; border: none;
         }
@@ -115,23 +172,29 @@
         .btn-sidebar-primary:hover { box-shadow: 0 4px 12px rgba(21,101,192,0.4); }
         .btn-sidebar-outline { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18) !important; }
         .btn-sidebar-outline:hover { background: rgba(255,255,255,0.06); color: white; }
-
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
 
         /* ── Main area ── */
-        .main-area { flex: 1; padding: 12px; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+        .main-area {
+            flex: 1; padding: 10px; display: flex; flex-direction: column;
+            overflow-y: auto; min-width: 0;
+        }
+        @media (max-width: 767px) { .main-area { padding: 8px; overflow-y: auto; height: 100%; } }
 
         /* ── Selection banner ── */
         #selected-banner {
             display: none; background: linear-gradient(135deg, var(--navy), var(--blue-deep));
-            color: white; padding: 9px 14px; border-radius: 8px; margin-bottom: 10px;
-            align-items: center; justify-content: space-between; border-left: 4px solid var(--gold); font-size: 0.8rem;
+            color: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px;
+            align-items: center; justify-content: space-between;
+            border-left: 4px solid var(--gold); font-size: 0.78rem; gap: 8px;
         }
         #selected-banner.active { display: flex; }
         #selected-banner strong { color: var(--gold); }
         #btn-clear-selection {
-            padding: 4px 12px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
-            color: white; border-radius: 5px; font-size: 0.72rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+            padding: 4px 10px; background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2); color: white;
+            border-radius: 5px; font-size: 0.7rem; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
         }
         #btn-clear-selection:hover { background: rgba(255,255,255,0.22); }
 
@@ -139,12 +202,13 @@
         .kpi-row {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
+            gap: 8px; margin-bottom: 8px;
         }
+        @media (max-width: 1100px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 767px)  { .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 6px; } }
 
         .kpi-card {
-            background: white; border-radius: 10px; padding: 12px 10px;
+            background: white; border-radius: 10px; padding: 10px 10px 12px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border);
             position: relative; overflow: hidden; transition: all 0.25s;
         }
@@ -156,34 +220,51 @@
             border-color: var(--gold); box-shadow: 0 4px 16px rgba(251,191,36,0.25); background: #fffbeb;
         }
         .kpi-card.highlighted::after { background: var(--gold); }
-
-        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); line-height: 1; margin-bottom: 4px; letter-spacing: -0.5px; display: block; }
-        .kpi-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue-deep); font-weight: 700; }
-        .kpi-sub { font-size: 0.56rem; color: var(--text-muted); margin-top: 3px; display: block; }
+        .kpi-value {
+            font-size: clamp(1rem, 2.5vw, 1.35rem);
+            font-weight: 800; color: var(--text-primary);
+            line-height: 1; margin-bottom: 4px; letter-spacing: -0.5px; display: block;
+        }
+        .kpi-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue-deep); font-weight: 700; }
+        .kpi-sub { font-size: 0.52rem; color: var(--text-muted); margin-top: 3px; display: block; }
 
         /* ── Charts area ── */
         .charts-row {
-            display: grid; grid-template-columns: 1fr 320px; gap: 10px; flex: 1; min-height: 0;
+            display: grid; grid-template-columns: 1fr 300px;
+            gap: 8px; flex: 1; min-height: 0;
+        }
+        @media (max-width: 1024px) { .charts-row { grid-template-columns: 1fr 260px; } }
+        @media (max-width: 767px) {
+            .charts-row {
+                grid-template-columns: 1fr; grid-template-rows: 320px auto auto;
+                flex: none;
+            }
         }
 
         .chart-card {
-            background: white; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-            border: 1px solid var(--border); display: flex; flex-direction: column;
+            background: white; border-radius: 10px; padding: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border);
+            display: flex; flex-direction: column;
         }
-
         .chart-title {
-            font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.7px;
+            font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.7px;
             font-weight: 700; color: var(--blue-deep); text-align: center; margin-bottom: 8px;
         }
+        #map { flex: 1; border-radius: 6px; min-height: 260px; }
 
-        #map { flex: 1; border-radius: 6px; min-height: 300px; }
-
-        .charts-col { display: flex; flex-direction: column; gap: 10px; }
+        .charts-col { display: flex; flex-direction: column; gap: 8px; }
+        /* No mobile, charts-col vai abaixo do mapa e os charts ficam lado a lado */
+        @media (max-width: 767px) {
+            .charts-col { flex-direction: row; }
+            .charts-col .chart-card { flex: 1; }
+        }
+        @media (max-width: 479px) {
+            .charts-col { flex-direction: column; }
+        }
         .charts-col .chart-card { flex: 1; }
-
-        .chart-legend { font-size: 0.68rem; margin-top: 5px; color: var(--text-secondary); text-align: center; }
-
-        canvas { max-height: 180px; }
+        .chart-legend { font-size: 0.64rem; margin-top: 5px; color: var(--text-secondary); text-align: center; }
+        canvas { max-height: 160px; }
+        @media (max-width: 767px) { canvas { max-height: 140px; } }
     </style>
 </head>
 <body>
@@ -193,19 +274,37 @@
         <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
             <img src="../../static/img/logo.png" alt="CORE">
         </a>
-       
+        <span class="navbar-badge">BI Imobiliário</span>
     </div>
     <div class="navbar-right">
         {% if usuario %}
             <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
         {% endif %}
-        <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline">← Voltar</a>
+        <!-- Botão filtros só aparece no mobile -->
+        <button class="btn-filter-toggle" id="btnFilterToggle" onclick="toggleSidebar()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path d="M3 4h18M7 10h10M10 16h4"/>
+            </svg>
+            Filtros
+            <span class="filter-count" id="filterCount">0</span>
+        </button>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav btn-nav-outline">← Voltar</a>
     </div>
 </nav>
 
+<!-- Overlay para fechar sidebar no mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
 <div class="body-wrap">
     <!-- ── Sidebar ── -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
+
+        <!-- Header só visível no mobile -->
+        <div class="sidebar-header-mobile">
+            <span class="sidebar-header-title">⚙️ Filtros</span>
+            <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
+        </div>
+
         <div class="sidebar-user">
             <div class="sidebar-avatar">{{ usuario.username|slice:":2"|upper }}</div>
             <div>
@@ -312,7 +411,7 @@
         <div class="kpi-row">
             <div class="kpi-card" id="kpi-total">
                 <span class="kpi-value" id="kpi-total-val">{{ total_unidades }}</span>
-                <span class="kpi-label">Total de Unidades</span>
+                <span class="kpi-label">Total Unidades</span>
                 <span class="kpi-sub" id="kpi-total-sub"></span>
             </div>
             <div class="kpi-card" id="kpi-estoque">
@@ -322,38 +421,35 @@
             </div>
             <div class="kpi-card" id="kpi-vendidas">
                 <span class="kpi-value" id="kpi-vendidas-val">{{ total_vendidas }}</span>
-                <span class="kpi-label">Unidades Vendidas</span>
+                <span class="kpi-label">Vendidas</span>
                 <span class="kpi-sub" id="kpi-vendidas-sub"></span>
             </div>
             <div class="kpi-card" id="kpi-area">
                 <span class="kpi-value" id="kpi-area-val">{{ media_area|floatformat:1 }}</span>
-                <span class="kpi-label">Área da Unidade M²</span>
+                <span class="kpi-label">Área Média M²</span>
                 <span class="kpi-sub" id="kpi-area-sub"></span>
             </div>
             <div class="kpi-card" id="kpi-m2">
                 <span class="kpi-value" id="kpi-m2-val">R$ {{ media_m2|floatformat:2 }}</span>
-                <span class="kpi-label">Preço Médio M²</span>
+                <span class="kpi-label">Preço M²</span>
                 <span class="kpi-sub" id="kpi-m2-sub"></span>
             </div>
             <div class="kpi-card" id="kpi-emp">
                 <span class="kpi-value" id="kpi-emp-val">{{ num_empreendimentos }}</span>
-                <span class="kpi-label"># Empreendimentos</span>
+                <span class="kpi-label"># Empreend.</span>
                 <span class="kpi-sub" id="kpi-emp-sub"></span>
             </div>
         </div>
 
         <!-- Charts row -->
         <div class="charts-row">
-            <!-- Map -->
             <div class="chart-card">
                 <div class="chart-title">Mapa de Empreendimentos</div>
                 <div id="map"></div>
             </div>
-
-            <!-- Charts col -->
             <div class="charts-col">
                 <div class="chart-card">
-                    <div class="chart-title">Estoque vs Unidades Vendidas</div>
+                    <div class="chart-title">Estoque vs Vendidas</div>
                     <canvas id="chartDoughnut"></canvas>
                     <div id="legend-doughnut" class="chart-legend"></div>
                 </div>
@@ -400,6 +496,32 @@ let selectedMarker = null;
 let chartDoughnut  = null;
 let chartFases     = null;
 
+/* ── Toggle Sidebar Mobile ── */
+function toggleSidebar() {
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebarOverlay');
+    const isOpen   = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    overlay.classList.toggle('active', !isOpen);
+    document.body.style.overflow = !isOpen ? 'hidden' : '';
+}
+
+/* ── Contador de filtros ativos ── */
+function updateFilterCount() {
+    const params = new URLSearchParams(window.location.search);
+    const filterKeys = ['quartos','construtora','data_inicio','data_fim','bairro','fase','pm2_min','pm2_max','area_min','area_max','preco_min','preco_max'];
+    const count = filterKeys.filter(k => params.get(k) && params.get(k) !== '').length;
+    const badge = document.getElementById('filterCount');
+    badge.textContent = count;
+    badge.classList.toggle('has-filters', count > 0);
+}
+updateFilterCount();
+
+/* Fecha sidebar ao submeter o form no mobile */
+document.getElementById('filterForm').addEventListener('submit', () => {
+    if (window.innerWidth < 768) toggleSidebar();
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     const bairrosUnicos = [...new Set(EMPREENDIMENTOS.map(e => e.bairro))];
     const coresBairros = {};
@@ -414,7 +536,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }).addTo(map);
 
     var markers = L.featureGroup();
-
     EMPREENDIMENTOS.forEach(item => {
         if (!item.latitude || !item.longitude) return;
         const circle = L.circleMarker([item.latitude, item.longitude], {
@@ -451,7 +572,7 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {
                 responsive: true, maintainAspectRatio: true,
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } },
+                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 }, boxWidth: 12 } },
                     tooltip: { callbacks: { label: ctx => {
                         const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                         const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
@@ -472,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function () {
             options: {
                 responsive: true, maintainAspectRatio: true,
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } },
+                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 }, boxWidth: 12 } },
                     tooltip: { callbacks: { label: ctx => {
                         const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                         const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
@@ -494,7 +615,6 @@ function applySelection(item) {
 
     document.getElementById('selected-name').textContent = item.nome;
     document.getElementById('selected-banner').classList.add('active');
-
     ['kpi-total','kpi-estoque','kpi-vendidas','kpi-area','kpi-m2','kpi-emp'].forEach(id =>
         document.getElementById(id).classList.add('highlighted'));
 
@@ -502,18 +622,18 @@ function applySelection(item) {
     const pctEstoque  = GLOBAL_TOTAL_ESTOQUE  > 0 ? ((totalEstoque  / GLOBAL_TOTAL_ESTOQUE)  * 100).toFixed(1) : 0;
     const pctVendidas = GLOBAL_TOTAL_VENDIDAS > 0 ? ((totalVendidas / GLOBAL_TOTAL_VENDIDAS) * 100).toFixed(1) : 0;
 
-    document.getElementById('kpi-total-val').textContent  = totalUnidades.toLocaleString('pt-BR');
-    document.getElementById('kpi-total-sub').textContent  = `${pctTotal}% do total geral`;
-    document.getElementById('kpi-estoque-val').textContent = totalEstoque.toLocaleString('pt-BR');
-    document.getElementById('kpi-estoque-sub').textContent = `${pctEstoque}% do estoque geral`;
+    document.getElementById('kpi-total-val').textContent   = totalUnidades.toLocaleString('pt-BR');
+    document.getElementById('kpi-total-sub').textContent   = `${pctTotal}% do total geral`;
+    document.getElementById('kpi-estoque-val').textContent  = totalEstoque.toLocaleString('pt-BR');
+    document.getElementById('kpi-estoque-sub').textContent  = `${pctEstoque}% do estoque geral`;
     document.getElementById('kpi-vendidas-val').textContent = totalVendidas.toLocaleString('pt-BR');
     document.getElementById('kpi-vendidas-sub').textContent = `${pctVendidas}% das vendas gerais`;
-    document.getElementById('kpi-area-val').textContent  = mediaArea ? mediaArea.toFixed(1) : '—';
-    document.getElementById('kpi-area-sub').textContent  = `Média de ${tipologias.length} tipologia(s)`;
-    document.getElementById('kpi-m2-val').textContent = mediaM2 ? `R$ ${mediaM2.toLocaleString('pt-BR', {minimumFractionDigits:2})}` : '—';
-    document.getElementById('kpi-m2-sub').textContent = 'Preço m² médio do empr.';
-    document.getElementById('kpi-emp-val').textContent  = '1';
-    document.getElementById('kpi-emp-sub').textContent  = `${tipologias.length} tipologia(s)`;
+    document.getElementById('kpi-area-val').textContent     = mediaArea ? mediaArea.toFixed(1) : '—';
+    document.getElementById('kpi-area-sub').textContent     = `Média de ${tipologias.length} tipologia(s)`;
+    document.getElementById('kpi-m2-val').textContent       = mediaM2 ? `R$ ${mediaM2.toLocaleString('pt-BR', {minimumFractionDigits:2})}` : '—';
+    document.getElementById('kpi-m2-sub').textContent       = 'Preço m² médio do empr.';
+    document.getElementById('kpi-emp-val').textContent      = '1';
+    document.getElementById('kpi-emp-sub').textContent      = `${tipologias.length} tipologia(s)`;
 
     if (chartDoughnut) {
         const totalRosca = GLOBAL_TOTAL_ESTOQUE + GLOBAL_TOTAL_VENDIDAS;
@@ -523,14 +643,13 @@ function applySelection(item) {
         chartDoughnut.data.datasets[0].data = [totalEstoque, totalVendidas, Math.max(0, GLOBAL_TOTAL_ESTOQUE - totalEstoque), Math.max(0, GLOBAL_TOTAL_VENDIDAS - totalVendidas)];
         chartDoughnut.data.datasets[0].backgroundColor = ['#fbbf24','#f59e0b','#1565c080','#42a5f540'];
         chartDoughnut.update();
-        document.getElementById('legend-doughnut').innerHTML = `<b>${item.nome}</b>: <b>${pctEstRosca}%</b> do estoque e <b>${pctVenRosca}%</b> das vendas.`;
+        document.getElementById('legend-doughnut').innerHTML = `<b>${item.nome}</b>: <b>${pctEstRosca}%</b> estoque · <b>${pctVenRosca}%</b> vendas.`;
     }
 
     if (chartFases) {
         const faseIdx = FASES_LABELS.indexOf(item.fase_obra);
         const cores = ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#10b981'];
-        const novasCores = FASES_LABELS.map((_, i) => (i === faseIdx ? cores[i % cores.length] : '#cccccc50'));
-        chartFases.data.datasets[0].backgroundColor = novasCores;
+        chartFases.data.datasets[0].backgroundColor = FASES_LABELS.map((_, i) => (i === faseIdx ? cores[i % cores.length] : '#cccccc50'));
         chartFases.update();
         const pctFase = faseIdx >= 0 && FASES_COUNTS.reduce((a,b)=>a+b,0) > 0
             ? ((FASES_COUNTS[faseIdx] / FASES_COUNTS.reduce((a,b)=>a+b,0)) * 100).toFixed(1) : 0;
@@ -551,9 +670,9 @@ function clearSelection() {
     document.getElementById('kpi-total-val').textContent   = GLOBAL_TOTAL_UNIDADES.toLocaleString('pt-BR');
     document.getElementById('kpi-estoque-val').textContent  = GLOBAL_TOTAL_ESTOQUE.toLocaleString('pt-BR');
     document.getElementById('kpi-vendidas-val').textContent = GLOBAL_TOTAL_VENDIDAS.toLocaleString('pt-BR');
-    document.getElementById('kpi-area-val').textContent = "{{ media_area|floatformat:1 }}";
-    document.getElementById('kpi-m2-val').textContent   = "R$ {{ media_m2|floatformat:2 }}";
-    document.getElementById('kpi-emp-val').textContent  = "{{ num_empreendimentos }}";
+    document.getElementById('kpi-area-val').textContent     = "{{ media_area|floatformat:1 }}";
+    document.getElementById('kpi-m2-val').textContent       = "R$ {{ media_m2|floatformat:2 }}";
+    document.getElementById('kpi-emp-val').textContent      = "{{ num_empreendimentos }}";
     ['kpi-total-sub','kpi-estoque-sub','kpi-vendidas-sub','kpi-area-sub','kpi-m2-sub','kpi-emp-sub'].forEach(id =>
         document.getElementById(id).textContent = '');
     if (chartDoughnut) {
