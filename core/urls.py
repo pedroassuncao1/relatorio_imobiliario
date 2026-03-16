@@ -31,4 +31,10 @@ urlpatterns = [
 
     # ── Redireciona raiz para dashboards ──
     path('', views.lista_dashboards, name='home'),
+
+    # Página de tabela analitica (exibe tabela filtrada e geocodificada)
+    path('dashboard/<int:dashboard_id>/tabela/', views.tabela, name='tabela'),
+
+    # Página de gráficos (exibe gráficos dinâmicos baseados nos dados)
+    path('dashboard/<int:dashboard_id>/graficos/', views.graficos, name='graficos'),
 ]

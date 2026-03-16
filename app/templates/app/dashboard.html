@@ -40,62 +40,35 @@
         }
         .navbar-left { display: flex; align-items: center; gap: 10px; }
         .navbar-brand { display: flex; align-items: center; text-decoration: none; }
-        .navbar-brand img {
-            height: clamp(26px, 4vw, 40px);
-            width: auto; max-width: 140px;
-            object-fit: contain; display: block;
-        }
-        .navbar-badge {
-            font-size: 0.6rem; background: rgba(255,255,255,0.12);
-            color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.15); font-weight: 500;
-            display: none; /* esconde no mobile para economizar espaço */
-        }
-        @media (min-width: 640px) { .navbar-badge { display: inline-block; } }
-
+        .navbar-brand img { height: clamp(26px, 4vw, 40px); width: auto; max-width: 140px; object-fit: contain; display: block; }
+        .navbar-badge { font-size: 0.6rem; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); font-weight: 500; }
+        @media (max-width: 640px) { .navbar-badge { display: none; } }
         .navbar-right { display: flex; align-items: center; gap: 8px; }
         .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); white-space: nowrap; }
         .navbar-user strong { color: var(--gold); }
-        /* Ocultar nome do usuário no mobile pequeno */
         @media (max-width: 479px) { .navbar-user { display: none; } }
-
         .btn-nav { font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
         .btn-nav-outline { border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); background: transparent; }
         .btn-nav-outline:hover { background: rgba(255,255,255,0.1); color: white; }
 
         /* ── Botão filtros mobile ── */
         .btn-filter-toggle {
-            display: none;
-            align-items: center; gap: 6px;
-            padding: 6px 12px; border-radius: 8px;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.25);
-            color: white; font-size: 0.75rem; font-weight: 600;
-            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+            display: none; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px;
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+            color: white; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
         }
         .btn-filter-toggle:hover { background: rgba(255,255,255,0.2); }
-        .btn-filter-toggle .filter-count {
-            background: var(--gold); color: var(--navy);
-            border-radius: 10px; padding: 1px 6px;
-            font-size: 0.62rem; font-weight: 800; display: none;
-        }
+        .btn-filter-toggle .filter-count { background: var(--gold); color: var(--navy); border-radius: 10px; padding: 1px 6px; font-size: 0.62rem; font-weight: 800; display: none; }
         .btn-filter-toggle .filter-count.has-filters { display: inline-block; }
         @media (max-width: 767px) { .btn-filter-toggle { display: flex; } }
 
         /* ── Layout ── */
         .body-wrap { display: flex; height: calc(100vh - 56px); position: relative; }
 
-        /* ── Overlay (mobile) ── */
-        .sidebar-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            z-index: 1500; backdrop-filter: blur(2px);
-        }
+        /* ── Overlay ── */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; backdrop-filter: blur(2px); }
         .sidebar-overlay.active { display: block; }
-
-        /* Força o Leaflet a ficar abaixo da sidebar e overlay */
-        .leaflet-pane,
-        .leaflet-top,
-        .leaflet-bottom { z-index: 400 !important; }
+        .leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 400 !important; }
 
         /* ── Sidebar ── */
         .sidebar {
@@ -105,168 +78,99 @@
             flex-shrink: 0; padding: 16px 12px; z-index: 160;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        /* Mobile: sidebar vira drawer da esquerda */
         @media (max-width: 767px) {
-            .sidebar {
-                position: fixed; top: 56px; left: 0; bottom: 0;
-                width: min(var(--sidebar-w), 88vw);
-                transform: translateX(-110%);
-                box-shadow: 4px 0 24px rgba(0,0,0,0.3);
-                z-index: 1600;
-            }
+            .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: min(var(--sidebar-w), 88vw); transform: translateX(-110%); box-shadow: 4px 0 24px rgba(0,0,0,0.3); z-index: 1600; }
             .sidebar.open { transform: translateX(0); }
         }
-
-        .sidebar-header-mobile {
-            display: none; align-items: center; justify-content: space-between;
-            margin-bottom: 16px; padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        .sidebar-header-mobile { display: none; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         @media (max-width: 767px) { .sidebar-header-mobile { display: flex; } }
         .sidebar-header-title { font-size: 0.9rem; font-weight: 700; color: white; }
-        .btn-close-sidebar {
-            width: 28px; height: 28px; border-radius: 6px;
-            background: rgba(255,255,255,0.1); border: none;
-            color: white; font-size: 1rem; cursor: pointer; display: flex;
-            align-items: center; justify-content: center;
-        }
+        .btn-close-sidebar { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        .sidebar-user {
-            background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px;
-            margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
-        }
-        .sidebar-avatar {
-            width: 30px; height: 30px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--blue-bright), var(--blue-light));
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 0.62rem; font-weight: 700; flex-shrink: 0;
-        }
+        .sidebar-user { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--blue-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
         .sidebar-username { font-size: 0.78rem; color: rgba(255,255,255,0.8); font-weight: 500; }
         .sidebar-logout { font-size: 0.62rem; color: var(--gold); text-decoration: none; font-weight: 600; }
         .sidebar-logout:hover { text-decoration: underline; }
 
-        .filter-section-title {
-            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px;
-            color: rgba(255,255,255,0.3); font-weight: 600;
-            margin-bottom: 8px; margin-top: 12px; padding: 0 2px;
-        }
+        .filter-section-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.3); font-weight: 600; margin-bottom: 8px; margin-top: 12px; padding: 0 2px; }
         .filter-group { margin-bottom: 10px; }
         .filter-label { font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
-        .filter-select, .filter-input, .filter-date {
-            width: 100%; padding: 7px 9px;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem;
-            font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;
-        }
-        .filter-select:focus, .filter-input:focus, .filter-date:focus {
-            border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1);
-        }
+        .filter-select, .filter-input, .filter-date { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; }
+        .filter-select:focus, .filter-input:focus, .filter-date:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
         .filter-select option { background: var(--navy-mid); color: white; }
         .filter-range { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .filter-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .sidebar-actions { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-        .btn-sidebar {
-            padding: 8px 10px; border-radius: 6px; font-size: 0.72rem;
-            font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer;
-            text-align: center; text-decoration: none; display: block; transition: all 0.2s; border: none;
-        }
-        .btn-sidebar-primary {
-            background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright));
-            color: white; box-shadow: 0 2px 8px rgba(21,101,192,0.3);
-        }
+        .btn-sidebar { padding: 8px 10px; border-radius: 6px; font-size: 0.72rem; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: block; transition: all 0.2s; border: none; }
+        .btn-sidebar-primary { background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright)); color: white; box-shadow: 0 2px 8px rgba(21,101,192,0.3); }
         .btn-sidebar-primary:hover { box-shadow: 0 4px 12px rgba(21,101,192,0.4); }
         .btn-sidebar-outline { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18) !important; }
         .btn-sidebar-outline:hover { background: rgba(255,255,255,0.06); color: white; }
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
 
         /* ── Main area ── */
-        .main-area {
-            flex: 1; padding: 10px; display: flex; flex-direction: column;
-            overflow-y: auto; min-width: 0;
+        .main-area { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; gap: 8px; }
+        @media (max-width: 767px) { .main-area { padding: 8px; } }
+
+        /* ══════════════════════════════════
+           VIEW TABS
+        ══════════════════════════════════ */
+        .view-tabs {
+            display: flex; gap: 5px; flex-shrink: 0;
+            overflow-x: auto; padding-bottom: 2px;
+            scrollbar-width: none;
         }
-        @media (max-width: 767px) { .main-area { padding: 8px; overflow-y: auto; height: 100%; } }
+        .view-tabs::-webkit-scrollbar { display: none; }
+
+        .view-tab {
+            padding: 6px 13px; border-radius: 8px; font-size: 0.73rem; font-weight: 600;
+            text-decoration: none; transition: all 0.2s; border: 1.5px solid var(--border);
+            color: var(--text-secondary); background: white;
+            display: flex; align-items: center; gap: 6px;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .view-tab:hover { border-color: var(--blue-bright); color: var(--blue-bright); background: var(--surface-3); }
+        .view-tab.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; border-color: transparent; box-shadow: 0 2px 10px rgba(21,101,192,0.3); }
+        .view-tab svg { flex-shrink: 0; }
 
         /* ── Selection banner ── */
         #selected-banner {
             display: none; background: linear-gradient(135deg, var(--navy), var(--blue-deep));
-            color: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 8px;
+            color: white; padding: 8px 12px; border-radius: 8px;
             align-items: center; justify-content: space-between;
-            border-left: 4px solid var(--gold); font-size: 0.78rem; gap: 8px;
+            border-left: 4px solid var(--gold); font-size: 0.78rem; gap: 8px; flex-shrink: 0;
         }
         #selected-banner.active { display: flex; }
         #selected-banner strong { color: var(--gold); }
-        #btn-clear-selection {
-            padding: 4px 10px; background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.2); color: white;
-            border-radius: 5px; font-size: 0.7rem; cursor: pointer;
-            font-family: 'Inter', sans-serif; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
-        }
+        #btn-clear-selection { padding: 4px 10px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 5px; font-size: 0.7rem; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
         #btn-clear-selection:hover { background: rgba(255,255,255,0.22); }
 
         /* ── KPI Cards ── */
-        .kpi-row {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px; margin-bottom: 8px;
-        }
+        .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; flex-shrink: 0; }
         @media (max-width: 1100px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 767px)  { .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 6px; } }
 
-        .kpi-card {
-            background: white; border-radius: 10px; padding: 10px 10px 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border);
-            position: relative; overflow: hidden; transition: all 0.25s;
-        }
-        .kpi-card::after {
-            content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, var(--blue-mid), var(--blue-light));
-        }
-        .kpi-card.highlighted {
-            border-color: var(--gold); box-shadow: 0 4px 16px rgba(251,191,36,0.25); background: #fffbeb;
-        }
+        .kpi-card { background: white; border-radius: 10px; padding: 10px 10px 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border); position: relative; overflow: hidden; transition: all 0.25s; }
+        .kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue-mid), var(--blue-light)); }
+        .kpi-card.highlighted { border-color: var(--gold); box-shadow: 0 4px 16px rgba(251,191,36,0.25); background: #fffbeb; }
         .kpi-card.highlighted::after { background: var(--gold); }
-        .kpi-value {
-            font-size: clamp(1rem, 2.5vw, 1.35rem);
-            font-weight: 800; color: var(--text-primary);
-            line-height: 1; margin-bottom: 4px; letter-spacing: -0.5px; display: block;
-        }
+        .kpi-value { font-size: clamp(1rem, 2.5vw, 1.35rem); font-weight: 800; color: var(--text-primary); line-height: 1; margin-bottom: 4px; letter-spacing: -0.5px; display: block; }
         .kpi-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue-deep); font-weight: 700; }
         .kpi-sub { font-size: 0.52rem; color: var(--text-muted); margin-top: 3px; display: block; }
 
-        /* ── Charts area ── */
-        .charts-row {
-            display: grid; grid-template-columns: 1fr 300px;
-            gap: 8px; flex: 1; min-height: 0;
-        }
+        /* ── Charts ── */
+        .charts-row { display: grid; grid-template-columns: 1fr 300px; gap: 8px; flex: 1; min-height: 0; }
         @media (max-width: 1024px) { .charts-row { grid-template-columns: 1fr 260px; } }
-        @media (max-width: 767px) {
-            .charts-row {
-                grid-template-columns: 1fr; grid-template-rows: 320px auto auto;
-                flex: none;
-            }
-        }
+        @media (max-width: 767px)  { .charts-row { grid-template-columns: 1fr; grid-template-rows: 320px auto auto; flex: none; } }
 
-        .chart-card {
-            background: white; border-radius: 10px; padding: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border);
-            display: flex; flex-direction: column;
-        }
-        .chart-title {
-            font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.7px;
-            font-weight: 700; color: var(--blue-deep); text-align: center; margin-bottom: 8px;
-        }
+        .chart-card { background: white; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .chart-title { font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700; color: var(--blue-deep); text-align: center; margin-bottom: 8px; }
         #map { flex: 1; border-radius: 6px; min-height: 260px; }
 
         .charts-col { display: flex; flex-direction: column; gap: 8px; }
-        /* No mobile, charts-col vai abaixo do mapa e os charts ficam lado a lado */
-        @media (max-width: 767px) {
-            .charts-col { flex-direction: row; }
-            .charts-col .chart-card { flex: 1; }
-        }
-        @media (max-width: 479px) {
-            .charts-col { flex-direction: column; }
-        }
+        @media (max-width: 767px) { .charts-col { flex-direction: row; } .charts-col .chart-card { flex: 1; } }
+        @media (max-width: 479px) { .charts-col { flex-direction: column; } }
         .charts-col .chart-card { flex: 1; }
         .chart-legend { font-size: 0.64rem; margin-top: 5px; color: var(--text-secondary); text-align: center; }
         canvas { max-height: 160px; }
@@ -286,11 +190,8 @@
         {% if usuario %}
             <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
         {% endif %}
-        <!-- Botão filtros só aparece no mobile -->
         <button class="btn-filter-toggle" id="btnFilterToggle" onclick="toggleSidebar()">
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path d="M3 4h18M7 10h10M10 16h4"/>
-            </svg>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 4h18M7 10h10M10 16h4"/></svg>
             Filtros
             <span class="filter-count" id="filterCount">0</span>
         </button>
@@ -298,14 +199,11 @@
     </div>
 </nav>
 
-<!-- Overlay para fechar sidebar no mobile -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="body-wrap">
     <!-- ── Sidebar ── -->
     <div class="sidebar" id="sidebar">
-
-        <!-- Header só visível no mobile -->
         <div class="sidebar-header-mobile">
             <span class="sidebar-header-title">⚙️ Filtros</span>
             <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
@@ -320,7 +218,6 @@
         </div>
 
         <form method="GET" id="filterForm" action="{% url 'dashboard' dash.id %}">
-
             <div class="filter-section-title">Filtros</div>
 
             <div class="filter-group">
@@ -347,7 +244,7 @@
                 <label class="filter-label">Data de Entrega</label>
                 <div class="filter-date-row">
                     <input type="date" name="data_inicio" class="filter-date" value="{{ request.GET.data_inicio }}" onchange="this.form.submit()">
-                    <input type="date" name="data_fim" class="filter-date" value="{{ request.GET.data_fim }}" onchange="this.form.submit()">
+                    <input type="date" name="data_fim"    class="filter-date" value="{{ request.GET.data_fim }}"    onchange="this.form.submit()">
                 </div>
             </div>
 
@@ -398,7 +295,9 @@
             <div class="sidebar-actions">
                 <button type="submit" class="btn-sidebar btn-sidebar-primary">Aplicar Filtros</button>
                 <a href="{% url 'dashboard' dash.id %}" class="btn-sidebar btn-sidebar-outline">Limpar Filtros</a>
-                <a href="{% url 'upload_planilha' %}" class="btn-sidebar btn-sidebar-outline">Novo Upload</a>
+                {% if usuario.is_admin %}
+                    <a href="{% url 'upload_planilha' %}" class="btn-sidebar btn-sidebar-outline">+ Novo Upload</a>
+                {% endif %}
                 <div class="sidebar-divider"></div>
                 <a href="{% url 'lista_dashboards' %}" class="btn-sidebar btn-sidebar-outline">← Voltar</a>
             </div>
@@ -408,6 +307,31 @@
     <!-- ── Main ── -->
     <div class="main-area">
 
+        <!-- ══ TABS ══ -->
+        <div class="view-tabs">
+            <a href="{% url 'dashboard' dash.id %}" class="view-tab active">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Mapa & KPIs
+            </a>
+            <a href="{% url 'tabela' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/>
+                </svg>
+                Tabela Analítica
+            </a>
+            <a href="{% url 'graficos' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
+                </svg>
+                Gráficos & Análise
+            </a>
+            
+        </div>
+
+        <!-- Banner seleção -->
         <div id="selected-banner">
             <span>📍 Visualizando: <strong id="selected-name">—</strong></span>
             <button id="btn-clear-selection" onclick="clearSelection()">✕ Voltar ao total</button>
@@ -502,28 +426,22 @@ let selectedMarker = null;
 let chartDoughnut  = null;
 let chartFases     = null;
 
-/* ── Toggle Sidebar Mobile ── */
 function toggleSidebar() {
-    const sidebar  = document.getElementById('sidebar');
-    const overlay  = document.getElementById('sidebarOverlay');
-    const isOpen   = sidebar.classList.contains('open');
-    sidebar.classList.toggle('open', !isOpen);
-    overlay.classList.toggle('active', !isOpen);
+    const sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebarOverlay');
+    const isOpen  = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen); overlay.classList.toggle('active', !isOpen);
     document.body.style.overflow = !isOpen ? 'hidden' : '';
 }
 
-/* ── Contador de filtros ativos ── */
 function updateFilterCount() {
     const params = new URLSearchParams(window.location.search);
-    const filterKeys = ['quartos','construtora','data_inicio','data_fim','bairro','fase','pm2_min','pm2_max','area_min','area_max','preco_min','preco_max'];
-    const count = filterKeys.filter(k => params.get(k) && params.get(k) !== '').length;
+    const keys = ['quartos','construtora','data_inicio','data_fim','bairro','fase','pm2_min','pm2_max','area_min','area_max','preco_min','preco_max'];
+    const count = keys.filter(k => params.get(k) && params.get(k) !== '').length;
     const badge = document.getElementById('filterCount');
-    badge.textContent = count;
-    badge.classList.toggle('has-filters', count > 0);
+    badge.textContent = count; badge.classList.toggle('has-filters', count > 0);
 }
 updateFilterCount();
 
-/* Fecha sidebar ao submeter o form no mobile */
 document.getElementById('filterForm').addEventListener('submit', () => {
     if (window.innerWidth < 768) toggleSidebar();
 });
@@ -537,163 +455,112 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     var map = L.map('map').setView([-8.05, -34.9], 12);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© CORE BI Imobiliário',
-    }).addTo(map);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© CORE BI Imobiliário' }).addTo(map);
 
     var markers = L.featureGroup();
     EMPREENDIMENTOS.forEach(item => {
         if (!item.latitude || !item.longitude) return;
         const circle = L.circleMarker([item.latitude, item.longitude], {
-            radius: 12, fillColor: coresBairros[item.bairro] || '#3498db',
-            color: "#fff", weight: 2, fillOpacity: 0.9
+            radius: 12, fillColor: coresBairros[item.bairro] || '#3498db', color: "#fff", weight: 2, fillOpacity: 0.9
         });
         circle.bindPopup(`<b>${item.nome}</b><br>Bairro: ${item.bairro}<br>Fase: ${item.fase_obra}`);
         circle.on('click', function () {
-            if (selectedMarker && selectedMarker._circle) {
-                selectedMarker._circle.setStyle({ color: "#fff", weight: 2, radius: 12 });
-            }
+            if (selectedMarker && selectedMarker._circle) selectedMarker._circle.setStyle({ color: "#fff", weight: 2, radius: 12 });
             circle.setStyle({ color: "#fbbf24", weight: 4, radius: 14 });
             selectedMarker = { _circle: circle, data: item };
             applySelection(item);
         });
         circle.addTo(markers);
     });
-
     markers.addTo(map);
     setTimeout(function () {
         map.invalidateSize();
-        if (markers.getLayers().length > 0) {
-            map.fitBounds(markers.getBounds(), { padding: [20, 20] });
-        }
+        if (markers.getLayers().length > 0) map.fitBounds(markers.getBounds(), { padding: [20, 20] });
     }, 200);
 
     if (GLOBAL_TOTAL_ESTOQUE > 0 || GLOBAL_TOTAL_VENDIDAS > 0) {
         chartDoughnut = new Chart(document.getElementById('chartDoughnut'), {
             type: 'doughnut',
-            data: {
-                labels: ['Estoque', 'Vendido'],
-                datasets: [{ data: [GLOBAL_TOTAL_ESTOQUE, GLOBAL_TOTAL_VENDIDAS], backgroundColor: ['#1565c0', '#42a5f5'] }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: true,
-                plugins: {
-                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 }, boxWidth: 12 } },
-                    tooltip: { callbacks: { label: ctx => {
-                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                        const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
-                        return ` ${ctx.label}: ${ctx.parsed.toLocaleString('pt-BR')} (${pct}%)`;
-                    }}}
-                }
-            }
+            data: { labels: ['Estoque', 'Vendido'], datasets: [{ data: [GLOBAL_TOTAL_ESTOQUE, GLOBAL_TOTAL_VENDIDAS], backgroundColor: ['#1565c0', '#42a5f5'] }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 }, boxWidth: 12 } }, tooltip: { callbacks: { label: ctx => { const total = ctx.dataset.data.reduce((a,b)=>a+b,0); const pct = total>0?((ctx.parsed/total)*100).toFixed(1):0; return ` ${ctx.label}: ${ctx.parsed.toLocaleString('pt-BR')} (${pct}%)`; }}} } }
         });
     }
 
     if (FASES_COUNTS.some(v => v > 0)) {
         chartFases = new Chart(document.getElementById('chartFases'), {
             type: 'pie',
-            data: {
-                labels: FASES_LABELS,
-                datasets: [{ data: FASES_COUNTS, backgroundColor: ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#10b981'] }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: true,
-                plugins: {
-                    legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 }, boxWidth: 12 } },
-                    tooltip: { callbacks: { label: ctx => {
-                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                        const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
-                        return ` ${ctx.label}: ${ctx.parsed.toLocaleString('pt-BR')} (${pct}%)`;
-                    }}}
-                }
-            }
+            data: { labels: FASES_LABELS, datasets: [{ data: FASES_COUNTS, backgroundColor: ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#10b981'] }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 10 }, boxWidth: 12 } }, tooltip: { callbacks: { label: ctx => { const total = ctx.dataset.data.reduce((a,b)=>a+b,0); const pct = total>0?((ctx.parsed/total)*100).toFixed(1):0; return ` ${ctx.label}: ${ctx.parsed.toLocaleString('pt-BR')} (${pct}%)`; }}} } }
         });
     }
 });
 
 function applySelection(item) {
-    const tipologias = EMPREENDIMENTOS.filter(e => e.nome === item.nome);
-    const totalUnidades = tipologias.reduce((s, e) => s + e.unidades_totais, 0);
-    const totalEstoque  = tipologias.reduce((s, e) => s + e.estoque, 0);
-    const totalVendidas = tipologias.reduce((s, e) => s + e.unidades_vendidas, 0);
-    const mediaArea     = tipologias.reduce((s, e) => s + e.area_unidade, 0) / tipologias.length;
-    const mediaM2       = tipologias.reduce((s, e) => s + e.preco_medio_m2, 0) / tipologias.length;
-
+    const tip = EMPREENDIMENTOS.filter(e => e.nome === item.nome);
+    const tU  = tip.reduce((s,e)=>s+e.unidades_totais,0);
+    const tE  = tip.reduce((s,e)=>s+e.estoque,0);
+    const tV  = tip.reduce((s,e)=>s+e.unidades_vendidas,0);
+    const mA  = tip.reduce((s,e)=>s+e.area_unidade,0)/tip.length;
+    const mM  = tip.reduce((s,e)=>s+e.preco_medio_m2,0)/tip.length;
     document.getElementById('selected-name').textContent = item.nome;
     document.getElementById('selected-banner').classList.add('active');
-    ['kpi-total','kpi-estoque','kpi-vendidas','kpi-area','kpi-m2','kpi-emp'].forEach(id =>
-        document.getElementById(id).classList.add('highlighted'));
-
-    const pctTotal    = GLOBAL_TOTAL_UNIDADES > 0 ? ((totalUnidades / GLOBAL_TOTAL_UNIDADES) * 100).toFixed(1) : 0;
-    const pctEstoque  = GLOBAL_TOTAL_ESTOQUE  > 0 ? ((totalEstoque  / GLOBAL_TOTAL_ESTOQUE)  * 100).toFixed(1) : 0;
-    const pctVendidas = GLOBAL_TOTAL_VENDIDAS > 0 ? ((totalVendidas / GLOBAL_TOTAL_VENDIDAS) * 100).toFixed(1) : 0;
-
-    document.getElementById('kpi-total-val').textContent   = totalUnidades.toLocaleString('pt-BR');
-    document.getElementById('kpi-total-sub').textContent   = `${pctTotal}% do total geral`;
-    document.getElementById('kpi-estoque-val').textContent  = totalEstoque.toLocaleString('pt-BR');
-    document.getElementById('kpi-estoque-sub').textContent  = `${pctEstoque}% do estoque geral`;
-    document.getElementById('kpi-vendidas-val').textContent = totalVendidas.toLocaleString('pt-BR');
-    document.getElementById('kpi-vendidas-sub').textContent = `${pctVendidas}% das vendas gerais`;
-    document.getElementById('kpi-area-val').textContent     = mediaArea ? mediaArea.toFixed(1) : '—';
-    document.getElementById('kpi-area-sub').textContent     = `Média de ${tipologias.length} tipologia(s)`;
-    document.getElementById('kpi-m2-val').textContent       = mediaM2 ? `R$ ${mediaM2.toLocaleString('pt-BR', {minimumFractionDigits:2})}` : '—';
+    ['kpi-total','kpi-estoque','kpi-vendidas','kpi-area','kpi-m2','kpi-emp'].forEach(id => document.getElementById(id).classList.add('highlighted'));
+    const pT = GLOBAL_TOTAL_UNIDADES>0?((tU/GLOBAL_TOTAL_UNIDADES)*100).toFixed(1):0;
+    const pE = GLOBAL_TOTAL_ESTOQUE>0?((tE/GLOBAL_TOTAL_ESTOQUE)*100).toFixed(1):0;
+    const pV = GLOBAL_TOTAL_VENDIDAS>0?((tV/GLOBAL_TOTAL_VENDIDAS)*100).toFixed(1):0;
+    document.getElementById('kpi-total-val').textContent   = tU.toLocaleString('pt-BR');
+    document.getElementById('kpi-total-sub').textContent   = `${pT}% do total geral`;
+    document.getElementById('kpi-estoque-val').textContent  = tE.toLocaleString('pt-BR');
+    document.getElementById('kpi-estoque-sub').textContent  = `${pE}% do estoque geral`;
+    document.getElementById('kpi-vendidas-val').textContent = tV.toLocaleString('pt-BR');
+    document.getElementById('kpi-vendidas-sub').textContent = `${pV}% das vendas gerais`;
+    document.getElementById('kpi-area-val').textContent     = mA ? mA.toFixed(1) : '—';
+    document.getElementById('kpi-area-sub').textContent     = `Média de ${tip.length} tipologia(s)`;
+    document.getElementById('kpi-m2-val').textContent       = mM ? `R$ ${mM.toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—';
     document.getElementById('kpi-m2-sub').textContent       = 'Preço m² médio do empr.';
     document.getElementById('kpi-emp-val').textContent      = '1';
-    document.getElementById('kpi-emp-sub').textContent      = `${tipologias.length} tipologia(s)`;
-
+    document.getElementById('kpi-emp-sub').textContent      = `${tip.length} tipologia(s)`;
     if (chartDoughnut) {
-        const totalRosca = GLOBAL_TOTAL_ESTOQUE + GLOBAL_TOTAL_VENDIDAS;
-        const pctEstRosca = totalRosca > 0 ? ((totalEstoque / totalRosca) * 100).toFixed(1) : 0;
-        const pctVenRosca = totalRosca > 0 ? ((totalVendidas / totalRosca) * 100).toFixed(1) : 0;
-        chartDoughnut.data.labels = ['Estoque (empr.)', 'Vendido (empr.)', 'Estoque (outros)', 'Vendido (outros)'];
-        chartDoughnut.data.datasets[0].data = [totalEstoque, totalVendidas, Math.max(0, GLOBAL_TOTAL_ESTOQUE - totalEstoque), Math.max(0, GLOBAL_TOTAL_VENDIDAS - totalVendidas)];
+        const tot = GLOBAL_TOTAL_ESTOQUE+GLOBAL_TOTAL_VENDIDAS;
+        chartDoughnut.data.labels = ['Estoque (empr.)','Vendido (empr.)','Estoque (outros)','Vendido (outros)'];
+        chartDoughnut.data.datasets[0].data = [tE,tV,Math.max(0,GLOBAL_TOTAL_ESTOQUE-tE),Math.max(0,GLOBAL_TOTAL_VENDIDAS-tV)];
         chartDoughnut.data.datasets[0].backgroundColor = ['#fbbf24','#f59e0b','#1565c080','#42a5f540'];
         chartDoughnut.update();
-        document.getElementById('legend-doughnut').innerHTML = `<b>${item.nome}</b>: <b>${pctEstRosca}%</b> estoque · <b>${pctVenRosca}%</b> vendas.`;
+        document.getElementById('legend-doughnut').innerHTML = `<b>${item.nome}</b>: <b>${tot>0?((tE/tot)*100).toFixed(1):0}%</b> estoque · <b>${tot>0?((tV/tot)*100).toFixed(1):0}%</b> vendas.`;
     }
-
     if (chartFases) {
-        const faseIdx = FASES_LABELS.indexOf(item.fase_obra);
-        const cores = ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#10b981'];
-        chartFases.data.datasets[0].backgroundColor = FASES_LABELS.map((_, i) => (i === faseIdx ? cores[i % cores.length] : '#cccccc50'));
+        const fi = FASES_LABELS.indexOf(item.fase_obra);
+        const co = ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#10b981'];
+        chartFases.data.datasets[0].backgroundColor = FASES_LABELS.map((_,i)=>(i===fi?co[i%co.length]:'#cccccc50'));
         chartFases.update();
-        const pctFase = faseIdx >= 0 && FASES_COUNTS.reduce((a,b)=>a+b,0) > 0
-            ? ((FASES_COUNTS[faseIdx] / FASES_COUNTS.reduce((a,b)=>a+b,0)) * 100).toFixed(1) : 0;
-        document.getElementById('legend-fases').innerHTML = item.fase_obra
-            ? `Fase <b>"${item.fase_obra}"</b>: <b>${pctFase}%</b> das unidades.`
-            : 'Fase de obra não informada.';
+        const tot = FASES_COUNTS.reduce((a,b)=>a+b,0);
+        document.getElementById('legend-fases').innerHTML = item.fase_obra ? `Fase <b>"${item.fase_obra}"</b>: <b>${fi>=0&&tot>0?((FASES_COUNTS[fi]/tot)*100).toFixed(1):0}%</b> das unidades.` : 'Fase de obra não informada.';
     }
 }
 
 function clearSelection() {
-    if (selectedMarker && selectedMarker._circle) {
-        selectedMarker._circle.setStyle({ color: "#fff", weight: 2, radius: 12 });
-    }
+    if (selectedMarker && selectedMarker._circle) selectedMarker._circle.setStyle({ color: "#fff", weight: 2, radius: 12 });
     selectedMarker = null;
     document.getElementById('selected-banner').classList.remove('active');
-    ['kpi-total','kpi-estoque','kpi-vendidas','kpi-area','kpi-m2','kpi-emp'].forEach(id =>
-        document.getElementById(id).classList.remove('highlighted'));
+    ['kpi-total','kpi-estoque','kpi-vendidas','kpi-area','kpi-m2','kpi-emp'].forEach(id => document.getElementById(id).classList.remove('highlighted'));
     document.getElementById('kpi-total-val').textContent   = GLOBAL_TOTAL_UNIDADES.toLocaleString('pt-BR');
     document.getElementById('kpi-estoque-val').textContent  = GLOBAL_TOTAL_ESTOQUE.toLocaleString('pt-BR');
     document.getElementById('kpi-vendidas-val').textContent = GLOBAL_TOTAL_VENDIDAS.toLocaleString('pt-BR');
     document.getElementById('kpi-area-val').textContent     = "{{ media_area|floatformat:1 }}";
     document.getElementById('kpi-m2-val').textContent       = "R$ {{ media_m2|floatformat:2 }}";
     document.getElementById('kpi-emp-val').textContent      = "{{ num_empreendimentos }}";
-    ['kpi-total-sub','kpi-estoque-sub','kpi-vendidas-sub','kpi-area-sub','kpi-m2-sub','kpi-emp-sub'].forEach(id =>
-        document.getElementById(id).textContent = '');
+    ['kpi-total-sub','kpi-estoque-sub','kpi-vendidas-sub','kpi-area-sub','kpi-m2-sub','kpi-emp-sub'].forEach(id => document.getElementById(id).textContent = '');
     if (chartDoughnut) {
-        chartDoughnut.data.labels = ['Estoque', 'Vendido'];
-        chartDoughnut.data.datasets[0].data = [GLOBAL_TOTAL_ESTOQUE, GLOBAL_TOTAL_VENDIDAS];
+        chartDoughnut.data.labels = ['Estoque','Vendido'];
+        chartDoughnut.data.datasets[0].data = [GLOBAL_TOTAL_ESTOQUE,GLOBAL_TOTAL_VENDIDAS];
         chartDoughnut.data.datasets[0].backgroundColor = ['#1565c0','#42a5f5'];
-        chartDoughnut.update();
-        document.getElementById('legend-doughnut').innerHTML = '';
+        chartDoughnut.update(); document.getElementById('legend-doughnut').innerHTML = '';
     }
     if (chartFases) {
-        const cores = ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#10b981'];
-        chartFases.data.datasets[0].backgroundColor = FASES_LABELS.map((_, i) => cores[i % cores.length]);
+        const co = ['#ef4444','#3b82f6','#8b5cf6','#f59e0b','#10b981'];
+        chartFases.data.datasets[0].backgroundColor = FASES_LABELS.map((_,i)=>co[i%co.length]);
         chartFases.data.datasets[0].data = FASES_COUNTS;
-        chartFases.update();
-        document.getElementById('legend-fases').innerHTML = '';
+        chartFases.update(); document.getElementById('legend-fases').innerHTML = '';
     }
 }
 </script>

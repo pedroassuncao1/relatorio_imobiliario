@@ -1,0 +1,807 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE — Análise Gráfica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #0a0e27;
+            --navy-mid: #0f1535;
+            --blue-deep: #1a237e;
+            --blue-mid: #1565c0;
+            --blue-bright: #1976d2;
+            --blue-light: #42a5f5;
+            --gold: #fbbf24;
+            --border: #e2e8f4;
+            --text-primary: #0f1535;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --surface-2: #f8faff;
+            --surface-3: #f0f4ff;
+            --sidebar-w: 255px;
+        }
+
+        html, body { height: 100%; font-family: 'Inter', 'Segoe UI', sans-serif; background: #eef2f9; }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%);
+            padding: 0 16px; height: 56px; display: flex; align-items: center;
+            justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: sticky; top: 0; z-index: 200;
+        }
+        .navbar-left { display: flex; align-items: center; gap: 10px; }
+        .navbar-brand { display: flex; align-items: center; text-decoration: none; }
+        .navbar-brand img { height: clamp(26px, 4vw, 40px); width: auto; max-width: 140px; object-fit: contain; display: block; }
+        .navbar-badge { font-size: 0.6rem; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); font-weight: 500; }
+        @media (max-width: 640px) { .navbar-badge { display: none; } }
+        .navbar-right { display: flex; align-items: center; gap: 8px; }
+        .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); white-space: nowrap; }
+        .navbar-user strong { color: var(--gold); }
+        @media (max-width: 479px) { .navbar-user { display: none; } }
+        .btn-nav { font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+        .btn-nav-outline { border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); background: transparent; }
+        .btn-nav-outline:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* ── Botão filtros mobile ── */
+        .btn-filter-toggle {
+            display: none; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 8px;
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+            color: white; font-size: 0.75rem; font-weight: 600;
+            font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-filter-toggle:hover { background: rgba(255,255,255,0.2); }
+        .btn-filter-toggle .filter-count { background: var(--gold); color: var(--navy); border-radius: 10px; padding: 1px 6px; font-size: 0.62rem; font-weight: 800; display: none; }
+        .btn-filter-toggle .filter-count.has-filters { display: inline-block; }
+        @media (max-width: 767px) { .btn-filter-toggle { display: flex; } }
+
+        /* ── Layout ── */
+        .body-wrap { display: flex; height: calc(100vh - 56px); position: relative; }
+
+        /* ── Overlay ── */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; backdrop-filter: blur(2px); }
+        .sidebar-overlay.active { display: block; }
+
+        /* ── Leaflet override (just in case) ── */
+        .leaflet-pane, .leaflet-top, .leaflet-bottom { z-index: 400 !important; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%);
+            display: flex; flex-direction: column; overflow-y: auto;
+            flex-shrink: 0; padding: 16px 12px; z-index: 160;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 767px) {
+            .sidebar {
+                position: fixed; top: 56px; left: 0; bottom: 0;
+                width: min(var(--sidebar-w), 88vw);
+                transform: translateX(-110%);
+                box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+                z-index: 1600;
+            }
+            .sidebar.open { transform: translateX(0); }
+        }
+
+        .sidebar-header-mobile { display: none; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        @media (max-width: 767px) { .sidebar-header-mobile { display: flex; } }
+        .sidebar-header-title { font-size: 0.9rem; font-weight: 700; color: white; }
+        .btn-close-sidebar { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .sidebar-user { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--blue-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
+        .sidebar-username { font-size: 0.78rem; color: rgba(255,255,255,0.8); font-weight: 500; }
+        .sidebar-logout { font-size: 0.62rem; color: var(--gold); text-decoration: none; font-weight: 600; }
+        .sidebar-logout:hover { text-decoration: underline; }
+
+        .filter-section-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.3); font-weight: 600; margin-bottom: 8px; margin-top: 12px; padding: 0 2px; }
+        .filter-group { margin-bottom: 10px; }
+        .filter-label { font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
+        .filter-select, .filter-input, .filter-date {
+            width: 100%; padding: 7px 9px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem;
+            font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;
+        }
+        .filter-select:focus, .filter-input:focus, .filter-date:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+        .filter-select option { background: var(--navy-mid); color: white; }
+        .filter-range { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .filter-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        .sidebar-actions { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+        .btn-sidebar { padding: 8px 10px; border-radius: 6px; font-size: 0.72rem; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: block; transition: all 0.2s; border: none; }
+        .btn-sidebar-primary { background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright)); color: white; box-shadow: 0 2px 8px rgba(21,101,192,0.3); }
+        .btn-sidebar-primary:hover { box-shadow: 0 4px 12px rgba(21,101,192,0.4); }
+        .btn-sidebar-outline { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18) !important; }
+        .btn-sidebar-outline:hover { background: rgba(255,255,255,0.06); color: white; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
+
+        /* ── Main area ── */
+        .main-area { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; gap: 8px; }
+        @media (max-width: 767px) { .main-area { padding: 8px; } }
+
+        /* ── View tabs ── */
+        .view-tabs { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+        .view-tab {
+            padding: 6px 14px; border-radius: 8px; font-size: 0.74rem; font-weight: 600;
+            text-decoration: none; transition: all 0.2s; border: 1.5px solid var(--border);
+            color: var(--text-secondary); background: white; display: flex; align-items: center; gap: 6px;
+        }
+        .view-tab:hover { border-color: var(--blue-bright); color: var(--blue-bright); }
+        .view-tab.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; border-color: transparent; box-shadow: 0 2px 8px rgba(21,101,192,0.25); }
+
+        /* ── Charts row ── */
+        .charts-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex-shrink: 0;
+        }
+        @media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } }
+
+        .chart-card {
+            background: white; border-radius: 10px; padding: 14px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border);
+            display: flex; flex-direction: column;
+        }
+        .chart-card-title {
+            font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.7px;
+            font-weight: 700; color: white; text-align: center; margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--navy), var(--blue-deep));
+            padding: 8px 12px; border-radius: 7px;
+        }
+        .chart-wrap { position: relative; height: 220px; }
+        @media (max-width: 767px) { .chart-wrap { height: 180px; } }
+
+        /* ── Table card ── */
+        .table-card {
+            background: white; border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border);
+            display: flex; flex-direction: column; flex: 1; min-height: 320px;
+        }
+        .table-header {
+            padding: 10px 16px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-shrink: 0; gap: 10px; flex-wrap: wrap;
+        }
+        .table-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; color: var(--blue-deep); display: flex; align-items: center; gap: 8px; }
+        .table-controls { display: flex; align-items: center; gap: 8px; }
+        .search-input { padding: 5px 10px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; width: 180px; transition: border-color 0.2s; }
+        .search-input:focus { border-color: var(--blue-bright); }
+        .btn-expand-all { padding: 5px 12px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; border: 1.5px solid var(--border); color: var(--text-secondary); background: white; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 5px; }
+        .btn-expand-all:hover { border-color: var(--blue-bright); color: var(--blue-bright); }
+
+        .table-scroll { flex: 1; overflow: auto; }
+
+        /* ── Table styles ── */
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 680px; }
+
+        thead { position: sticky; top: 0; z-index: 10; }
+        thead th {
+            padding: 9px 12px; text-align: right; font-size: 0.62rem; text-transform: uppercase;
+            letter-spacing: 0.6px; font-weight: 700; color: white; white-space: nowrap;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%);
+            border-right: 1px solid rgba(255,255,255,0.08);
+        }
+        thead th:first-child { text-align: left; }
+        thead th:last-child { border-right: none; }
+        thead th.sortable { cursor: pointer; user-select: none; }
+        thead th.sortable:hover { background: linear-gradient(135deg, #0d1440 0%, #1a2b96 100%); }
+        thead th .sort-icon { display: inline-block; margin-left: 4px; opacity: 0.4; font-size: 0.6rem; }
+        thead th.asc .sort-icon::after  { content: '▲'; opacity: 1; }
+        thead th.desc .sort-icon::after { content: '▼'; opacity: 1; }
+        thead th:not(.asc):not(.desc) .sort-icon::after { content: '⇅'; }
+
+        tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+        tbody tr:last-child { border-bottom: none; }
+
+        /* row levels */
+        tr.row-bairro td  { background: var(--surface-3); font-weight: 700; color: var(--text-primary); }
+        tr.row-bairro:hover td  { background: #e5edff; }
+        tr.row-fase td    { background: #f5f7ff; font-weight: 600; color: var(--navy-mid); }
+        tr.row-fase:hover td    { background: #ebf0ff; }
+        tr.row-const td   { background: white; font-weight: 400; color: var(--text-secondary); }
+        tr.row-const:hover td   { background: var(--surface-2); }
+
+        td { padding: 8px 12px; text-align: right; white-space: nowrap; vertical-align: middle; }
+        td:first-child { text-align: left; }
+
+        .indent-0 { padding-left: 10px !important; }
+        .indent-1 { padding-left: 26px !important; }
+        .indent-2 { padding-left: 44px !important; }
+
+        .toggle-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 16px; height: 16px; border-radius: 3px;
+            background: rgba(25,118,210,0.12); border: none;
+            color: var(--blue-bright); font-size: 0.65rem; cursor: pointer;
+            margin-right: 6px; transition: all 0.15s; flex-shrink: 0; font-family: monospace; line-height: 1;
+        }
+        .toggle-btn:hover { background: var(--blue-bright); color: white; }
+        .row-name { display: flex; align-items: center; }
+        .no-toggle { display: inline-block; width: 22px; flex-shrink: 0; }
+
+        /* bar */
+        .bar-wrap { display: flex; align-items: center; gap: 5px; justify-content: flex-end; }
+        .bar { height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--blue-mid), var(--blue-light)); flex-shrink: 0; }
+
+        /* pct colors */
+        .pct-high { color: #16a34a; font-weight: 700; }
+        .pct-mid  { color: #ca8a04; font-weight: 600; }
+        .pct-low  { color: #dc2626; font-weight: 600; }
+
+        /* total row */
+        tr.row-total td { background: linear-gradient(135deg, var(--navy), var(--blue-deep)); color: white !important; font-weight: 800; font-size: 0.8rem; font-style: normal !important; position: sticky; bottom: 0; z-index: 5; }
+
+        tr.empty-row td { text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.82rem; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="../../static/img/logo.png" alt="">
+        </a>
+        <span class="navbar-badge">BI Imobiliário</span>
+    </div>
+    <div class="navbar-right">
+        {% if usuario %}
+            <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
+        {% endif %}
+        <button class="btn-filter-toggle" id="btnFilterToggle" onclick="toggleSidebar()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 4h18M7 10h10M10 16h4"/></svg>
+            Filtros
+            <span class="filter-count" id="filterCount">0</span>
+        </button>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav btn-nav-outline">← Voltar</a>
+    </div>
+</nav>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="body-wrap">
+    <!-- ── Sidebar ── -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header-mobile">
+            <span class="sidebar-header-title">⚙️ Filtros</span>
+            <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="sidebar-avatar">{{ usuario.username|slice:":2"|upper }}</div>
+            <div>
+                <div class="sidebar-username">{{ usuario.username }}</div>
+                <a href="{% url 'logout' %}" class="sidebar-logout">Sair</a>
+            </div>
+        </div>
+
+        <form method="GET" id="filterForm" action="{% url 'graficos' dash.id %}">
+            <div class="filter-section-title">Filtros</div>
+
+            <div class="filter-group">
+                <label class="filter-label">Nº de Quartos</label>
+                <select name="quartos" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for q in lista_quartos %}
+                        <option value="{{ q }}" {% if request.GET.quartos == q|stringformat:"i" %}selected{% endif %}>{{ q }} Quartos</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Empreendedor</label>
+                <select name="construtora" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for c in lista_construtoras %}
+                        <option value="{{ c }}" {% if request.GET.construtora == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Data de Entrega</label>
+                <div class="filter-date-row">
+                    <input type="date" name="data_inicio" class="filter-date" value="{{ request.GET.data_inicio }}" onchange="this.form.submit()">
+                    <input type="date" name="data_fim"    class="filter-date" value="{{ request.GET.data_fim }}"    onchange="this.form.submit()">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Bairro</label>
+                <select name="bairro" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for b in lista_bairros %}
+                        <option value="{{ b }}" {% if request.GET.bairro == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Fase da Obra</label>
+                <select name="fase" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Todos</option>
+                    {% for f in lista_fases %}
+                        <option value="{{ f }}" {% if request.GET.fase == f %}selected{% endif %}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Preço M² (Min / Max)</label>
+                <div class="filter-range">
+                    <input type="number" name="pm2_min" class="filter-input" placeholder="Mín" value="{{ request.GET.pm2_min }}">
+                    <input type="number" name="pm2_max" class="filter-input" placeholder="Máx" value="{{ request.GET.pm2_max }}">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Área (m²) (Min / Max)</label>
+                <div class="filter-range">
+                    <input type="number" name="area_min" class="filter-input" placeholder="Mín" value="{{ request.GET.area_min }}">
+                    <input type="number" name="area_max" class="filter-input" placeholder="Máx" value="{{ request.GET.area_max }}">
+                </div>
+            </div>
+
+            <div class="sidebar-actions">
+                <button type="submit" class="btn-sidebar btn-sidebar-primary">Aplicar Filtros</button>
+                <a href="{% url 'graficos' dash.id %}" class="btn-sidebar btn-sidebar-outline">Limpar Filtros</a>
+                <div class="sidebar-divider"></div>
+                <a href="{% url 'dashboard' dash.id %}" class="btn-sidebar btn-sidebar-outline">← Ver Dashboard</a>
+                <a href="{% url 'tabela' dash.id %}" class="btn-sidebar btn-sidebar-outline">← Ver Tabela</a>
+                <a href="{% url 'lista_dashboards' %}" class="btn-sidebar btn-sidebar-outline">← Voltar</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── Main ── -->
+    <div class="main-area">
+
+        <!-- View tabs -->
+        <div class="view-tabs">
+            <a href="{% url 'dashboard' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Mapa & KPIs
+            </a>
+            <a href="{% url 'tabela' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
+                </svg>
+                Tabela Analítica
+            </a>
+            <a href="{% url 'graficos' dash.id %}" class="view-tab active">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
+                </svg>
+                Gráficos & Análise
+            </a>
+        </div>
+
+        <!-- Charts row -->
+        <div class="charts-row">
+
+            <!-- Chart 1: Preço médio m² por empreendimento -->
+            <div class="chart-card">
+                <div class="chart-card-title">Preço Médio da Unidade por m² por Empreendimento</div>
+                <div class="chart-wrap">
+                    <canvas id="chartPrecoEmp"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Lançadas vs Vendidas vs Metragem -->
+            <div class="chart-card">
+                <div class="chart-card-title">Unidades Lançadas vs Vendidas vs Metragem</div>
+                <div class="chart-wrap">
+                    <canvas id="chartMetragem"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Table card -->
+        <div class="table-card">
+            <div class="table-header">
+                <div class="table-title">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
+                    </svg>
+                    Bairro / Fase / Construtora
+                    <span style="font-size:0.6rem; color:var(--text-muted); font-weight:400; text-transform:none; letter-spacing:0;">
+                        — {{ total_unidades }} unidades
+                    </span>
+                </div>
+                <div class="table-controls">
+                    <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar..." oninput="filterTable(this.value)">
+                    <button class="btn-expand-all" id="btnExpandAll" onclick="toggleAllRows()">
+                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                        Expandir
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-scroll">
+                <table id="mainTable">
+                    <thead>
+                        <tr>
+                            <th style="min-width:200px; text-align:left;">Bairro / Fase / Construtora</th>
+                            <th class="sortable" data-col="estoque"   style="min-width:90px;">Estoque <span class="sort-icon"></span></th>
+                            <th class="sortable" data-col="total"     style="min-width:100px;">Total de Unid. <span class="sort-icon"></span></th>
+                            <th class="sortable" data-col="share"     style="min-width:100px;">% Share de Unid. <span class="sort-icon"></span></th>
+                            <th class="sortable" data-col="vendidas"  style="min-width:110px;">Unid. Vendidas <span class="sort-icon"></span></th>
+                            <th class="sortable" data-col="pct_vend"  style="min-width:100px;">% Vendido <span class="sort-icon"></span></th>
+                            <th class="sortable" data-col="m2"        style="min-width:120px;">Preço Médio m² <span class="sort-icon"></span></th>
+                            <th class="sortable" data-col="area"      style="min-width:110px;">Área da Unid. m² <span class="sort-icon"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        {% if tabela_dados %}
+                            {% for bairro in tabela_dados %}
+                            {# ── Bairro ── #}
+                            <tr class="row-bairro" data-level="0" data-id="b{{ forloop.counter }}" data-parent="" data-search="{{ bairro.nome|lower }}">
+                                <td class="indent-0">
+                                    <div class="row-name">
+                                        <button class="toggle-btn" onclick="toggleRow('b{{ forloop.counter }}')">−</button>
+                                        {{ bairro.nome }}
+                                    </div>
+                                </td>
+                                <td>{{ bairro.estoque|floatformat:0 }}</td>
+                                <td>{{ bairro.total|floatformat:0 }}</td>
+                                <td><div class="bar-wrap">{{ bairro.share|floatformat:2 }}%<div class="bar" style="width:{{ bairro.share|floatformat:0 }}px;max-width:40px;"></div></div></td>
+                                <td>{{ bairro.vendidas|floatformat:0 }}</td>
+                                <td>{% if bairro.pct_vend >= 80 %}<span class="pct-high">{{ bairro.pct_vend|floatformat:2 }}%</span>{% elif bairro.pct_vend >= 50 %}<span class="pct-mid">{{ bairro.pct_vend|floatformat:2 }}%</span>{% else %}<span class="pct-low">{{ bairro.pct_vend|floatformat:2 }}%</span>{% endif %}</td>
+                                <td>R$ {{ bairro.m2|floatformat:2 }}</td>
+                                <td>{{ bairro.area|floatformat:2 }}</td>
+                            </tr>
+
+                            {% for fase in bairro.fases %}
+                            {# ── Fase ── #}
+                            <tr class="row-fase" data-level="1" data-id="f{{ forloop.parentloop.counter }}_{{ forloop.counter }}" data-parent="b{{ forloop.parentloop.counter }}" data-search="{{ fase.nome|lower }}">
+                                <td class="indent-1">
+                                    <div class="row-name">
+                                        <button class="toggle-btn" onclick="toggleRow('f{{ forloop.parentloop.counter }}_{{ forloop.counter }}')">−</button>
+                                        {{ fase.nome }}
+                                    </div>
+                                </td>
+                                <td>{{ fase.estoque|floatformat:0 }}</td>
+                                <td>{{ fase.total|floatformat:0 }}</td>
+                                <td><div class="bar-wrap">{{ fase.share|floatformat:2 }}%<div class="bar" style="width:{{ fase.share|floatformat:0 }}px;max-width:36px;"></div></div></td>
+                                <td>{{ fase.vendidas|floatformat:0 }}</td>
+                                <td>{% if fase.pct_vend >= 80 %}<span class="pct-high">{{ fase.pct_vend|floatformat:2 }}%</span>{% elif fase.pct_vend >= 50 %}<span class="pct-mid">{{ fase.pct_vend|floatformat:2 }}%</span>{% else %}<span class="pct-low">{{ fase.pct_vend|floatformat:2 }}%</span>{% endif %}</td>
+                                <td>R$ {{ fase.m2|floatformat:2 }}</td>
+                                <td>{{ fase.area|floatformat:2 }}</td>
+                            </tr>
+
+                            {% for const in fase.construtoras %}
+                            {# ── Construtora ── #}
+                            <tr class="row-const" data-level="2" data-parent="f{{ forloop.parentloop.parentloop.counter }}_{{ forloop.parentloop.counter }}" data-search="{{ const.nome|lower }}">
+                                <td class="indent-2">
+                                    <div class="row-name">
+                                        <span class="no-toggle"></span>
+                                        {{ const.nome }}
+                                    </div>
+                                </td>
+                                <td>{{ const.estoque|floatformat:0 }}</td>
+                                <td>{{ const.total|floatformat:0 }}</td>
+                                <td><div class="bar-wrap">{{ const.share|floatformat:2 }}%</div></td>
+                                <td>{{ const.vendidas|floatformat:0 }}</td>
+                                <td>{% if const.pct_vend >= 80 %}<span class="pct-high">{{ const.pct_vend|floatformat:2 }}%</span>{% elif const.pct_vend >= 50 %}<span class="pct-mid">{{ const.pct_vend|floatformat:2 }}%</span>{% else %}<span class="pct-low">{{ const.pct_vend|floatformat:2 }}%</span>{% endif %}</td>
+                                <td>R$ {{ const.m2|floatformat:2 }}</td>
+                                <td>{{ const.area|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% endfor %}
+                            {% endfor %}
+
+                            <!-- Total -->
+                            <tr class="row-total">
+                                <td class="indent-0"><strong>Total</strong></td>
+                                <td><strong>{{ total_estoque }}</strong></td>
+                                <td><strong>{{ total_unidades }}</strong></td>
+                                <td><strong>100,00%</strong></td>
+                                <td><strong>{{ total_vendidas }}</strong></td>
+                                <td>
+                                    {% if pct_vendido_total >= 80 %}<strong style="color:#86efac;">{{ pct_vendido_total|floatformat:2 }}%</strong>
+                                    {% elif pct_vendido_total >= 50 %}<strong style="color:#fde047;">{{ pct_vendido_total|floatformat:2 }}%</strong>
+                                    {% else %}<strong style="color:#fca5a5;">{{ pct_vendido_total|floatformat:2 }}%</strong>{% endif %}
+                                </td>
+                                <td><strong>R$ {{ media_m2|floatformat:2 }}</strong></td>
+                                <td><strong>{{ media_area|floatformat:2 }}</strong></td>
+                            </tr>
+                        {% else %}
+                            <tr class="empty-row"><td colspan="8">Nenhum dado encontrado para os filtros selecionados.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /main-area -->
+</div><!-- /body-wrap -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+/* ────────────────────────────────────────
+   Dados injetados pelo Django
+──────────────────────────────────────── */
+const CHART_PRECO_EMP = {
+    labels:  {{ chart_preco_emp_labels|safe }},
+    valores: {{ chart_preco_emp_valores|safe }},
+};
+const CHART_METRAGEM = {
+    labels:   {{ chart_metragem_labels|safe }},
+    vendidas: {{ chart_metragem_vendidas|safe }},
+    estoque:  {{ chart_metragem_estoque|safe }},
+    preco_m2: {{ chart_metragem_preco|safe }},
+};
+
+/* ────────────────────────────────────────
+   Chart 1 — Preço médio m² por Empreendimento
+──────────────────────────────────────── */
+new Chart(document.getElementById('chartPrecoEmp'), {
+    type: 'bar',
+    data: {
+        labels: CHART_PRECO_EMP.labels,
+        datasets: [{
+            data: CHART_PRECO_EMP.valores,
+            backgroundColor: '#1565c0',
+            borderRadius: 4,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` R$ ${ctx.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits:0})}/m²`
+                }
+            },
+            datalabels: false,
+        },
+        scales: {
+            x: {
+                ticks: {
+                    maxRotation: 60, minRotation: 30,
+                    font: { size: 9, family: 'Inter' },
+                    color: '#64748b',
+                    maxTicksLimit: 20,
+                },
+                grid: { display: false },
+            },
+            y: {
+                ticks: {
+                    callback: v => `${(v/1000).toFixed(0)} Mil`,
+                    font: { size: 9, family: 'Inter' },
+                    color: '#64748b',
+                },
+                grid: { color: '#f0f4ff' },
+            }
+        }
+    }
+});
+
+/* ────────────────────────────────────────
+   Chart 2 — Barras empilhadas + linha (metragem)
+──────────────────────────────────────── */
+new Chart(document.getElementById('chartMetragem'), {
+    type: 'bar',
+    data: {
+        labels: CHART_METRAGEM.labels,
+        datasets: [
+            {
+                label: 'Unidades Vendidas',
+                data: CHART_METRAGEM.vendidas,
+                backgroundColor: '#1976d2',
+                borderRadius: 2,
+                stack: 'stack0',
+            },
+            {
+                label: 'Estoque',
+                data: CHART_METRAGEM.estoque,
+                backgroundColor: '#1a237e',
+                borderRadius: 2,
+                stack: 'stack0',
+            },
+            {
+                label: 'Preço Médio m²',
+                data: CHART_METRAGEM.preco_m2,
+                type: 'line',
+                borderColor: '#f97316',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointBackgroundColor: '#22c55e',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                tension: 0.3,
+                yAxisID: 'y2',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: { font: { size: 10, family: 'Inter' }, boxWidth: 12, padding: 10 }
+            },
+            tooltip: {
+                callbacks: {
+                    label: ctx => {
+                        if (ctx.dataset.yAxisID === 'y2')
+                            return ` Preço m²: R$ ${ctx.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits:0})}`;
+                        return ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('pt-BR')}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { font: { size: 8, family: 'Inter' }, color: '#64748b', maxRotation: 30 },
+                grid: { display: false },
+                stacked: true,
+            },
+            y: {
+                stacked: true,
+                ticks: {
+                    callback: v => v >= 1000 ? `${(v/1000).toFixed(0)} Mil` : v,
+                    font: { size: 9, family: 'Inter' },
+                    color: '#64748b',
+                },
+                grid: { color: '#f0f4ff' },
+            },
+            y2: {
+                position: 'right',
+                grid: { drawOnChartArea: false },
+                ticks: {
+                    callback: v => `R$ ${(v/1000).toFixed(0)}k`,
+                    font: { size: 9, family: 'Inter' },
+                    color: '#f97316',
+                },
+            }
+        }
+    }
+});
+
+/* ────────────────────────────────────────
+   Sidebar mobile
+──────────────────────────────────────── */
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isOpen  = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    overlay.classList.toggle('active', !isOpen);
+    document.body.style.overflow = !isOpen ? 'hidden' : '';
+}
+
+function updateFilterCount() {
+    const params = new URLSearchParams(window.location.search);
+    const keys = ['quartos','construtora','data_inicio','data_fim','bairro','fase','pm2_min','pm2_max','area_min','area_max'];
+    const count = keys.filter(k => params.get(k) && params.get(k) !== '').length;
+    const badge = document.getElementById('filterCount');
+    badge.textContent = count;
+    badge.classList.toggle('has-filters', count > 0);
+}
+updateFilterCount();
+
+document.getElementById('filterForm').addEventListener('submit', () => {
+    if (window.innerWidth < 768) toggleSidebar();
+});
+
+/* ────────────────────────────────────────
+   Table expand/collapse
+──────────────────────────────────────── */
+function getChildren(parentId) {
+    return document.querySelectorAll(`tr[data-parent="${parentId}"]`);
+}
+
+function setSubtreeVisible(parentId, visible) {
+    getChildren(parentId).forEach(child => {
+        child.style.display = visible ? '' : 'none';
+        const childId = child.getAttribute('data-id');
+        if (childId) {
+            if (!visible) {
+                setSubtreeVisible(childId, false);
+                const btn = child.querySelector('.toggle-btn');
+                if (btn) btn.textContent = '+';
+            }
+        }
+    });
+}
+
+function toggleRow(id) {
+    const children = getChildren(id);
+    if (!children.length) return;
+    const firstVisible = children[0].style.display !== 'none';
+    setSubtreeVisible(id, !firstVisible);
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (row) { const btn = row.querySelector('.toggle-btn'); if (btn) btn.textContent = firstVisible ? '+' : '−'; }
+}
+
+let allExpanded = true;
+function toggleAllRows() {
+    allExpanded = !allExpanded;
+    const btn = document.getElementById('btnExpandAll');
+    document.querySelectorAll('tr[data-level]').forEach(row => {
+        if (parseInt(row.getAttribute('data-level')) > 0) row.style.display = allExpanded ? '' : 'none';
+        const tb = row.querySelector('.toggle-btn');
+        if (tb) tb.textContent = allExpanded ? '−' : '+';
+    });
+    btn.innerHTML = allExpanded
+        ? `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Expandir`
+        : `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg> Recolher`;
+}
+
+function filterTable(query) {
+    const q = query.toLowerCase().trim();
+    const rows = document.querySelectorAll('#tableBody tr[data-search]');
+    if (!q) { rows.forEach(r => r.style.display = ''); return; }
+    const matchedIds = new Set();
+    rows.forEach(row => {
+        const text = row.getAttribute('data-search') || '';
+        const id   = row.getAttribute('data-id') || '';
+        if (text.includes(q)) { row.style.display = ''; matchedIds.add(id); }
+        else row.style.display = 'none';
+    });
+    rows.forEach(row => {
+        const id = row.getAttribute('data-id') || '';
+        if (matchedIds.has(id)) {
+            let parentId = row.getAttribute('data-parent');
+            while (parentId) {
+                const p = document.querySelector(`tr[data-id="${parentId}"]`);
+                if (p) { p.style.display = ''; parentId = p.getAttribute('data-parent'); } else break;
+            }
+        }
+    });
+}
+
+/* ────────────────────────────────────────
+   Table sort (por grupo de bairro)
+──────────────────────────────────────── */
+document.querySelectorAll('thead th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+        const col = th.getAttribute('data-col');
+        const isAsc = th.classList.contains('asc');
+        document.querySelectorAll('thead th').forEach(h => h.classList.remove('asc','desc'));
+        th.classList.add(isAsc ? 'desc' : 'asc');
+        sortBairros(col, !isAsc);
+    });
+});
+
+function sortBairros(col, asc) {
+    const colIdx = { estoque:1, total:2, share:3, vendidas:4, pct_vend:5, m2:6, area:7 };
+    const idx = colIdx[col]; if (!idx) return;
+    const tbody = document.getElementById('tableBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const groups = [];
+    let cur = null;
+    rows.forEach(r => {
+        if (r.classList.contains('row-total')) return;
+        const level = parseInt(r.getAttribute('data-level') ?? '-1');
+        if (level === 0) { cur = { header: r, children: [] }; groups.push(cur); }
+        else if (cur) cur.children.push(r);
+    });
+    const val = row => {
+        const cell = row.querySelectorAll('td')[idx];
+        if (!cell) return 0;
+        return parseFloat(cell.textContent.replace(/[R$%\s.]/g, '').replace(',','.')) || 0;
+    };
+    groups.sort((a,b) => asc ? val(a.header)-val(b.header) : val(b.header)-val(a.header));
+    const totalRow = tbody.querySelector('tr.row-total');
+    groups.forEach(g => { tbody.appendChild(g.header); g.children.forEach(c => tbody.appendChild(c)); });
+    if (totalRow) tbody.appendChild(totalRow);
+}
+</script>
+</body>
+</html>
