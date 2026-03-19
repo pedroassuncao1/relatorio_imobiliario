@@ -47,36 +47,48 @@ geocode = RateLimiter(
 # FUNÇÕES
 # ==============================
 
+# Cache em memória para evitar geocoding repetido na mesma planilha
+_cache_coordenadas = {}
+
 def buscar_coordenadas(rua, bairro, cidade):
     try:
         if not rua and not bairro:
             return None, None
 
-        # Normalização leve (sem forçar estado)
-        rua = str(rua or "").replace("nº", "").replace("Nº", "").replace("°", "").strip()
+        rua    = str(rua or "").strip()
         bairro = str(bairro or "").strip()
         cidade = str(cidade or "").strip()
 
-        # Remove possíveis siglas duplicadas tipo Recife/PE ou Recife-PE
-        cidade = cidade.replace("/", " ").replace("-", " ")
+        # ← chave de cache: usa só bairro+cidade se rua for genérica
+        cache_key = f"{rua}|{bairro}|{cidade}"
+
+        if cache_key in _cache_coordenadas:
+            print(f"CACHE HIT: {cache_key}")
+            return _cache_coordenadas[cache_key]
 
         endereco_formatado = f"{rua}, {bairro}, {cidade}"
-
         print("GEOCODING:", endereco_formatado)
 
         location = geocode(endereco_formatado)
 
         if location:
             print("OK:", location.latitude, location.longitude)
+            _cache_coordenadas[cache_key] = (location.latitude, location.longitude)
             return location.latitude, location.longitude
 
-        # 🔁 Fallback inteligente
+        # Fallback só por bairro+cidade
+        fallback_key = f"|{bairro}|{cidade}"
+        if fallback_key in _cache_coordenadas:
+            print(f"CACHE HIT FALLBACK: {fallback_key}")
+            return _cache_coordenadas[fallback_key]
+
         endereco_fallback = f"{bairro}, {cidade}"
         print("FALLBACK:", endereco_fallback)
 
         location = geocode(endereco_fallback)
 
         if location:
+            _cache_coordenadas[fallback_key] = (location.latitude, location.longitude)
             return location.latitude, location.longitude
 
     except Exception as e:
