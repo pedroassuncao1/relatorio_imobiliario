@@ -88,6 +88,7 @@ class Empreendimento(models.Model):
     bairro = models.CharField(max_length=100)
     cidade = models.CharField(max_length=100)
     data_entrega = models.DateField(null=True, blank=True)
+    data_comercializacao = models.DateField(null=True, blank=True)
 
     unidades_totais = models.IntegerField(default=0)
     unidades_vendidas = models.IntegerField(default=0)

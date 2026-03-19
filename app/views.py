@@ -143,6 +143,13 @@ def dashboard(request, dashboard_id):
         dados_queryset = dados_queryset.filter(preco_unidade__gte=request.GET.get('preco_min'))
     if request.GET.get('preco_max'):
         dados_queryset = dados_queryset.filter(preco_unidade__lte=request.GET.get('preco_max'))
+    if request.GET.get('comerc_inicio') and request.GET.get('comerc_fim'):
+        dados_queryset = dados_queryset.filter(
+            data_comercializacao__range=[
+                request.GET.get('comerc_inicio'),
+                request.GET.get('comerc_fim')
+            ]
+        )
 
     # --- KPIs ---
     stats = dados_queryset.aggregate(
@@ -239,6 +246,14 @@ def upload_planilha(request):
             nome_val = row.get(mapeamento.get('nome'))
             if not nome_val:
                 continue
+            
+            data_comerc_raw = row.get(mapeamento.get('inicio_comercializacao'))
+            data_comerc_final = None
+            if pd.notna(data_comerc_raw):
+                try:
+                    data_comerc_final = pd.to_datetime(data_comerc_raw).date()
+                except:
+                    data_comerc_final = None
 
             data_raw   = row.get(mapeamento.get('data_entrega'))
             data_final = None
@@ -269,6 +284,7 @@ def upload_planilha(request):
                 bairro            = bairro,
                 cidade            = cidade,
                 data_entrega      = data_final,
+                data_comercializacao = data_comerc_final,
                 unidades_totais   = tratar_inteiro(row.get(mapeamento.get('unidades_totais'), 0)),
                 unidades_vendidas = tratar_inteiro(row.get(mapeamento.get('unidades_vendidas'), 0)),
                 preco_medio_m2    = limpar_valor(row.get(mapeamento.get('preco_m2'))),

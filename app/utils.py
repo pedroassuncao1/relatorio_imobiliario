@@ -124,6 +124,7 @@ def mapear_colunas_com_ia(colunas):
     - nome, categoria, construtora, endereco, bairro, cidade
     - unidades_totais, unidades_vendidas, preco_m2, preco_unidade
     - area_unidade, estoque, quartos, vagas_garagem, fase_obra, data_entrega
+    - inicio_comercializacao
 
     IMPORTANTE: Na coluna de 'quartos', podem existir valores como 'STUDIO'. 
     Apenas identifique a coluna correta.
