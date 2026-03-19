@@ -4,6 +4,7 @@ from google import genai
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import json
+import googlemaps
 
 # ==============================
 # CONFIGURAÇÕES GLOBAIS
@@ -47,8 +48,21 @@ geocode = RateLimiter(
 # FUNÇÕES
 # ==============================
 
-# Cache em memória para evitar geocoding repetido na mesma planilha
+_gmaps_client = None
 _cache_coordenadas = {}
+
+def get_gmaps():
+    global _gmaps_client
+    if _gmaps_client is None:
+        import os
+        api_key = os.getenv('GOOGLE_MAPS_API_KEY')
+        if api_key:
+            _gmaps_client = googlemaps.Client(key=api_key)
+            print("✅ GEOCODER: Google Maps API ativado")
+        else:
+            print("⚠️  GEOCODER: Google Maps API key não encontrada — usando Nominatim como fallback")
+    return _gmaps_client
+
 
 def buscar_coordenadas(rua, bairro, cidade):
     try:
@@ -59,40 +73,71 @@ def buscar_coordenadas(rua, bairro, cidade):
         bairro = str(bairro or "").strip()
         cidade = str(cidade or "").strip()
 
-        # ← chave de cache: usa só bairro+cidade se rua for genérica
         cache_key = f"{rua}|{bairro}|{cidade}"
-
         if cache_key in _cache_coordenadas:
-            print(f"CACHE HIT: {cache_key}")
+            print(f"📦 CACHE HIT: {cache_key}")
             return _cache_coordenadas[cache_key]
 
-        endereco_formatado = f"{rua}, {bairro}, {cidade}"
-        print("GEOCODING:", endereco_formatado)
+        gmaps = get_gmaps()
 
-        location = geocode(endereco_formatado)
+        if gmaps:
+            endereco = f"{rua}, {bairro}, {cidade}"
+            print(f"🗺️  GOOGLE: {endereco}")
 
-        if location:
-            print("OK:", location.latitude, location.longitude)
-            _cache_coordenadas[cache_key] = (location.latitude, location.longitude)
-            return location.latitude, location.longitude
+            result = gmaps.geocode(endereco, language='pt-BR')
 
-        # Fallback só por bairro+cidade
-        fallback_key = f"|{bairro}|{cidade}"
-        if fallback_key in _cache_coordenadas:
-            print(f"CACHE HIT FALLBACK: {fallback_key}")
-            return _cache_coordenadas[fallback_key]
+            if result:
+                lat = result[0]['geometry']['location']['lat']
+                lng = result[0]['geometry']['location']['lng']
+                tipo = result[0]['geometry']['location_type']
+                print(f"✅ OK ({tipo}): {lat}, {lng}")
+                _cache_coordenadas[cache_key] = (lat, lng)
+                return lat, lng
 
-        endereco_fallback = f"{bairro}, {cidade}"
-        print("FALLBACK:", endereco_fallback)
+            # Fallback bairro+cidade
+            fallback_key = f"|{bairro}|{cidade}"
+            if fallback_key in _cache_coordenadas:
+                print(f"📦 CACHE HIT FALLBACK: {fallback_key}")
+                return _cache_coordenadas[fallback_key]
 
-        location = geocode(endereco_fallback)
+            print(f"⚠️  GOOGLE sem resultado — tentando só bairro: {bairro}, {cidade}")
+            result = gmaps.geocode(f"{bairro}, {cidade}", language='pt-BR')
+            if result:
+                lat = result[0]['geometry']['location']['lat']
+                lng = result[0]['geometry']['location']['lng']
+                print(f"✅ FALLBACK OK: {lat}, {lng}")
+                _cache_coordenadas[fallback_key] = (lat, lng)
+                return lat, lng
 
-        if location:
-            _cache_coordenadas[fallback_key] = (location.latitude, location.longitude)
-            return location.latitude, location.longitude
+            print(f"❌ GOOGLE: nenhum resultado para {endereco}")
+
+        else:
+            # Nominatim
+            from geopy.geocoders import Nominatim
+            from geopy.extra.rate_limiter import RateLimiter
+
+            geolocator = Nominatim(user_agent="core_bi", timeout=10)
+            geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+
+            endereco = f"{rua}, {bairro}, {cidade}"
+            print(f"🔍 NOMINATIM: {endereco}")
+            location = geocode(endereco)
+
+            if location:
+                print(f"✅ OK: {location.latitude}, {location.longitude}")
+                _cache_coordenadas[cache_key] = (location.latitude, location.longitude)
+                return location.latitude, location.longitude
+
+            print(f"⚠️  NOMINATIM sem resultado — tentando fallback: {bairro}, {cidade}")
+            location = geocode(f"{bairro}, {cidade}")
+            if location:
+                print(f"✅ FALLBACK OK: {location.latitude}, {location.longitude}")
+                return location.latitude, location.longitude
+
+            print(f"❌ NOMINATIM: nenhum resultado")
 
     except Exception as e:
-        print("Erro geocode:", e)
+        print(f"❌ ERRO GEOCODE: {e}")
 
     return None, None
 
