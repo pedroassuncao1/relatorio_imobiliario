@@ -1,1 +1,1 @@
-web: gunicorn core.wsgi:application
+web: gunicorn core.wsgi:application --timeout 500 --workers 2
