@@ -30,18 +30,26 @@ def admin_required(view_func):
 
 
 def aplicar_filtros(qs, request, incluir_slider=True):
-    if request.GET.get('quartos'):
-        qs = qs.filter(quartos=request.GET.get('quartos'))
-    if request.GET.get('construtora'):
-        qs = qs.filter(construtora=request.GET.get('construtora'))
-    if request.GET.get('bairro'):
-        qs = qs.filter(bairro=request.GET.get('bairro'))
-    if request.GET.get('fase'):
-        qs = qs.filter(fase_obra=request.GET.get('fase'))
+    # Múltipla seleção — getlist retorna lista
+    quartos_list     = request.GET.getlist('quartos')
+    construtora_list = request.GET.getlist('construtora')
+    bairro_list      = request.GET.getlist('bairro')
+    fase_list        = request.GET.getlist('fase')
+
+    if quartos_list:
+        qs = qs.filter(quartos__in=quartos_list)
+    if construtora_list:
+        qs = qs.filter(construtora__in=construtora_list)
+    if bairro_list:
+        qs = qs.filter(bairro__in=bairro_list)
+    if fase_list:
+        qs = qs.filter(fase_obra__in=fase_list)
+
     if request.GET.get('data_inicio') and request.GET.get('data_fim'):
         qs = qs.filter(data_entrega__range=[request.GET.get('data_inicio'), request.GET.get('data_fim')])
     if request.GET.get('comerc_inicio') and request.GET.get('comerc_fim'):
         qs = qs.filter(data_comercializacao__range=[request.GET.get('comerc_inicio'), request.GET.get('comerc_fim')])
+
     if incluir_slider:
         if request.GET.get('pm2_min'):
             qs = qs.filter(preco_medio_m2__gte=request.GET.get('pm2_min'))

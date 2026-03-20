@@ -20,51 +20,71 @@
         html, body { height: 100%; font-family: 'Inter', sans-serif; background: #eef2f9; overflow: hidden; }
 
         /* ── Navbar ── */
-        .navbar {
-            background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%);
-            padding: 0 16px; height: 56px; display: flex; align-items: center;
-            justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            position: sticky; top: 0; z-index: 200;
-        }
+        .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 200; }
         .navbar-left { display: flex; align-items: center; gap: 10px; }
         .navbar-brand img { height: 36px; width: auto; object-fit: contain; }
         .navbar-badge { font-size: 0.6rem; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); font-weight: 500; }
+        @media (max-width: 640px) { .navbar-badge { display: none; } }
         .navbar-right { display: flex; align-items: center; gap: 8px; }
-        .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); }
+        .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); white-space: nowrap; }
         .navbar-user strong { color: var(--gold); }
+        @media (max-width: 479px) { .navbar-user { display: none; } }
         .btn-nav { font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
         .btn-nav-outline { border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); background: transparent; }
         .btn-nav-outline:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* ── Botão filtros mobile ── */
         .btn-filter-toggle { display: none; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: white; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+        .btn-filter-toggle .filter-count { background: var(--gold); color: var(--navy); border-radius: 10px; padding: 1px 6px; font-size: 0.62rem; font-weight: 800; display: none; }
+        .btn-filter-toggle .filter-count.has-filters { display: inline-block; }
         @media (max-width: 767px) { .btn-filter-toggle { display: flex; } }
 
         /* ── Layout ── */
-        .body-wrap { display: flex; height: calc(100vh - 56px); }
+        .body-wrap { display: flex; height: calc(100vh - 56px); position: relative; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
         .sidebar-overlay.active { display: block; }
 
         /* ── Sidebar ── */
-        .sidebar {
-            width: var(--sidebar-w); min-width: var(--sidebar-w);
-            background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%);
-            display: flex; flex-direction: column; overflow-y: auto;
-            padding: 16px 12px; z-index: 160;
-            transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-        }
-        @media (max-width: 767px) {
-            .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: min(var(--sidebar-w), 88vw); transform: translateX(-110%); box-shadow: 4px 0 24px rgba(0,0,0,0.3); z-index: 1600; }
-            .sidebar.open { transform: translateX(0); }
-        }
+        .sidebar { width: var(--sidebar-w); background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; padding: 16px 12px; z-index: 160; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+        @media (max-width: 767px) { .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: min(var(--sidebar-w), 88vw); transform: translateX(-110%); box-shadow: 4px 0 24px rgba(0,0,0,0.3); z-index: 1600; } .sidebar.open { transform: translateX(0); } }
+
+        .sidebar-header-mobile { display: none; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        @media (max-width: 767px) { .sidebar-header-mobile { display: flex; } }
+        .sidebar-header-title { font-size: 0.9rem; font-weight: 700; color: white; }
+        .btn-close-sidebar { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
         .sidebar-user { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
         .sidebar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--blue-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
         .sidebar-username { font-size: 0.78rem; color: rgba(255,255,255,0.8); font-weight: 500; }
         .sidebar-logout { font-size: 0.62rem; color: var(--gold); text-decoration: none; font-weight: 600; }
+
         .filter-section-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.3); font-weight: 600; margin-bottom: 8px; margin-top: 12px; }
         .filter-group { margin-bottom: 10px; }
         .filter-label { font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
-        .filter-select, .filter-date { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; }
-        .filter-select option { background: var(--navy-mid); }
+        .filter-date { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; }
         .filter-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+
+        /* ── Multiselect ── */
+        .ms-wrap { position: relative; margin-bottom: 2px; }
+        .ms-trigger { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; transition: all 0.2s; }
+        .ms-trigger:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+        .ms-trigger.has-value { border-color: var(--gold); color: var(--gold); }
+        .ms-arrow { font-size: 0.55rem; transition: transform 0.2s; flex-shrink: 0; }
+        .ms-dropdown { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; z-index: 9999; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        .ms-dropdown.open { display: block; }
+        .ms-dropdown::-webkit-scrollbar { width: 4px; }
+        .ms-dropdown::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .ms-search { width: 100%; padding: 7px 10px; background: var(--navy-mid); border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); font-size: 0.73rem; font-family: 'Inter', sans-serif; outline: none; position: sticky; top: 0; }
+        .ms-search::placeholder { color: rgba(255,255,255,0.35); }
+        .ms-option { display: flex; align-items: center; gap: 7px; padding: 6px 10px; cursor: pointer; font-size: 0.73rem; color: rgba(255,255,255,0.8); transition: background 0.15s; }
+        .ms-option:hover { background: rgba(255,255,255,0.08); }
+        .ms-option input[type=checkbox] { width: 13px; height: 13px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0; }
+        .ms-option.checked { color: var(--gold); }
+        .ms-empty { padding: 10px; font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
+        .ms-actions { display: flex; border-top: 1px solid rgba(255,255,255,0.1); position: sticky; bottom: 0; background: var(--navy-mid); }
+        .ms-action-btn { flex: 1; padding: 6px; font-size: 0.68rem; font-family: 'Inter', sans-serif; font-weight: 600; background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; }
+        .ms-action-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+        .ms-action-btn:first-child { border-right: 1px solid rgba(255,255,255,0.1); }
 
         /* ── Slider ── */
         .slider-group { margin-bottom: 12px; }
@@ -106,25 +126,11 @@
         /* ── Mapa ── */
         .map-container { flex: 1; border-radius: 10px; overflow: hidden; position: relative; min-height: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border); }
         #map { width: 100%; height: 100%; }
-
-        /* ── Legenda do mapa ── */
-        .map-legend {
-            position: absolute; bottom: 24px; right: 10px; z-index: 1000;
-            background: white; border-radius: 8px; padding: 10px 14px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.15); border: 1px solid var(--border);
-            font-size: 0.7rem; min-width: 160px;
-        }
+        .map-legend { position: absolute; bottom: 24px; right: 10px; z-index: 1000; background: white; border-radius: 8px; padding: 10px 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); border: 1px solid var(--border); font-size: 0.7rem; min-width: 160px; }
         .map-legend-title { font-weight: 700; color: var(--blue-deep); margin-bottom: 8px; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .legend-gradient { height: 10px; border-radius: 5px; background: linear-gradient(90deg, #0000ff, #00ff00, #ffff00, #ff0000); margin-bottom: 5px; }
         .legend-labels { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.62rem; }
-
-        /* ── Tooltip customizado ── */
-        .map-tooltip {
-            position: absolute; z-index: 2000; background: white; border-radius: 8px;
-            padding: 10px 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-            border: 1px solid var(--border); pointer-events: none;
-            font-size: 0.75rem; min-width: 180px; display: none;
-        }
+        .map-tooltip { position: absolute; z-index: 2000; background: white; border-radius: 8px; padding: 10px 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); border: 1px solid var(--border); pointer-events: none; font-size: 0.75rem; min-width: 180px; display: none; }
         .tooltip-nome { font-weight: 700; color: var(--blue-deep); margin-bottom: 6px; font-size: 0.78rem; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
         .tooltip-row { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 3px; color: var(--text-secondary); }
         .tooltip-val { font-weight: 700; color: var(--text-primary); }
@@ -142,9 +148,10 @@
     </div>
     <div class="navbar-right">
         <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
-        <button class="btn-filter-toggle" onclick="toggleSidebar()">
+        <button class="btn-filter-toggle" id="btnFilterToggle" onclick="toggleSidebar()">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 4h18M7 10h10M10 16h4"/></svg>
             Filtros
+            <span class="filter-count" id="filterCount">0</span>
         </button>
         <a href="{% url 'lista_dashboards' %}" class="btn-nav btn-nav-outline">← Voltar</a>
     </div>
@@ -153,8 +160,13 @@
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <div class="body-wrap">
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
+
+        <div class="sidebar-header-mobile">
+            <span class="sidebar-header-title">⚙️ Filtros</span>
+            <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
+        </div>
+
         <div class="sidebar-user">
             <div class="sidebar-avatar">{{ usuario.username|slice:":2"|upper }}</div>
             <div>
@@ -164,8 +176,6 @@
         </div>
 
         <form method="GET" id="filterForm" action="{% url 'mapa_calor' dash.id %}">
-
-            <!-- Filtros hidden dos sliders (atualizados via JS) -->
             <input type="hidden" name="pm2_min"   id="h_pm2_min">
             <input type="hidden" name="pm2_max"   id="h_pm2_max">
             <input type="hidden" name="area_min"  id="h_area_min">
@@ -175,57 +185,81 @@
 
             <div class="filter-section-title">Filtros</div>
 
+            <!-- Nº de Quartos -->
             <div class="filter-group">
                 <label class="filter-label">Nº de Quartos</label>
-                <select name="quartos" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for q in lista_quartos %}
-                        <option value="{{ q }}" {% if request.GET.quartos == q|stringformat:"i" %}selected{% endif %}>{{ q }} Quartos</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Empreendedor</label>
-                <select name="construtora" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for c in lista_construtoras %}
-                        <option value="{{ c }}" {% if request.GET.construtora == c %}selected{% endif %}>{{ c }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Data de Entrega</label>
-                <div class="filter-date-row">
-                    <input type="date" name="data_inicio" class="filter-date" value="{{ request.GET.data_inicio }}" onchange="this.form.submit()">
-                    <input type="date" name="data_fim"    class="filter-date" value="{{ request.GET.data_fim }}"    onchange="this.form.submit()">
+                <div class="ms-wrap" data-name="quartos">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <!-- Empreendedor -->
             <div class="filter-group">
-                <label class="filter-label">Bairro</label>
-                <select name="bairro" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for b in lista_bairros %}
-                        <option value="{{ b }}" {% if request.GET.bairro == b %}selected{% endif %}>{{ b }}</option>
-                    {% endfor %}
-                </select>
+                <label class="filter-label">Empreendedor</label>
+                <div class="ms-wrap" data-name="construtora">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Data de Entrega -->
+            <div class="filter-group">
+                <label class="filter-label">Data de Entrega</label>
+                <div class="filter-date-row">
+                    <input type="date" name="data_inicio" class="filter-date" value="{{ request.GET.data_inicio }}">
+                    <input type="date" name="data_fim"    class="filter-date" value="{{ request.GET.data_fim }}">
+                </div>
+            </div>
+
+            <!-- Bairro -->
+            <div class="filter-group">
+                <label class="filter-label">Bairro</label>
+                <div class="ms-wrap" data-name="bairro">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fase da Obra -->
             <div class="filter-group">
                 <label class="filter-label">Fase da Obra</label>
-                <select name="fase" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for f in lista_fases %}
-                        <option value="{{ f }}" {% if request.GET.fase == f %}selected{% endif %}>{{ f }}</option>
-                    {% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="fase">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="filter-section-title">Ranges</div>
 
-            <!-- Slider Preço M² -->
             <div class="slider-group">
                 <label class="filter-label">Preço Médio M²</label>
                 <div class="slider-values">
@@ -233,20 +267,12 @@
                     <span class="slider-val" id="lbl_pm2_max">{{ pm2_max_val|default:ranges.pm2_max|floatformat:0 }}</span>
                 </div>
                 <div class="range-wrap">
-                    <div class="range-track"></div>
-                    <div class="range-fill" id="fill_pm2"></div>
-                    <input type="range" class="range-input" id="sl_pm2_min"
-                        min="{{ ranges.pm2_min|floatformat:0 }}" max="{{ ranges.pm2_max|floatformat:0 }}"
-                        value="{{ pm2_min_val|default:ranges.pm2_min|floatformat:0 }}"
-                        oninput="updateSlider('pm2')">
-                    <input type="range" class="range-input" id="sl_pm2_max"
-                        min="{{ ranges.pm2_min|floatformat:0 }}" max="{{ ranges.pm2_max|floatformat:0 }}"
-                        value="{{ pm2_max_val|default:ranges.pm2_max|floatformat:0 }}"
-                        oninput="updateSlider('pm2')">
+                    <div class="range-track"></div><div class="range-fill" id="fill_pm2"></div>
+                    <input type="range" class="range-input" id="sl_pm2_min" min="{{ ranges.pm2_min|floatformat:0 }}" max="{{ ranges.pm2_max|floatformat:0 }}" value="{{ pm2_min_val|default:ranges.pm2_min|floatformat:0 }}" oninput="updateSlider('pm2')">
+                    <input type="range" class="range-input" id="sl_pm2_max" min="{{ ranges.pm2_min|floatformat:0 }}" max="{{ ranges.pm2_max|floatformat:0 }}" value="{{ pm2_max_val|default:ranges.pm2_max|floatformat:0 }}" oninput="updateSlider('pm2')">
                 </div>
             </div>
 
-            <!-- Slider Área -->
             <div class="slider-group">
                 <label class="filter-label">Área da Unidade (m²)</label>
                 <div class="slider-values">
@@ -254,20 +280,12 @@
                     <span class="slider-val" id="lbl_area_max">{{ area_max_val|default:ranges.area_max|floatformat:0 }}</span>
                 </div>
                 <div class="range-wrap">
-                    <div class="range-track"></div>
-                    <div class="range-fill" id="fill_area"></div>
-                    <input type="range" class="range-input" id="sl_area_min"
-                        min="{{ ranges.area_min|floatformat:0 }}" max="{{ ranges.area_max|floatformat:0 }}"
-                        value="{{ area_min_val|default:ranges.area_min|floatformat:0 }}"
-                        oninput="updateSlider('area')">
-                    <input type="range" class="range-input" id="sl_area_max"
-                        min="{{ ranges.area_min|floatformat:0 }}" max="{{ ranges.area_max|floatformat:0 }}"
-                        value="{{ area_max_val|default:ranges.area_max|floatformat:0 }}"
-                        oninput="updateSlider('area')">
+                    <div class="range-track"></div><div class="range-fill" id="fill_area"></div>
+                    <input type="range" class="range-input" id="sl_area_min" min="{{ ranges.area_min|floatformat:0 }}" max="{{ ranges.area_max|floatformat:0 }}" value="{{ area_min_val|default:ranges.area_min|floatformat:0 }}" oninput="updateSlider('area')">
+                    <input type="range" class="range-input" id="sl_area_max" min="{{ ranges.area_min|floatformat:0 }}" max="{{ ranges.area_max|floatformat:0 }}" value="{{ area_max_val|default:ranges.area_max|floatformat:0 }}" oninput="updateSlider('area')">
                 </div>
             </div>
 
-            <!-- Slider Preço Unidade -->
             <div class="slider-group">
                 <label class="filter-label">Preço da Unidade</label>
                 <div class="slider-values">
@@ -275,16 +293,9 @@
                     <span class="slider-val" id="lbl_preco_max">{{ preco_max_val|default:ranges.preco_max|floatformat:0 }}</span>
                 </div>
                 <div class="range-wrap">
-                    <div class="range-track"></div>
-                    <div class="range-fill" id="fill_preco"></div>
-                    <input type="range" class="range-input" id="sl_preco_min"
-                        min="{{ ranges.preco_min|floatformat:0 }}" max="{{ ranges.preco_max|floatformat:0 }}"
-                        value="{{ preco_min_val|default:ranges.preco_min|floatformat:0 }}"
-                        oninput="updateSlider('preco')">
-                    <input type="range" class="range-input" id="sl_preco_max"
-                        min="{{ ranges.preco_min|floatformat:0 }}" max="{{ ranges.preco_max|floatformat:0 }}"
-                        value="{{ preco_max_val|default:ranges.preco_max|floatformat:0 }}"
-                        oninput="updateSlider('preco')">
+                    <div class="range-track"></div><div class="range-fill" id="fill_preco"></div>
+                    <input type="range" class="range-input" id="sl_preco_min" min="{{ ranges.preco_min|floatformat:0 }}" max="{{ ranges.preco_max|floatformat:0 }}" value="{{ preco_min_val|default:ranges.preco_min|floatformat:0 }}" oninput="updateSlider('preco')">
+                    <input type="range" class="range-input" id="sl_preco_max" min="{{ ranges.preco_min|floatformat:0 }}" max="{{ ranges.preco_max|floatformat:0 }}" value="{{ preco_max_val|default:ranges.preco_max|floatformat:0 }}" oninput="updateSlider('preco')">
                 </div>
             </div>
 
@@ -297,67 +308,46 @@
         </form>
     </div>
 
-    <!-- Main -->
     <div class="main-area">
 
         <!-- Tabs -->
         <div class="view-tabs">
-            <a href="{% url 'dashboard' dash.id %}" class="view-tab active">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
+            <a href="{% url 'dashboard' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 Mapa & KPIs
             </a>
             <a href="{% url 'tabela' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/></svg>
                 Tabela Analítica
             </a>
             <a href="{% url 'graficos' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></svg>
                 Gráficos & Análise
             </a>
-
             <a href="{% url 'pricing' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
                 Pricing
             </a>
-
             <a href="{% url 'share_estoque' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                    <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
                 Share de Estoque
             </a>
-
-            <a href="{% url 'mapa_calor' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                </svg>
+            <a href="{% url 'mapa_calor' dash.id %}" class="view-tab active">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                 Mapa de Calor
             </a>
-
             <a href="{% url 'comparativo' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 Comparativo
             </a>
-
             <a href="{% url 'evolucao' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 Evolução
             </a>
-
             <a href="{% url 'analise_preco' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Análise de Preço
             </a>
-
-                        
         </div>
 
         <!-- KPIs -->
@@ -391,19 +381,11 @@
         <!-- Mapa -->
         <div class="map-container">
             <div id="map"></div>
-
-            <!-- Legenda -->
             <div class="map-legend">
                 <div class="map-legend-title">% Unidades Vendidas</div>
                 <div class="legend-gradient"></div>
-                <div class="legend-labels">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
-                </div>
+                <div class="legend-labels"><span>0%</span><span>50%</span><span>100%</span></div>
             </div>
-
-            <!-- Tooltip -->
             <div class="map-tooltip" id="mapTooltip">
                 <div class="tooltip-nome" id="tt-nome"></div>
                 <div class="tooltip-row"><span>% Vendido</span><span class="tooltip-val" id="tt-pct"></span></div>
@@ -420,50 +402,23 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script>
-// ── Dados do Django ──
 const PONTOS = {{ pontos_json|safe }};
 
-// ── Mapa ──
 const map = L.map('map');
 L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '© CORE BI Imobiliário'
 }).addTo(map);
 
-// ── Heatmap ──
 const heatData = PONTOS.map(p => [p.lat, p.lng, p.pct_vendido]);
-
-console.log('Pontos heatmap:', heatData.length, heatData[0]);
-console.log('L.heatLayer disponível:', typeof L.heatLayer);
-
 if (typeof L.heatLayer !== 'undefined' && heatData.length > 0) {
-    L.heatLayer(heatData, {
-        radius: 50,
-        blur: 20,
-        max: 100,
-        minOpacity: 0.6,
-        gradient: {
-            0.0: '#0000ff',
-            0.4: '#00ff00',
-            0.7: '#ffff00',
-            1.0: '#ff0000'
-        }
-    }).addTo(map);
-} else {
-    console.error('leaflet.heat não carregou ou sem pontos');
+    L.heatLayer(heatData, { radius: 50, blur: 20, max: 100, minOpacity: 0.6, gradient: { 0.0: '#0000ff', 0.4: '#00ff00', 0.7: '#ffff00', 1.0: '#ff0000' } }).addTo(map);
 }
 
-// ── Marcadores invisíveis para tooltip ──
 const tooltip = document.getElementById('mapTooltip');
 const mapContainer = document.getElementById('map');
 
 PONTOS.forEach(p => {
-    const marker = L.circleMarker([p.lat, p.lng], {
-        radius: 12,
-        fillOpacity: 0,
-        opacity: 0,
-        interactive: true,
-    }).addTo(map);
-
+    const marker = L.circleMarker([p.lat, p.lng], { radius: 12, fillOpacity: 0, opacity: 0, interactive: true }).addTo(map);
     marker.on('mouseover', function(e) {
         const cor = pctParaCor(p.pct_vendido);
         document.getElementById('tt-nome').textContent     = p.nome;
@@ -472,92 +427,138 @@ PONTOS.forEach(p => {
         document.getElementById('tt-estoque').textContent  = p.total_estoque.toLocaleString('pt-BR');
         document.getElementById('tt-total').textContent    = p.total_unidades.toLocaleString('pt-BR');
         document.getElementById('tt-bar').style.cssText    = `height:6px; border-radius:3px; margin-top:5px; width:${p.pct_vendido}%; background:${cor};`;
-
         const rect = mapContainer.getBoundingClientRect();
-        const x    = e.originalEvent.clientX - rect.left;
-        const y    = e.originalEvent.clientY - rect.top;
-        tooltip.style.left    = (x + 14) + 'px';
-        tooltip.style.top     = (y - 20) + 'px';
+        tooltip.style.left = (e.originalEvent.clientX - rect.left + 14) + 'px';
+        tooltip.style.top  = (e.originalEvent.clientY - rect.top  - 20) + 'px';
         tooltip.style.display = 'block';
     });
-
     marker.on('mousemove', function(e) {
         const rect = mapContainer.getBoundingClientRect();
-        const x    = e.originalEvent.clientX - rect.left;
-        const y    = e.originalEvent.clientY - rect.top;
-        tooltip.style.left = (x + 14) + 'px';
-        tooltip.style.top  = (y - 20) + 'px';
+        tooltip.style.left = (e.originalEvent.clientX - rect.left + 14) + 'px';
+        tooltip.style.top  = (e.originalEvent.clientY - rect.top  - 20) + 'px';
     });
-
-    marker.on('mouseout', function() {
-        tooltip.style.display = 'none';
-    });
+    marker.on('mouseout', function() { tooltip.style.display = 'none'; });
 });
 
-// ── Fit bounds ──
 setTimeout(() => {
     map.invalidateSize();
-    if (PONTOS.length > 0) {
-        const bounds = L.latLngBounds(PONTOS.map(p => [p.lat, p.lng]));
-        map.fitBounds(bounds, { padding: [40, 40] });
-    }
+    if (PONTOS.length > 0) map.fitBounds(L.latLngBounds(PONTOS.map(p => [p.lat, p.lng])), { padding: [40, 40] });
 }, 200);
 
-// ── Cor gradiente para a barra do tooltip ──
 function pctParaCor(pct) {
-    if (pct < 30)  return '#0000ff';
-    if (pct < 60)  return '#00cc00';
-    if (pct < 80)  return '#ffcc00';
+    if (pct < 30) return '#0000ff';
+    if (pct < 60) return '#00cc00';
+    if (pct < 80) return '#ffcc00';
     return '#ff0000';
 }
 
-// ── Sliders ──
-function updateSlider(tipo) {
-    const minEl  = document.getElementById(`sl_${tipo}_min`);
-    const maxEl  = document.getElementById(`sl_${tipo}_max`);
-    const fillEl = document.getElementById(`fill_${tipo}`);
-    const lblMin = document.getElementById(`lbl_${tipo}_min`);
-    const lblMax = document.getElementById(`lbl_${tipo}_max`);
+/* ── Sidebar ── */
+function toggleSidebar() {
+    const s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
+    const open = s.classList.contains('open');
+    s.classList.toggle('open', !open); o.classList.toggle('active', !open);
+    document.body.style.overflow = !open ? 'hidden' : '';
+}
 
-    let minVal = parseFloat(minEl.value);
-    let maxVal = parseFloat(maxEl.value);
-    const absMin = parseFloat(minEl.min);
-    const absMax = parseFloat(minEl.max);
+/* ── Contador de filtros ativos ── */
+function updateFilterCount() {
+    const params = new URLSearchParams(window.location.search);
+    const keys = ['quartos','construtora','data_inicio','data_fim','bairro','fase','pm2_min','pm2_max','area_min','area_max','preco_min','preco_max'];
+    const count = keys.filter(k => params.getAll(k).some(v => v !== '')).length;
+    const badge = document.getElementById('filterCount');
+    badge.textContent = count;
+    badge.classList.toggle('has-filters', count > 0);
+}
+updateFilterCount();
 
-    if (minVal > maxVal) {
-        if (event.target === minEl) minVal = maxVal;
-        else maxVal = minVal;
-        minEl.value = minVal;
-        maxEl.value = maxVal;
+/* ── Multiselect ── */
+function initMultiselect(name, options, selected, placeholder) {
+    const wrap = document.querySelector(`.ms-wrap[data-name="${name}"]`);
+    if (!wrap) return;
+    const trigger  = wrap.querySelector('.ms-trigger');
+    const dropdown = wrap.querySelector('.ms-dropdown');
+    const search   = wrap.querySelector('.ms-search');
+    const list     = wrap.querySelector('.ms-list');
+    const selSet   = new Set(selected.map(String));
+
+    function renderLabel() {
+        if (selSet.size === 0) {
+            trigger.classList.remove('has-value');
+            trigger.querySelector('.ms-label').textContent = placeholder;
+        } else {
+            trigger.classList.add('has-value');
+            trigger.querySelector('.ms-label').textContent = `${selSet.size} selecionado${selSet.size > 1 ? 's' : ''}`;
+        }
     }
 
-    const pctMin = ((minVal - absMin) / (absMax - absMin)) * 100;
-    const pctMax = ((maxVal - absMin) / (absMax - absMin)) * 100;
-    fillEl.style.left  = pctMin + '%';
-    fillEl.style.width = (pctMax - pctMin) + '%';
+    function renderOptions(filter = '') {
+        list.innerHTML = '';
+        const filtered = options.filter(o => String(o).toLowerCase().includes(filter.toLowerCase()));
+        if (!filtered.length) { list.innerHTML = '<div class="ms-empty">Nenhum resultado</div>'; return; }
+        filtered.forEach(opt => {
+            const div = document.createElement('div');
+            div.className = 'ms-option' + (selSet.has(String(opt)) ? ' checked' : '');
+            div.innerHTML = `<input type="checkbox" name="${name}" value="${opt}" ${selSet.has(String(opt)) ? 'checked' : ''}><span>${opt}</span>`;
+            const cb = div.querySelector('input');
+            cb.addEventListener('change', () => {
+                if (cb.checked) { selSet.add(String(opt)); div.classList.add('checked'); }
+                else            { selSet.delete(String(opt)); div.classList.remove('checked'); }
+                renderLabel();
+            });
+            list.appendChild(div);
+        });
+    }
 
-    lblMin.textContent = minVal.toLocaleString('pt-BR');
-    lblMax.textContent = maxVal.toLocaleString('pt-BR');
+    renderOptions(); renderLabel();
+
+    trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('.ms-dropdown.open').forEach(d => { if (d !== dropdown) d.classList.remove('open'); });
+        dropdown.classList.toggle('open');
+        if (dropdown.classList.contains('open')) search.focus();
+    });
+    search.addEventListener('input', () => renderOptions(search.value));
+    wrap.querySelector('.ms-btn-all').addEventListener('click',  () => { options.forEach(o => selSet.add(String(o))); renderOptions(search.value); renderLabel(); });
+    wrap.querySelector('.ms-btn-none').addEventListener('click', () => { selSet.clear(); renderOptions(search.value); renderLabel(); });
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) dropdown.classList.remove('open'); });
 }
 
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.ms-dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    initMultiselect('quartos',     [{% for q in lista_quartos %}{{ q }},{% endfor %}],                 params.getAll('quartos'),     'Todos');
+    initMultiselect('construtora', [{% for c in lista_construtoras %}"{{ c|escapejs }}",{% endfor %}], params.getAll('construtora'), 'Todos');
+    initMultiselect('bairro',      [{% for b in lista_bairros %}"{{ b|escapejs }}",{% endfor %}],      params.getAll('bairro'),      'Todos');
+    initMultiselect('fase',        [{% for f in lista_fases %}"{{ f|escapejs }}",{% endfor %}],        params.getAll('fase'),        'Todos');
+});
+
+/* ── Sliders ── */
+function updateSlider(tipo) {
+    const minEl = document.getElementById(`sl_${tipo}_min`);
+    const maxEl = document.getElementById(`sl_${tipo}_max`);
+    const fill  = document.getElementById(`fill_${tipo}`);
+    const lMin  = document.getElementById(`lbl_${tipo}_min`);
+    const lMax  = document.getElementById(`lbl_${tipo}_max`);
+    let mn = parseFloat(minEl.value), mx = parseFloat(maxEl.value);
+    const aMin = parseFloat(minEl.min), aMax = parseFloat(minEl.max);
+    if (mn > mx) { if (event.target === minEl) mn = mx; else mx = mn; minEl.value = mn; maxEl.value = mx; }
+    const pMin = ((mn - aMin) / (aMax - aMin)) * 100;
+    const pMax = ((mx - aMin) / (aMax - aMin)) * 100;
+    fill.style.left  = pMin + '%';
+    fill.style.width = (pMax - pMin) + '%';
+    lMin.textContent = mn.toLocaleString('pt-BR');
+    lMax.textContent = mx.toLocaleString('pt-BR');
+}
 function prepareSubmit() {
-    ['pm2', 'area', 'preco'].forEach(tipo => {
-        document.getElementById(`h_${tipo}_min`).value = document.getElementById(`sl_${tipo}_min`).value;
-        document.getElementById(`h_${tipo}_max`).value = document.getElementById(`sl_${tipo}_max`).value;
+    ['pm2','area','preco'].forEach(t => {
+        document.getElementById(`h_${t}_min`).value = document.getElementById(`sl_${t}_min`).value;
+        document.getElementById(`h_${t}_max`).value = document.getElementById(`sl_${t}_max`).value;
     });
 }
-
-// ── Init sliders ──
-['pm2', 'area', 'preco'].forEach(tipo => updateSlider(tipo));
-
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const isOpen  = sidebar.classList.contains('open');
-    sidebar.classList.toggle('open', !isOpen);
-    overlay.classList.toggle('active', !isOpen);
-    document.body.style.overflow = !isOpen ? 'hidden' : '';
-}
+['pm2','area','preco'].forEach(t => updateSlider(t));
 </script>
 </body>
 </html>

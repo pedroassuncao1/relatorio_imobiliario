@@ -120,12 +120,35 @@
         .btn-sidebar-outline:hover { background: rgba(255,255,255,0.06); color: white; }
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
 
+        /* ── Multiselect ── */
+        .ms-wrap { position: relative; margin-bottom: 2px; }
+        .ms-trigger { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; transition: all 0.2s; }
+        .ms-trigger:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+        .ms-trigger.has-value { border-color: var(--gold); color: var(--gold); }
+        .ms-arrow { font-size: 0.55rem; transition: transform 0.2s; flex-shrink: 0; }
+        .ms-dropdown { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; z-index: 9999; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        .ms-dropdown.open { display: block; }
+        .ms-dropdown::-webkit-scrollbar { width: 4px; }
+        .ms-dropdown::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .ms-search { width: 100%; padding: 7px 10px; background: rgba(255,255,255,0.06); border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); font-size: 0.73rem; font-family: 'Inter', sans-serif; outline: none; position: sticky; top: 0; background: var(--navy-mid); }
+        .ms-search::placeholder { color: rgba(255,255,255,0.35); }
+        .ms-option { display: flex; align-items: center; gap: 7px; padding: 6px 10px; cursor: pointer; font-size: 0.73rem; color: rgba(255,255,255,0.8); transition: background 0.15s; }
+        .ms-option:hover { background: rgba(255,255,255,0.08); }
+        .ms-option input[type=checkbox] { width: 13px; height: 13px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0; }
+        .ms-option.checked { color: var(--gold); }
+        .ms-empty { padding: 10px; font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
+        .ms-actions { display: flex; border-top: 1px solid rgba(255,255,255,0.1); position: sticky; bottom: 0; background: var(--navy-mid); }
+        .ms-action-btn { flex: 1; padding: 6px; font-size: 0.68rem; font-family: 'Inter', sans-serif; font-weight: 600; background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; }
+        .ms-action-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+        .ms-action-btn:first-child { border-right: 1px solid rgba(255,255,255,0.1); }
+
         /* ── View tabs ── */
-        .view-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+        .view-tabs { display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+        .view-tabs::-webkit-scrollbar { display: none; }
         .view-tab {
             padding: 6px 14px; border-radius: 8px; font-size: 0.74rem; font-weight: 600;
             text-decoration: none; transition: all 0.2s; border: 1.5px solid var(--border);
-            color: var(--text-secondary); background: white; display: flex; align-items: center; gap: 6px;
+            color: var(--text-secondary); background: white; display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0;
         }
         .view-tab:hover { border-color: var(--blue-bright); color: var(--blue-bright); }
         .view-tab.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; border-color: transparent; box-shadow: 0 2px 8px rgba(21,101,192,0.25); }
@@ -140,25 +163,21 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border);
             display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden;
         }
-
         .table-header {
             padding: 12px 16px; border-bottom: 1px solid var(--border);
             display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 10px; flex-wrap: wrap;
         }
         .table-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; color: var(--blue-deep); display: flex; align-items: center; gap: 8px; }
         .table-controls { display: flex; align-items: center; gap: 8px; }
-
         .btn-expand-all {
             padding: 5px 12px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;
             border: 1.5px solid var(--border); color: var(--text-secondary); background: white;
             cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 5px;
         }
         .btn-expand-all:hover { border-color: var(--blue-bright); color: var(--blue-bright); }
-
         .search-input {
             padding: 5px 10px; border: 1.5px solid var(--border); border-radius: 6px;
-            font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; width: 180px;
-            transition: border-color 0.2s;
+            font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; width: 180px; transition: border-color 0.2s;
         }
         .search-input:focus { border-color: var(--blue-bright); }
         @media (max-width: 767px) { .search-input { width: 130px; } }
@@ -168,7 +187,6 @@
 
         /* ── Table ── */
         table { width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 700px; }
-
         thead { position: sticky; top: 0; z-index: 10; }
         thead th {
             padding: 9px 12px; text-align: right; font-size: 0.63rem; text-transform: uppercase;
@@ -176,10 +194,8 @@
             background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%);
             border-right: 1px solid rgba(255,255,255,0.08);
         }
-        thead th:first-child { text-align: left; border-radius: 0; }
+        thead th:first-child { text-align: left; }
         thead th:last-child { border-right: none; }
-
-        /* sort arrow */
         thead th.sortable { cursor: pointer; user-select: none; }
         thead th.sortable:hover { background: linear-gradient(135deg, #0d1440 0%, #1a2b96 100%); }
         thead th .sort-icon { display: inline-block; margin-left: 4px; opacity: 0.4; font-size: 0.6rem; }
@@ -189,60 +205,35 @@
 
         tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
         tbody tr:last-child { border-bottom: none; }
-
-        /* ── Row levels ── */
-        /* Level 0 = Bairro */
         tr.row-bairro td { background: var(--surface-3); font-weight: 700; color: var(--text-primary); }
         tr.row-bairro:hover td { background: #e5edff; }
-
-        /* Level 1 = Fase */
         tr.row-fase td { background: #f5f7ff; font-weight: 600; color: var(--navy-mid); }
         tr.row-fase:hover td { background: #ebf0ff; }
-
-        /* Level 2 = Empreendimento */
         tr.row-emp td { background: white; font-weight: 600; color: var(--text-primary); }
         tr.row-emp:hover td { background: var(--surface-2); }
-
-        /* Level 3 = Construtora */
         tr.row-const td { background: #fafbff; font-weight: 400; color: var(--text-secondary); font-style: italic; }
         tr.row-const:hover td { background: #f3f6ff; }
-
         td { padding: 8px 12px; text-align: right; white-space: nowrap; vertical-align: middle; }
         td:first-child { text-align: left; }
-
-        /* indents */
         .indent-0 { padding-left: 10px !important; }
         .indent-1 { padding-left: 24px !important; }
         .indent-2 { padding-left: 38px !important; }
         .indent-3 { padding-left: 54px !important; }
-
-        /* toggle icon */
         .toggle-btn {
             display: inline-flex; align-items: center; justify-content: center;
             width: 16px; height: 16px; border-radius: 3px;
             background: rgba(25,118,210,0.12); border: none;
             color: var(--blue-bright); font-size: 0.65rem; cursor: pointer;
-            margin-right: 6px; transition: all 0.15s; flex-shrink: 0; font-family: monospace;
-            line-height: 1;
+            margin-right: 6px; transition: all 0.15s; flex-shrink: 0; font-family: monospace; line-height: 1;
         }
         .toggle-btn:hover { background: var(--blue-bright); color: white; }
         .row-name { display: flex; align-items: center; }
-
-        /* % bars */
         .bar-wrap { display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
         .bar { height: 5px; border-radius: 3px; background: var(--blue-light); flex-shrink: 0; }
-        .bar.bar-vendido { background: linear-gradient(90deg, var(--blue-mid), var(--blue-light)); }
-
-        /* ── Total row ── */
         tr.row-total td { background: linear-gradient(135deg, var(--navy), var(--blue-deep)); color: white !important; font-weight: 800; font-size: 0.8rem; font-style: normal !important; position: sticky; bottom: 0; z-index: 5; }
-        tr.row-total td .bar { background: rgba(255,255,255,0.4); }
-
-        /* ── Highlight % vendido ── */
         .pct-high { color: #16a34a; font-weight: 700; }
         .pct-mid  { color: #ca8a04; font-weight: 600; }
         .pct-low  { color: #dc2626; font-weight: 600; }
-
-        /* ── Empty ── */
         .empty-row td { text-align: center; color: var(--text-muted); padding: 40px; font-size: 0.82rem; }
     </style>
 </head>
@@ -251,9 +242,8 @@
 <nav class="navbar">
     <div class="navbar-left">
         <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
-            <img src="../../static/img/logo.png" alt="CORE">
+            <img src="{% static 'img/logo.png' %}" alt="CORE">
         </a>
-        <!-- <span class="navbar-badge">BI Imobiliário</span> -->
     </div>
     <div class="navbar-right">
         {% if usuario %}
@@ -289,44 +279,68 @@
         <form method="GET" id="filterForm" action="{% url 'tabela' dash.id %}">
             <div class="filter-section-title">Filtros</div>
 
+            <!-- Nº de Quartos -->
             <div class="filter-group">
                 <label class="filter-label">Nº de Quartos</label>
-                <select name="quartos" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for q in lista_quartos %}
-                        <option value="{{ q }}" {% if request.GET.quartos == q|stringformat:"i" %}selected{% endif %}>{{ q }} Quartos</option>
-                    {% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="quartos">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Empreendedor -->
             <div class="filter-group">
                 <label class="filter-label">Empreendedor</label>
-                <select name="construtora" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for c in lista_construtoras %}
-                        <option value="{{ c }}" {% if request.GET.construtora == c %}selected{% endif %}>{{ c }}</option>
-                    {% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="construtora">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Bairro -->
             <div class="filter-group">
                 <label class="filter-label">Bairro</label>
-                <select name="bairro" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for b in lista_bairros %}
-                        <option value="{{ b }}" {% if request.GET.bairro == b %}selected{% endif %}>{{ b }}</option>
-                    {% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="bairro">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Fase da Obra -->
             <div class="filter-group">
                 <label class="filter-label">Fase da Obra</label>
-                <select name="fase" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for f in lista_fases %}
-                        <option value="{{ f }}" {% if request.GET.fase == f %}selected{% endif %}>{{ f }}</option>
-                    {% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="fase">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="filter-group">
@@ -358,78 +372,53 @@
     <!-- ── Main ── -->
     <div class="main-area">
 
-        
         <!-- View tabs -->
         <div class="view-tabs">
-            <a href="{% url 'dashboard' dash.id %}" class="view-tab active">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
+            <a href="{% url 'dashboard' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 Mapa & KPIs
             </a>
-            <a href="{% url 'tabela' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/>
-                </svg>
+            <a href="{% url 'tabela' dash.id %}" class="view-tab active">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/></svg>
                 Tabela Analítica
             </a>
             <a href="{% url 'graficos' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></svg>
                 Gráficos & Análise
             </a>
-
             <a href="{% url 'pricing' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
                 Pricing
             </a>
-
             <a href="{% url 'share_estoque' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                    <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
                 Share de Estoque
             </a>
-
             <a href="{% url 'mapa_calor' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                 Mapa de Calor
             </a>
-
             <a href="{% url 'comparativo' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 Comparativo
             </a>
-
             <a href="{% url 'evolucao' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 Evolução
             </a>
-
             <a href="{% url 'analise_preco' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Análise de Preço
             </a>
-
-                        
         </div>
 
         <!-- Table card -->
         <div class="table-card">
             <div class="table-header">
                 <div class="table-title">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path d="M3 10h18M3 6h18M3 14h18M3 18h18"/>
-                    </svg>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 10h18M3 6h18M3 14h18M3 18h18"/></svg>
                     {{ dash.nome }}
-                    <span style="font-size:0.6rem; color:var(--text-muted); font-weight:500; text-transform:none; letter-spacing:0;">
-                        — {{ total_unidades }} unidades
-                    </span>
+                    <span style="font-size:0.6rem; color:var(--text-muted); font-weight:500; text-transform:none; letter-spacing:0;">— {{ total_unidades }} unidades</span>
                 </div>
                 <div class="table-controls">
                     <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar..." oninput="filterTable(this.value)">
@@ -457,7 +446,6 @@
                     <tbody id="tableBody">
                         {% if tabela_dados %}
                             {% for bairro in tabela_dados %}
-                            {# ── Linha Bairro ── #}
                             <tr class="row-bairro" data-level="0" data-id="b{{ forloop.counter }}" data-parent="" data-search="{{ bairro.nome|lower }}">
                                 <td class="indent-0">
                                     <div class="row-name">
@@ -467,24 +455,14 @@
                                 </td>
                                 <td>{{ bairro.estoque|floatformat:0 }}</td>
                                 <td>{{ bairro.total|floatformat:0 }}</td>
-                                <td>
-                                    <div class="bar-wrap">
-                                        {{ bairro.share|floatformat:2 }}%
-                                        <div class="bar" style="width:{{ bairro.share|floatformat:0 }}px; max-width:40px;"></div>
-                                    </div>
-                                </td>
+                                <td><div class="bar-wrap">{{ bairro.share|floatformat:2 }}%<div class="bar" style="width:{{ bairro.share|floatformat:0 }}px; max-width:40px;"></div></div></td>
                                 <td>{{ bairro.vendidas|floatformat:0 }}</td>
-                                <td>
-                                    {% if bairro.pct_vend >= 80 %}<span class="pct-high">{{ bairro.pct_vend|floatformat:2 }}%</span>
-                                    {% elif bairro.pct_vend >= 50 %}<span class="pct-mid">{{ bairro.pct_vend|floatformat:2 }}%</span>
-                                    {% else %}<span class="pct-low">{{ bairro.pct_vend|floatformat:2 }}%</span>{% endif %}
-                                </td>
+                                <td>{% if bairro.pct_vend >= 80 %}<span class="pct-high">{{ bairro.pct_vend|floatformat:2 }}%</span>{% elif bairro.pct_vend >= 50 %}<span class="pct-mid">{{ bairro.pct_vend|floatformat:2 }}%</span>{% else %}<span class="pct-low">{{ bairro.pct_vend|floatformat:2 }}%</span>{% endif %}</td>
                                 <td>R$ {{ bairro.m2|floatformat:2 }}</td>
                                 <td>{{ bairro.area|floatformat:2 }}</td>
                             </tr>
 
                             {% for fase in bairro.fases %}
-                            {# ── Linha Fase ── #}
                             <tr class="row-fase" data-level="1" data-id="f{{ forloop.parentloop.counter }}_{{ forloop.counter }}" data-parent="b{{ forloop.parentloop.counter }}" data-search="{{ fase.nome|lower }}">
                                 <td class="indent-1">
                                     <div class="row-name">
@@ -494,24 +472,14 @@
                                 </td>
                                 <td>{{ fase.estoque|floatformat:0 }}</td>
                                 <td>{{ fase.total|floatformat:0 }}</td>
-                                <td>
-                                    <div class="bar-wrap">
-                                        {{ fase.share|floatformat:2 }}%
-                                        <div class="bar" style="width:{{ fase.share|floatformat:0 }}px; max-width:36px;"></div>
-                                    </div>
-                                </td>
+                                <td><div class="bar-wrap">{{ fase.share|floatformat:2 }}%<div class="bar" style="width:{{ fase.share|floatformat:0 }}px; max-width:36px;"></div></div></td>
                                 <td>{{ fase.vendidas|floatformat:0 }}</td>
-                                <td>
-                                    {% if fase.pct_vend >= 80 %}<span class="pct-high">{{ fase.pct_vend|floatformat:2 }}%</span>
-                                    {% elif fase.pct_vend >= 50 %}<span class="pct-mid">{{ fase.pct_vend|floatformat:2 }}%</span>
-                                    {% else %}<span class="pct-low">{{ fase.pct_vend|floatformat:2 }}%</span>{% endif %}
-                                </td>
+                                <td>{% if fase.pct_vend >= 80 %}<span class="pct-high">{{ fase.pct_vend|floatformat:2 }}%</span>{% elif fase.pct_vend >= 50 %}<span class="pct-mid">{{ fase.pct_vend|floatformat:2 }}%</span>{% else %}<span class="pct-low">{{ fase.pct_vend|floatformat:2 }}%</span>{% endif %}</td>
                                 <td>R$ {{ fase.m2|floatformat:2 }}</td>
                                 <td>{{ fase.area|floatformat:2 }}</td>
                             </tr>
 
                             {% for emp in fase.empreendimentos %}
-                            {# ── Linha Empreendimento ── #}
                             <tr class="row-emp" data-level="2" data-id="e{{ forloop.parentloop.parentloop.counter }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}" data-parent="f{{ forloop.parentloop.parentloop.counter }}_{{ forloop.parentloop.counter }}" data-search="{{ emp.nome|lower }}">
                                 <td class="indent-2">
                                     <div class="row-name">
@@ -525,24 +493,14 @@
                                 </td>
                                 <td>{{ emp.estoque|floatformat:0 }}</td>
                                 <td>{{ emp.total|floatformat:0 }}</td>
-                                <td>
-                                    <div class="bar-wrap">
-                                        {{ emp.share|floatformat:2 }}%
-                                        <div class="bar" style="width:{{ emp.share|floatformat:0 }}px; max-width:30px;"></div>
-                                    </div>
-                                </td>
+                                <td><div class="bar-wrap">{{ emp.share|floatformat:2 }}%<div class="bar" style="width:{{ emp.share|floatformat:0 }}px; max-width:30px;"></div></div></td>
                                 <td>{{ emp.vendidas|floatformat:0 }}</td>
-                                <td>
-                                    {% if emp.pct_vend >= 80 %}<span class="pct-high">{{ emp.pct_vend|floatformat:2 }}%</span>
-                                    {% elif emp.pct_vend >= 50 %}<span class="pct-mid">{{ emp.pct_vend|floatformat:2 }}%</span>
-                                    {% else %}<span class="pct-low">{{ emp.pct_vend|floatformat:2 }}%</span>{% endif %}
-                                </td>
+                                <td>{% if emp.pct_vend >= 80 %}<span class="pct-high">{{ emp.pct_vend|floatformat:2 }}%</span>{% elif emp.pct_vend >= 50 %}<span class="pct-mid">{{ emp.pct_vend|floatformat:2 }}%</span>{% else %}<span class="pct-low">{{ emp.pct_vend|floatformat:2 }}%</span>{% endif %}</td>
                                 <td>R$ {{ emp.m2|floatformat:2 }}</td>
                                 <td>{{ emp.area|floatformat:2 }}</td>
                             </tr>
 
                             {% for const in emp.construtoras %}
-                            {# ── Linha Construtora ── #}
                             <tr class="row-const" data-level="3" data-parent="e{{ forloop.parentloop.parentloop.parentloop.counter }}_{{ forloop.parentloop.parentloop.counter }}_{{ forloop.parentloop.counter }}" data-search="{{ const.nome|lower }}">
                                 <td class="indent-3">
                                     <div class="row-name">
@@ -552,37 +510,24 @@
                                 </td>
                                 <td>{{ const.estoque|floatformat:0 }}</td>
                                 <td>{{ const.total|floatformat:0 }}</td>
-                                <td>
-                                    <div class="bar-wrap">
-                                        {{ const.share|floatformat:2 }}%
-                                    </div>
-                                </td>
+                                <td><div class="bar-wrap">{{ const.share|floatformat:2 }}%</div></td>
                                 <td>{{ const.vendidas|floatformat:0 }}</td>
-                                <td>
-                                    {% if const.pct_vend >= 80 %}<span class="pct-high">{{ const.pct_vend|floatformat:2 }}%</span>
-                                    {% elif const.pct_vend >= 50 %}<span class="pct-mid">{{ const.pct_vend|floatformat:2 }}%</span>
-                                    {% else %}<span class="pct-low">{{ const.pct_vend|floatformat:2 }}%</span>{% endif %}
-                                </td>
+                                <td>{% if const.pct_vend >= 80 %}<span class="pct-high">{{ const.pct_vend|floatformat:2 }}%</span>{% elif const.pct_vend >= 50 %}<span class="pct-mid">{{ const.pct_vend|floatformat:2 }}%</span>{% else %}<span class="pct-low">{{ const.pct_vend|floatformat:2 }}%</span>{% endif %}</td>
                                 <td>R$ {{ const.m2|floatformat:2 }}</td>
                                 <td>{{ const.area|floatformat:2 }}</td>
                             </tr>
-                            {% endfor %}{# construtoras #}
-                            {% endfor %}{# empreendimentos #}
-                            {% endfor %}{# fases #}
-                            {% endfor %}{# bairros #}
+                            {% endfor %}
+                            {% endfor %}
+                            {% endfor %}
+                            {% endfor %}
 
-                            <!-- Total -->
                             <tr class="row-total">
                                 <td class="indent-0"><strong>Total Geral</strong></td>
                                 <td><strong>{{ total_estoque }}</strong></td>
                                 <td><strong>{{ total_unidades }}</strong></td>
                                 <td><strong>100,00%</strong></td>
                                 <td><strong>{{ total_vendidas }}</strong></td>
-                                <td>
-                                    {% if pct_vendido_total >= 80 %}<strong style="color:#86efac;">{{ pct_vendido_total|floatformat:2 }}%</strong>
-                                    {% elif pct_vendido_total >= 50 %}<strong style="color:#fde047;">{{ pct_vendido_total|floatformat:2 }}%</strong>
-                                    {% else %}<strong style="color:#fca5a5;">{{ pct_vendido_total|floatformat:2 }}%</strong>{% endif %}
-                                </td>
+                                <td>{% if pct_vendido_total >= 80 %}<strong style="color:#86efac;">{{ pct_vendido_total|floatformat:2 }}%</strong>{% elif pct_vendido_total >= 50 %}<strong style="color:#fde047;">{{ pct_vendido_total|floatformat:2 }}%</strong>{% else %}<strong style="color:#fca5a5;">{{ pct_vendido_total|floatformat:2 }}%</strong>{% endif %}</td>
                                 <td><strong>R$ {{ media_m2|floatformat:2 }}</strong></td>
                                 <td><strong>{{ media_area|floatformat:2 }}</strong></td>
                             </tr>
@@ -610,52 +555,117 @@ function toggleSidebar() {
 
 function updateFilterCount() {
     const params = new URLSearchParams(window.location.search);
-    const keys = ['quartos','construtora','bairro','fase','pm2_min','pm2_max','area_min','area_max'];
-    const count = keys.filter(k => params.get(k) && params.get(k) !== '').length;
+    const count = ['quartos','construtora','bairro','fase','pm2_min','pm2_max','area_min','area_max']
+        .filter(k => params.getAll(k).some(v => v !== '')).length;
     const badge = document.getElementById('filterCount');
     badge.textContent = count;
     badge.classList.toggle('has-filters', count > 0);
 }
 updateFilterCount();
 
-document.getElementById('filterForm').addEventListener('submit', () => {
-    if (window.innerWidth < 768) toggleSidebar();
-});
+/* ── Multiselect ── */
+function initMultiselect(name, options, selected, placeholder) {
+    const wrap     = document.querySelector(`.ms-wrap[data-name="${name}"]`);
+    if (!wrap) return;
+    const trigger  = wrap.querySelector('.ms-trigger');
+    const dropdown = wrap.querySelector('.ms-dropdown');
+    const search   = wrap.querySelector('.ms-search');
+    const list     = wrap.querySelector('.ms-list');
+    const selSet   = new Set(selected.map(String));
 
-/* ── Toggle row (expand/collapse children) ── */
-function getChildren(parentId) {
-    return document.querySelectorAll(`tr[data-parent="${parentId}"]`);
+    function renderLabel() {
+        if (selSet.size === 0) {
+            trigger.classList.remove('has-value');
+            trigger.querySelector('.ms-label').textContent = placeholder;
+        } else {
+            trigger.classList.add('has-value');
+            trigger.querySelector('.ms-label').textContent = `${selSet.size} selecionado${selSet.size > 1 ? 's' : ''}`;
+        }
+    }
+
+    function renderOptions(filter = '') {
+        list.innerHTML = '';
+        const filtered = options.filter(o => String(o).toLowerCase().includes(filter.toLowerCase()));
+        if (!filtered.length) { list.innerHTML = '<div class="ms-empty">Nenhum resultado</div>'; return; }
+        filtered.forEach(opt => {
+            const div = document.createElement('div');
+            div.className = 'ms-option' + (selSet.has(String(opt)) ? ' checked' : '');
+            div.innerHTML = `<input type="checkbox" name="${name}" value="${opt}" ${selSet.has(String(opt)) ? 'checked' : ''}><span>${opt}</span>`;
+            const cb = div.querySelector('input');
+            cb.addEventListener('change', () => {
+                if (cb.checked) { selSet.add(String(opt)); div.classList.add('checked'); }
+                else            { selSet.delete(String(opt)); div.classList.remove('checked'); }
+                renderLabel();
+            });
+            list.appendChild(div);
+        });
+    }
+
+    renderOptions(); renderLabel();
+
+    trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('.ms-dropdown.open').forEach(d => { if (d !== dropdown) d.classList.remove('open'); });
+        dropdown.classList.toggle('open');
+        if (dropdown.classList.contains('open')) search.focus();
+    });
+    search.addEventListener('input', () => renderOptions(search.value));
+    wrap.querySelector('.ms-btn-all').addEventListener('click', () => { options.forEach(o => selSet.add(String(o))); renderOptions(search.value); renderLabel(); });
+    wrap.querySelector('.ms-btn-none').addEventListener('click', () => { selSet.clear(); renderOptions(search.value); renderLabel(); });
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) dropdown.classList.remove('open'); });
 }
 
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.ms-dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+
+    initMultiselect(
+        'quartos',
+        [{% for q in lista_quartos %}{{ q }},{% endfor %}],
+        params.getAll('quartos'),
+        'Todos'
+    );
+    initMultiselect(
+        'construtora',
+        [{% for c in lista_construtoras %}"{{ c|escapejs }}",{% endfor %}],
+        params.getAll('construtora'),
+        'Todos'
+    );
+    initMultiselect(
+        'bairro',
+        [{% for b in lista_bairros %}"{{ b|escapejs }}",{% endfor %}],
+        params.getAll('bairro'),
+        'Todos'
+    );
+    initMultiselect(
+        'fase',
+        [{% for f in lista_fases %}"{{ f|escapejs }}",{% endfor %}],
+        params.getAll('fase'),
+        'Todos'
+    );
+});
+
+/* ── Toggle row ── */
+function getChildren(parentId) { return document.querySelectorAll(`tr[data-parent="${parentId}"]`); }
+
 function setSubtreeVisible(parentId, visible) {
-    const children = getChildren(parentId);
-    children.forEach(child => {
+    getChildren(parentId).forEach(child => {
         child.style.display = visible ? '' : 'none';
         const childId = child.getAttribute('data-id');
-        if (childId) {
-            const btn = child.querySelector('.toggle-btn');
-            if (!visible) {
-                // collapse all descendants too
-                setSubtreeVisible(childId, false);
-                if (btn) btn.textContent = '+';
-            }
-        }
+        if (childId && !visible) { setSubtreeVisible(childId, false); const btn = child.querySelector('.toggle-btn'); if (btn) btn.textContent = '+'; }
     });
 }
 
 function toggleRow(id) {
     const children = getChildren(id);
     if (!children.length) return;
-
     const firstVisible = children[0].style.display !== 'none';
     setSubtreeVisible(id, !firstVisible);
-
-    // update button icon
     const row = document.querySelector(`tr[data-id="${id}"]`);
-    if (row) {
-        const btn = row.querySelector('.toggle-btn');
-        if (btn) btn.textContent = firstVisible ? '+' : '−';
-    }
+    if (row) { const btn = row.querySelector('.toggle-btn'); if (btn) btn.textContent = firstVisible ? '+' : '−'; }
 }
 
 /* ── Expand / Collapse All ── */
@@ -663,16 +673,10 @@ let allExpanded = true;
 function toggleAllRows() {
     allExpanded = !allExpanded;
     const btn = document.getElementById('btnExpandAll');
-
     document.querySelectorAll('tr[data-level]').forEach(row => {
-        const level = parseInt(row.getAttribute('data-level'));
-        if (level > 0) {
-            row.style.display = allExpanded ? '' : 'none';
-        }
-        const toggleBtn = row.querySelector('.toggle-btn');
-        if (toggleBtn) toggleBtn.textContent = allExpanded ? '−' : '+';
+        if (parseInt(row.getAttribute('data-level')) > 0) row.style.display = allExpanded ? '' : 'none';
+        const tb = row.querySelector('.toggle-btn'); if (tb) tb.textContent = allExpanded ? '−' : '+';
     });
-
     btn.innerHTML = allExpanded
         ? `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Expandir`
         : `<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg> Recolher`;
@@ -682,37 +686,21 @@ function toggleAllRows() {
 function filterTable(query) {
     const q = query.toLowerCase().trim();
     const rows = document.querySelectorAll('#tableBody tr[data-search]');
-
-    if (!q) {
-        rows.forEach(r => r.style.display = '');
-        return;
-    }
-
-    // First pass: show/hide based on match
+    if (!q) { rows.forEach(r => r.style.display = ''); return; }
     const matchedIds = new Set();
     rows.forEach(row => {
         const text = row.getAttribute('data-search') || '';
         const id   = row.getAttribute('data-id') || '';
-        if (text.includes(q)) {
-            row.style.display = '';
-            matchedIds.add(id);
-        } else {
-            row.style.display = 'none';
-        }
+        if (text.includes(q)) { row.style.display = ''; matchedIds.add(id); }
+        else row.style.display = 'none';
     });
-
-    // Second pass: show parents of matched rows
     rows.forEach(row => {
         const id = row.getAttribute('data-id') || '';
         if (matchedIds.has(id)) {
-            // Show all ancestors
             let parentId = row.getAttribute('data-parent');
             while (parentId) {
-                const parentRow = document.querySelector(`tr[data-id="${parentId}"]`);
-                if (parentRow) {
-                    parentRow.style.display = '';
-                    parentId = parentRow.getAttribute('data-parent');
-                } else break;
+                const p = document.querySelector(`tr[data-id="${parentId}"]`);
+                if (p) { p.style.display = ''; parentId = p.getAttribute('data-parent'); } else break;
             }
         }
     });
@@ -723,54 +711,31 @@ document.querySelectorAll('thead th.sortable').forEach(th => {
     th.addEventListener('click', () => {
         const col = th.getAttribute('data-col');
         const isAsc = th.classList.contains('asc');
-
         document.querySelectorAll('thead th').forEach(h => h.classList.remove('asc','desc'));
         th.classList.add(isAsc ? 'desc' : 'asc');
-
         sortBairros(col, !isAsc);
     });
 });
 
 function sortBairros(col, asc) {
     const colIndex = { estoque:1, total:2, share:3, vendidas:4, pct_vend:5, m2:6, area:7 };
-    const idx = colIndex[col];
-    if (!idx) return;
-
+    const idx = colIndex[col]; if (!idx) return;
     const tbody = document.getElementById('tableBody');
-    // Collect bairro groups
     const rows = Array.from(tbody.querySelectorAll('tr'));
-    const groups = [];
-    let current = null;
-
+    const groups = []; let current = null;
     rows.forEach(r => {
         if (r.classList.contains('row-total')) return;
         const level = parseInt(r.getAttribute('data-level') ?? '-1');
-        if (level === 0) {
-            current = { header: r, children: [] };
-            groups.push(current);
-        } else if (current) {
-            current.children.push(r);
-        }
+        if (level === 0) { current = { header: r, children: [] }; groups.push(current); }
+        else if (current) current.children.push(r);
     });
-
     const getValue = row => {
-        const cell = row.querySelectorAll('td')[idx];
-        if (!cell) return 0;
-        const txt = cell.textContent.replace(/[R$%\s,]/g, '').replace('.', '').replace(',', '.');
-        return parseFloat(txt) || 0;
+        const cell = row.querySelectorAll('td')[idx]; if (!cell) return 0;
+        return parseFloat(cell.textContent.replace(/[R$%\s,]/g,'').replace('.','').replace(',','.')) || 0;
     };
-
-    groups.sort((a, b) => {
-        const va = getValue(a.header);
-        const vb = getValue(b.header);
-        return asc ? va - vb : vb - va;
-    });
-
+    groups.sort((a,b) => asc ? getValue(a.header)-getValue(b.header) : getValue(b.header)-getValue(a.header));
     const totalRow = tbody.querySelector('tr.row-total');
-    groups.forEach(g => {
-        tbody.appendChild(g.header);
-        g.children.forEach(c => tbody.appendChild(c));
-    });
+    groups.forEach(g => { tbody.appendChild(g.header); g.children.forEach(c => tbody.appendChild(c)); });
     if (totalRow) tbody.appendChild(totalRow);
 }
 </script>

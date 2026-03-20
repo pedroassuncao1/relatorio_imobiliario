@@ -18,63 +18,101 @@
         }
         html, body { height: 100%; font-family: 'Inter', sans-serif; background: #eef2f9; overflow: hidden; }
 
+        /* ── Navbar ── */
         .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 200; }
         .navbar-left { display: flex; align-items: center; gap: 10px; }
         .navbar-brand img { height: 36px; width: auto; object-fit: contain; }
         .navbar-badge { font-size: 0.6rem; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); font-weight: 500; }
+        @media (max-width: 640px) { .navbar-badge { display: none; } }
         .navbar-right { display: flex; align-items: center; gap: 8px; }
-        .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); }
+        .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); white-space: nowrap; }
         .navbar-user strong { color: var(--gold); }
-        .btn-nav { font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; }
+        @media (max-width: 479px) { .navbar-user { display: none; } }
+        .btn-nav { font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
         .btn-nav-outline { border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); background: transparent; }
         .btn-nav-outline:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* ── Botão filtros mobile ── */
         .btn-filter-toggle { display: none; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: white; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+        .btn-filter-toggle .filter-count { background: var(--gold); color: var(--navy); border-radius: 10px; padding: 1px 6px; font-size: 0.62rem; font-weight: 800; display: none; }
+        .btn-filter-toggle .filter-count.has-filters { display: inline-block; }
         @media (max-width: 767px) { .btn-filter-toggle { display: flex; } }
 
-        .body-wrap { display: flex; height: calc(100vh - 56px); overflow: hidden; }
+        /* ── Layout ── */
+        .body-wrap { display: flex; height: calc(100vh - 56px); overflow: hidden; position: relative; }
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
         .sidebar-overlay.active { display: block; }
 
-        .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%); display: flex; flex-direction: column; overflow-y: auto; padding: 16px 12px; z-index: 160; transition: transform 0.3s; }
-        @media (max-width: 767px) { .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: min(var(--sidebar-w), 88vw); transform: translateX(-110%); z-index: 1600; } .sidebar.open { transform: translateX(0); } }
+        /* ── Sidebar ── */
+        .sidebar { width: var(--sidebar-w); background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; padding: 16px 12px; z-index: 160; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+        @media (max-width: 767px) { .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: min(var(--sidebar-w), 88vw); transform: translateX(-110%); box-shadow: 4px 0 24px rgba(0,0,0,0.3); z-index: 1600; } .sidebar.open { transform: translateX(0); } }
+
+        .sidebar-header-mobile { display: none; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        @media (max-width: 767px) { .sidebar-header-mobile { display: flex; } }
+        .sidebar-header-title { font-size: 0.9rem; font-weight: 700; color: white; }
+        .btn-close-sidebar { width: 28px; height: 28px; border-radius: 6px; background: rgba(255,255,255,0.1); border: none; color: white; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
         .sidebar-user { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
         .sidebar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--blue-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
         .sidebar-username { font-size: 0.78rem; color: rgba(255,255,255,0.8); font-weight: 500; }
         .sidebar-logout { font-size: 0.62rem; color: var(--gold); text-decoration: none; font-weight: 600; }
+
         .filter-section-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.3); font-weight: 600; margin-bottom: 8px; margin-top: 12px; }
         .filter-group { margin-bottom: 10px; }
         .filter-label { font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
-        .filter-select, .filter-input, .filter-date { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; }
-        .filter-select option { background: var(--navy-mid); }
+        .filter-input, .filter-date { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s; }
         .filter-range { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .filter-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+
+        /* ── Multiselect ── */
+        .ms-wrap { position: relative; margin-bottom: 2px; }
+        .ms-trigger { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: space-between; user-select: none; transition: all 0.2s; }
+        .ms-trigger:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
+        .ms-trigger.has-value { border-color: var(--gold); color: var(--gold); }
+        .ms-arrow { font-size: 0.55rem; transition: transform 0.2s; flex-shrink: 0; }
+        .ms-dropdown { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: var(--navy-mid); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; z-index: 9999; max-height: 200px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        .ms-dropdown.open { display: block; }
+        .ms-dropdown::-webkit-scrollbar { width: 4px; }
+        .ms-dropdown::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .ms-search { width: 100%; padding: 7px 10px; background: var(--navy-mid); border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); font-size: 0.73rem; font-family: 'Inter', sans-serif; outline: none; position: sticky; top: 0; }
+        .ms-search::placeholder { color: rgba(255,255,255,0.35); }
+        .ms-option { display: flex; align-items: center; gap: 7px; padding: 6px 10px; cursor: pointer; font-size: 0.73rem; color: rgba(255,255,255,0.8); transition: background 0.15s; }
+        .ms-option:hover { background: rgba(255,255,255,0.08); }
+        .ms-option input[type=checkbox] { width: 13px; height: 13px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0; }
+        .ms-option.checked { color: var(--gold); }
+        .ms-empty { padding: 10px; font-size: 0.72rem; color: rgba(255,255,255,0.35); text-align: center; }
+        .ms-actions { display: flex; border-top: 1px solid rgba(255,255,255,0.1); position: sticky; bottom: 0; background: var(--navy-mid); }
+        .ms-action-btn { flex: 1; padding: 6px; font-size: 0.68rem; font-family: 'Inter', sans-serif; font-weight: 600; background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; transition: all 0.2s; }
+        .ms-action-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+        .ms-action-btn:first-child { border-right: 1px solid rgba(255,255,255,0.1); }
+
         .sidebar-actions { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-        .btn-sidebar { padding: 8px 10px; border-radius: 6px; font-size: 0.72rem; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: block; border: none; }
+        .btn-sidebar { padding: 8px 10px; border-radius: 6px; font-size: 0.72rem; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: block; border: none; transition: all 0.2s; }
         .btn-sidebar-primary { background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright)); color: white; }
         .btn-sidebar-outline { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18) !important; }
         .btn-sidebar-outline:hover { background: rgba(255,255,255,0.06); color: white; }
         .sidebar-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
 
-        /* Main */
+        /* ── Main ── */
         .main-area { flex: 1; padding: 10px; display: flex; flex-direction: column; overflow: hidden; gap: 8px; min-width: 0; }
 
-        /* Tabs */
+        /* ── Tabs ── */
         .view-tabs { display: flex; gap: 5px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
         .view-tabs::-webkit-scrollbar { display: none; }
         .view-tab { padding: 6px 13px; border-radius: 8px; font-size: 0.73rem; font-weight: 600; text-decoration: none; transition: all 0.2s; border: 1.5px solid var(--border); color: var(--text-secondary); background: white; display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
         .view-tab:hover { border-color: var(--blue-bright); color: var(--blue-bright); }
         .view-tab.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; border-color: transparent; box-shadow: 0 2px 10px rgba(21,101,192,0.3); }
 
-        /* Grid 2x2 */
+        /* ── Grid 2x2 ── */
         .content-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; flex: 1; min-height: 0; overflow: hidden; }
         @media (max-width: 1024px) { .content-grid { grid-template-columns: 1fr; overflow-y: auto; } }
 
-        /* Cards */
+        /* ── Cards ── */
         .card { background: white; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
         .card-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700; color: var(--blue-deep); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
         .card-title span { font-size: 0.65rem; color: var(--text-muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
 
-        /* Rosca */
+        /* ── Rosca ── */
         .chart-wrap { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-height: 0; overflow: hidden; }
         .canvas-box { width: 180px; height: 180px; min-width: 180px; flex-shrink: 0; position: relative; }
         .canvas-box canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
@@ -86,7 +124,7 @@
         .legend-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.68rem; }
         .legend-pct { font-weight: 700; color: var(--text-primary); font-size: 0.68rem; min-width: 36px; text-align: right; }
 
-        /* Tabela */
+        /* ── Tabela ── */
         .table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
         .table-wrap::-webkit-scrollbar { width: 4px; }
         .table-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -116,9 +154,10 @@
     </div>
     <div class="navbar-right">
         <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
-        <button class="btn-filter-toggle" onclick="toggleSidebar()">
+        <button class="btn-filter-toggle" id="btnFilterToggle" onclick="toggleSidebar()">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 4h18M7 10h10M10 16h4"/></svg>
             Filtros
+            <span class="filter-count" id="filterCount">0</span>
         </button>
         <a href="{% url 'lista_dashboards' %}" class="btn-nav btn-nav-outline">← Voltar</a>
     </div>
@@ -128,6 +167,12 @@
 
 <div class="body-wrap">
     <div class="sidebar" id="sidebar">
+
+        <div class="sidebar-header-mobile">
+            <span class="sidebar-header-title">⚙️ Filtros</span>
+            <button class="btn-close-sidebar" onclick="toggleSidebar()">✕</button>
+        </div>
+
         <div class="sidebar-user">
             <div class="sidebar-avatar">{{ usuario.username|slice:":2"|upper }}</div>
             <div>
@@ -138,41 +183,80 @@
 
         <form method="GET" id="filterForm" action="{% url 'share_estoque' dash.id %}">
             <div class="filter-section-title">Filtros</div>
+
+            <!-- Nº de Quartos -->
             <div class="filter-group">
                 <label class="filter-label">Nº de Quartos</label>
-                <select name="quartos" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for q in lista_quartos %}<option value="{{ q }}" {% if request.GET.quartos == q|stringformat:"i" %}selected{% endif %}>{{ q }} Quartos</option>{% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="quartos">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Empreendedor -->
             <div class="filter-group">
                 <label class="filter-label">Empreendedor</label>
-                <select name="construtora" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for c in lista_construtoras %}<option value="{{ c }}" {% if request.GET.construtora == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="construtora">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Data de Entrega -->
             <div class="filter-group">
                 <label class="filter-label">Data de Entrega</label>
                 <div class="filter-date-row">
-                    <input type="date" name="data_inicio" class="filter-date" value="{{ request.GET.data_inicio }}" onchange="this.form.submit()">
-                    <input type="date" name="data_fim"    class="filter-date" value="{{ request.GET.data_fim }}"    onchange="this.form.submit()">
+                    <input type="date" name="data_inicio" class="filter-date" value="{{ request.GET.data_inicio }}">
+                    <input type="date" name="data_fim"    class="filter-date" value="{{ request.GET.data_fim }}">
                 </div>
             </div>
+
+            <!-- Bairro -->
             <div class="filter-group">
                 <label class="filter-label">Bairro</label>
-                <select name="bairro" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for b in lista_bairros %}<option value="{{ b }}" {% if request.GET.bairro == b %}selected{% endif %}>{{ b }}</option>{% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="bairro">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Fase da Obra -->
             <div class="filter-group">
                 <label class="filter-label">Fase da Obra</label>
-                <select name="fase" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Todos</option>
-                    {% for f in lista_fases %}<option value="{{ f }}" {% if request.GET.fase == f %}selected{% endif %}>{{ f }}</option>{% endfor %}
-                </select>
+                <div class="ms-wrap" data-name="fase">
+                    <div class="ms-trigger"><span class="ms-label">Todos</span><span class="ms-arrow">▼</span></div>
+                    <div class="ms-dropdown">
+                        <input class="ms-search" type="text" placeholder="🔍 Buscar...">
+                        <div class="ms-list"></div>
+                        <div class="ms-actions">
+                            <button type="button" class="ms-action-btn ms-btn-all">Todos</button>
+                            <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="filter-group">
                 <label class="filter-label">Preço M² (Min / Max)</label>
                 <div class="filter-range">
@@ -194,6 +278,7 @@
                     <input type="number" name="preco_max" class="filter-input" placeholder="Máx" value="{{ request.GET.preco_max }}">
                 </div>
             </div>
+
             <div class="sidebar-actions">
                 <button type="submit" class="btn-sidebar btn-sidebar-primary">Aplicar Filtros</button>
                 <a href="{% url 'share_estoque' dash.id %}" class="btn-sidebar btn-sidebar-outline">Limpar Filtros</a>
@@ -207,82 +292,58 @@
 
         <!-- Tabs -->
         <div class="view-tabs">
-            <a href="{% url 'dashboard' dash.id %}" class="view-tab active">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
+            <a href="{% url 'dashboard' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 Mapa & KPIs
             </a>
             <a href="{% url 'tabela' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/></svg>
                 Tabela Analítica
             </a>
             <a href="{% url 'graficos' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></svg>
                 Gráficos & Análise
             </a>
-
             <a href="{% url 'pricing' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
                 Pricing
             </a>
-
-            <a href="{% url 'share_estoque' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
-                    <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                </svg>
+            <a href="{% url 'share_estoque' dash.id %}" class="view-tab active">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
                 Share de Estoque
             </a>
-
             <a href="{% url 'mapa_calor' dash.id %}" class="view-tab">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                </svg>
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                 Mapa de Calor
             </a>
-
             <a href="{% url 'comparativo' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 Comparativo
             </a>
-
             <a href="{% url 'evolucao' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 Evolução
             </a>
-
             <a href="{% url 'analise_preco' dash.id %}" class="view-tab">
                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 Análise de Preço
             </a>
-
-                        
         </div>
 
         <!-- Grid 2x2 -->
         <div class="content-grid">
 
-            <!-- Rosca Construtora -->
             <div class="card">
                 <div class="card-title">
                     Share Estoque por Construtora
                     <span>{{ total_estoque_geral }} un.</span>
                 </div>
                 <div class="chart-wrap">
-                    <div class="canvas-box">
-                        <canvas id="chartConstrutora"></canvas>
-                    </div>
+                    <div class="canvas-box"><canvas id="chartConstrutora"></canvas></div>
                     <div class="chart-legend-list" id="legendConstrutora"></div>
                 </div>
             </div>
 
-            <!-- Tabela Construtora -->
             <div class="card">
                 <div class="card-title">Empreendedor — Estoque & Share</div>
                 <div class="table-wrap">
@@ -301,12 +362,7 @@
                             <tr>
                                 <td>{{ c.nome }}</td>
                                 <td style="text-align:right; font-weight:600;">{{ c.estoque }}</td>
-                                <td>
-                                    <div class="bar-cell">
-                                        <div class="bar-bg"><div class="bar-fill" style="width:{{ c.pct_estoque }}%"></div></div>
-                                        <span class="bar-pct">{{ c.pct_estoque }}%</span>
-                                    </div>
-                                </td>
+                                <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:{{ c.pct_estoque }}%"></div></div><span class="bar-pct">{{ c.pct_estoque }}%</span></div></td>
                                 <td style="text-align:right;">{{ c.total_unidades }}</td>
                                 <td style="text-align:right; color:var(--text-secondary);">{{ c.pct_unidades }}%</td>
                             </tr>
@@ -323,21 +379,17 @@
                 </div>
             </div>
 
-            <!-- Rosca Empreendimento -->
             <div class="card">
                 <div class="card-title">
                     Share Estoque por Empreendimento
                     <span>{{ empreendimentos_list|length }} empreend.</span>
                 </div>
                 <div class="chart-wrap">
-                    <div class="canvas-box">
-                        <canvas id="chartEmpreendimento"></canvas>
-                    </div>
+                    <div class="canvas-box"><canvas id="chartEmpreendimento"></canvas></div>
                     <div class="chart-legend-list" id="legendEmpreendimento"></div>
                 </div>
             </div>
 
-            <!-- Tabela Empreendimento -->
             <div class="card">
                 <div class="card-title">Empreendimento — Estoque & Share</div>
                 <div class="table-wrap">
@@ -356,12 +408,7 @@
                             <tr>
                                 <td>{{ e.nome }}</td>
                                 <td style="text-align:right; font-weight:600;">{{ e.estoque }}</td>
-                                <td>
-                                    <div class="bar-cell">
-                                        <div class="bar-bg"><div class="bar-fill" style="width:{{ e.pct_estoque }}%"></div></div>
-                                        <span class="bar-pct">{{ e.pct_estoque }}%</span>
-                                    </div>
-                                </td>
+                                <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:{{ e.pct_estoque }}%"></div></div><span class="bar-pct">{{ e.pct_estoque }}%</span></div></td>
                                 <td style="text-align:right;">{{ e.total_unidades }}</td>
                                 <td style="text-align:right; color:var(--text-secondary);">{{ e.pct_unidades }}%</td>
                             </tr>
@@ -394,45 +441,28 @@ const CORES = [
 function buildDoughnut(canvasId, legendId, labels, values) {
     const cores = labels.map((_, i) => CORES[i % CORES.length]);
     const total = values.reduce((a, b) => a + b, 0);
-
     const canvas = document.getElementById(canvasId);
-    canvas.width  = 180;
-    canvas.height = 180;
-
+    canvas.width = 180; canvas.height = 180;
     new Chart(canvas, {
         type: 'doughnut',
-        data: {
-            labels,
-            datasets: [{ data: values, backgroundColor: cores, borderWidth: 1, borderColor: '#fff' }]
-        },
+        data: { labels, datasets: [{ data: values, backgroundColor: cores, borderWidth: 1, borderColor: '#fff' }] },
         options: {
-            responsive: false,
-            maintainAspectRatio: false,
+            responsive: false, maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        title: ctx => ctx[0].label,
-                        label: ctx => {
-                            const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
-                            return ` ${ctx.parsed.toLocaleString('pt-BR')} un. (${pct}%)`;
-                        }
-                    }
-                }
+                tooltip: { callbacks: {
+                    title: ctx => ctx[0].label,
+                    label: ctx => { const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0; return ` ${ctx.parsed.toLocaleString('pt-BR')} un. (${pct}%)`; }
+                }}
             }
         }
     });
-
     const legendEl = document.getElementById(legendId);
     labels.forEach((label, i) => {
         const pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : 0;
         const item = document.createElement('div');
         item.className = 'legend-item';
-        item.innerHTML = `
-            <div class="legend-dot" style="background:${cores[i]}"></div>
-            <span class="legend-name" title="${label}">${label}</span>
-            <span class="legend-pct">${pct}%</span>
-        `;
+        item.innerHTML = `<div class="legend-dot" style="background:${cores[i]}"></div><span class="legend-name" title="${label}">${label}</span><span class="legend-pct">${pct}%</span>`;
         legendEl.appendChild(item);
     });
 }
@@ -445,12 +475,88 @@ const EV = [{% for e in empreendimentos_list %}{{ e.estoque }},{% endfor %}];
 buildDoughnut('chartConstrutora',    'legendConstrutora',    CL, CV);
 buildDoughnut('chartEmpreendimento', 'legendEmpreendimento', EL, EV);
 
+/* ── Sidebar ── */
 function toggleSidebar() {
     const s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
     const open = s.classList.contains('open');
     s.classList.toggle('open', !open); o.classList.toggle('active', !open);
     document.body.style.overflow = !open ? 'hidden' : '';
 }
+
+/* ── Contador de filtros ativos ── */
+function updateFilterCount() {
+    const params = new URLSearchParams(window.location.search);
+    const keys = ['quartos','construtora','data_inicio','data_fim','bairro','fase','pm2_min','pm2_max','area_min','area_max','preco_min','preco_max'];
+    const count = keys.filter(k => params.getAll(k).some(v => v !== '')).length;
+    const badge = document.getElementById('filterCount');
+    badge.textContent = count;
+    badge.classList.toggle('has-filters', count > 0);
+}
+updateFilterCount();
+
+/* ── Multiselect ── */
+function initMultiselect(name, options, selected, placeholder) {
+    const wrap = document.querySelector(`.ms-wrap[data-name="${name}"]`);
+    if (!wrap) return;
+    const trigger  = wrap.querySelector('.ms-trigger');
+    const dropdown = wrap.querySelector('.ms-dropdown');
+    const search   = wrap.querySelector('.ms-search');
+    const list     = wrap.querySelector('.ms-list');
+    const selSet   = new Set(selected.map(String));
+
+    function renderLabel() {
+        if (selSet.size === 0) {
+            trigger.classList.remove('has-value');
+            trigger.querySelector('.ms-label').textContent = placeholder;
+        } else {
+            trigger.classList.add('has-value');
+            trigger.querySelector('.ms-label').textContent = `${selSet.size} selecionado${selSet.size > 1 ? 's' : ''}`;
+        }
+    }
+
+    function renderOptions(filter = '') {
+        list.innerHTML = '';
+        const filtered = options.filter(o => String(o).toLowerCase().includes(filter.toLowerCase()));
+        if (!filtered.length) { list.innerHTML = '<div class="ms-empty">Nenhum resultado</div>'; return; }
+        filtered.forEach(opt => {
+            const div = document.createElement('div');
+            div.className = 'ms-option' + (selSet.has(String(opt)) ? ' checked' : '');
+            div.innerHTML = `<input type="checkbox" name="${name}" value="${opt}" ${selSet.has(String(opt)) ? 'checked' : ''}><span>${opt}</span>`;
+            const cb = div.querySelector('input');
+            cb.addEventListener('change', () => {
+                if (cb.checked) { selSet.add(String(opt)); div.classList.add('checked'); }
+                else            { selSet.delete(String(opt)); div.classList.remove('checked'); }
+                renderLabel();
+            });
+            list.appendChild(div);
+        });
+    }
+
+    renderOptions(); renderLabel();
+
+    trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('.ms-dropdown.open').forEach(d => { if (d !== dropdown) d.classList.remove('open'); });
+        dropdown.classList.toggle('open');
+        if (dropdown.classList.contains('open')) search.focus();
+    });
+    search.addEventListener('input', () => renderOptions(search.value));
+    wrap.querySelector('.ms-btn-all').addEventListener('click',  () => { options.forEach(o => selSet.add(String(o))); renderOptions(search.value); renderLabel(); });
+    wrap.querySelector('.ms-btn-none').addEventListener('click', () => { selSet.clear(); renderOptions(search.value); renderLabel(); });
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) dropdown.classList.remove('open'); });
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.ms-dropdown.open').forEach(d => d.classList.remove('open'));
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    initMultiselect('quartos',     [{% for q in lista_quartos %}{{ q }},{% endfor %}],                 params.getAll('quartos'),     'Todos');
+    initMultiselect('construtora', [{% for c in lista_construtoras %}"{{ c|escapejs }}",{% endfor %}], params.getAll('construtora'), 'Todos');
+    initMultiselect('bairro',      [{% for b in lista_bairros %}"{{ b|escapejs }}",{% endfor %}],      params.getAll('bairro'),      'Todos');
+    initMultiselect('fase',        [{% for f in lista_fases %}"{{ f|escapejs }}",{% endfor %}],        params.getAll('fase'),        'Todos');
+});
 </script>
 </body>
 </html>
