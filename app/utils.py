@@ -20,14 +20,14 @@ client = genai.Client(
 # TESTE DE CONEXÃO (AO INICIAR)
 # ==============================
 
-try:
-    test_response = client.models.generate_content(
-        model=MODEL_NAME,
-        contents="Teste de conexão"
-    )
-    print("✅ CONEXÃO GEMINI ESTABELECIDA.")
-except Exception as e:
-    print(f"❌ ERRO NA IA: {e}")
+# try:
+#     test_response = client.models.generate_content(
+#         model=MODEL_NAME,
+#         contents="Teste de conexão"
+#     )
+#     print("✅ CONEXÃO GEMINI ESTABELECIDA.")
+# except Exception as e:
+#     print(f"❌ ERRO NA IA: {e}")
 
 # ==============================
 # CONFIGURAÇÃO DO GEOCODER

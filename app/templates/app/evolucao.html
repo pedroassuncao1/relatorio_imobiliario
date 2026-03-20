@@ -1,0 +1,585 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE — Evolução</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #0a0e27; --navy-mid: #0f1535; --blue-deep: #1a237e;
+            --blue-mid: #1565c0; --blue-bright: #1976d2; --blue-light: #42a5f5;
+            --gold: #fbbf24; --border: #e2e8f4; --text-primary: #0f1535;
+            --text-secondary: #64748b; --text-muted: #94a3b8;
+            --surface-2: #f8faff; --sidebar-w: 255px;
+        }
+        html, body { height: 100%; font-family: 'Inter', sans-serif; background: #eef2f9; }
+
+        .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 16px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 200; }
+        .navbar-left { display: flex; align-items: center; gap: 10px; }
+        .navbar-brand img { height: 36px; width: auto; object-fit: contain; }
+        .navbar-badge { font-size: 0.6rem; background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7); padding: 2px 7px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); font-weight: 500; }
+        .navbar-right { display: flex; align-items: center; gap: 8px; }
+        .navbar-user { font-size: 0.78rem; color: rgba(255,255,255,0.65); }
+        .navbar-user strong { color: var(--gold); }
+        .btn-nav { font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+        .btn-nav-outline { border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85); background: transparent; }
+        .btn-nav-outline:hover { background: rgba(255,255,255,0.1); color: white; }
+        .btn-filter-toggle { display: none; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: white; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+        @media (max-width: 767px) { .btn-filter-toggle { display: flex; } }
+
+        .body-wrap { display: flex; height: calc(100vh - 56px); }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
+        .sidebar-overlay.active { display: block; }
+
+        .sidebar { width: var(--sidebar-w); min-width: var(--sidebar-w); background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%); display: flex; flex-direction: column; overflow-y: auto; padding: 16px 12px; z-index: 160; transition: transform 0.3s; }
+        @media (max-width: 767px) { .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: min(var(--sidebar-w), 88vw); transform: translateX(-110%); z-index: 1600; } .sidebar.open { transform: translateX(0); } }
+        .sidebar-user { background: rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .sidebar-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-bright), var(--blue-light)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.62rem; font-weight: 700; flex-shrink: 0; }
+        .sidebar-username { font-size: 0.78rem; color: rgba(255,255,255,0.8); font-weight: 500; }
+        .sidebar-logout { font-size: 0.62rem; color: var(--gold); text-decoration: none; font-weight: 600; }
+        .filter-section-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.3); font-weight: 600; margin-bottom: 8px; margin-top: 12px; }
+        .filter-group { margin-bottom: 10px; }
+        .filter-label { font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
+        .filter-select, .filter-date { width: 100%; padding: 7px 9px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem; font-family: 'Inter', sans-serif; outline: none; }
+        .filter-select option { background: var(--navy-mid); }
+        .sidebar-actions { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+        .btn-sidebar { padding: 8px 10px; border-radius: 6px; font-size: 0.72rem; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: block; border: none; }
+        .btn-sidebar-primary { background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright)); color: white; }
+        .btn-sidebar-outline { background: transparent; color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.18) !important; }
+        .btn-sidebar-outline:hover { background: rgba(255,255,255,0.06); color: white; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
+
+        /* Período badges */
+        .periodo-pills { display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+        .periodo-pill { border-radius: 6px; padding: 6px 10px; font-size: 0.7rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .pill-1 { background: rgba(21,101,192,0.2); border-left: 3px solid #1565c0; color: #90caf9; }
+        .pill-2 { background: rgba(56,189,248,0.15); border-left: 3px solid #38bdf8; color: #7dd3fc; }
+        .pill-3 { background: rgba(52,211,153,0.15); border-left: 3px solid #34d399; color: #6ee7b7; }
+        .pill-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        /* Main */
+        .main-area { flex: 1; display: flex; flex-direction: column; overflow-y: auto; min-width: 0; padding: 10px; gap: 8px; }
+
+        /* Tabs */
+        .view-tabs { display: flex; gap: 5px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+        .view-tabs::-webkit-scrollbar { display: none; }
+        .view-tab { padding: 6px 13px; border-radius: 8px; font-size: 0.73rem; font-weight: 600; text-decoration: none; transition: all 0.2s; border: 1.5px solid var(--border); color: var(--text-secondary); background: white; display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
+        .view-tab:hover { border-color: var(--blue-bright); color: var(--blue-bright); }
+        .view-tab.active { background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; border-color: transparent; box-shadow: 0 2px 10px rgba(21,101,192,0.3); }
+
+        /* KPI row */
+        .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; flex-shrink: 0; }
+        @media (max-width: 1100px) { .kpi-row { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 767px)  { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+        .kpi-card { background: white; border-radius: 10px; padding: 10px 10px 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border); position: relative; overflow: hidden; }
+        .kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--blue-mid), var(--blue-light)); }
+        .kpi-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue-deep); font-weight: 700; margin-bottom: 2px; }
+        .kpi-value { font-size: clamp(0.95rem, 2vw, 1.25rem); font-weight: 800; color: var(--text-primary); line-height: 1; }
+        .kpi-delta { font-size: 0.62rem; font-weight: 700; margin-top: 3px; display: inline-flex; align-items: center; gap: 2px; padding: 1px 5px; border-radius: 8px; }
+        .delta-up   { background: #dcfce7; color: #16a34a; }
+        .delta-down { background: #fee2e2; color: #dc2626; }
+        .delta-neu  { background: #f1f5f9; color: #64748b; }
+
+        /* Charts grid */
+        .charts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex-shrink: 0; }
+        @media (max-width: 1200px) { .charts-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 767px)  { .charts-grid { grid-template-columns: 1fr; } }
+        .chart-card { background: white; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border); }
+        .chart-title { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700; color: var(--blue-deep); margin-bottom: 8px; text-align: center; }
+        .canvas-wrap { position: relative; height: 180px; }
+
+        /* Tabela */
+        .table-card { background: white; border-radius: 10px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid var(--border); }
+        .table-card-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 700; color: var(--blue-deep); margin-bottom: 10px; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.74rem; white-space: nowrap; }
+        thead th { background: linear-gradient(135deg, var(--navy), var(--blue-deep)); color: white; padding: 7px 10px; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; position: sticky; top: 0; }
+        thead th:first-child { border-radius: 6px 0 0 0; }
+        thead th:last-child  { border-radius: 0 6px 0 0; }
+        tbody tr { border-bottom: 1px solid #f0f4ff; transition: background 0.15s; }
+        tbody tr:hover { background: var(--surface-2); }
+        tbody td { padding: 6px 10px; color: var(--text-primary); vertical-align: middle; }
+        tbody tr.total-row { font-weight: 700; background: #f0f4ff; border-top: 2px solid var(--border); }
+        .var-badge { display: inline-flex; align-items: center; gap: 2px; font-size: 0.65rem; font-weight: 700; padding: 1px 5px; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="navbar-left">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="{% static 'img/logo.png' %}" alt="CORE">
+        </a>
+        <span class="navbar-badge">BI Imobiliário</span>
+    </div>
+    <div class="navbar-right">
+        <span class="navbar-user">Olá, <strong>{{ usuario.username }}</strong></span>
+        <button class="btn-filter-toggle" onclick="toggleSidebar()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 4h18M7 10h10M10 16h4"/></svg>
+            Filtros
+        </button>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav btn-nav-outline">← Voltar</a>
+    </div>
+</nav>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="body-wrap">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-user">
+            <div class="sidebar-avatar">{{ usuario.username|slice:":2"|upper }}</div>
+            <div>
+                <div class="sidebar-username">{{ usuario.username }}</div>
+                <a href="{% url 'logout' %}" class="sidebar-logout">Sair</a>
+            </div>
+        </div>
+
+        <form method="GET" id="filterForm" action="{% url 'evolucao' dash.id %}">
+
+            <div class="filter-section-title">Períodos de Corte</div>
+
+            <div class="periodo-pills">
+                <div class="periodo-pill pill-1"><div class="pill-dot" style="background:#1565c0"></div>Período 1</div>
+            </div>
+            <div class="filter-group">
+                <input type="date" name="data_1" class="filter-date"
+                    value="{{ datas_corte.0|default:'' }}"
+                    min="{{ data_min }}" max="{{ data_max }}">
+            </div>
+
+            <div class="periodo-pills">
+                <div class="periodo-pill pill-2"><div class="pill-dot" style="background:#38bdf8"></div>Período 2</div>
+            </div>
+            <div class="filter-group">
+                <input type="date" name="data_2" class="filter-date"
+                    value="{{ datas_corte.1|default:'' }}"
+                    min="{{ data_min }}" max="{{ data_max }}">
+            </div>
+
+            <div class="periodo-pills">
+                <div class="periodo-pill pill-3"><div class="pill-dot" style="background:#34d399"></div>Período 3</div>
+            </div>
+            <div class="filter-group">
+                <input type="date" name="data_3" class="filter-date"
+                    value="{{ datas_corte.2|default:'' }}"
+                    min="{{ data_min }}" max="{{ data_max }}">
+            </div>
+
+            <div class="filter-section-title">Filtros</div>
+
+            <div class="filter-group">
+                <label class="filter-label">Nº de Quartos</label>
+                <select name="quartos" class="filter-select">
+                    <option value="">Todos</option>
+                    {% for q in lista_quartos %}
+                        <option value="{{ q }}" {% if request.GET.quartos == q|stringformat:"i" %}selected{% endif %}>{{ q }} Quartos</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Empreendedor</label>
+                <select name="construtora" class="filter-select">
+                    <option value="">Todos</option>
+                    {% for c in lista_construtoras %}
+                        <option value="{{ c }}" {% if request.GET.construtora == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Bairro</label>
+                <select name="bairro" class="filter-select">
+                    <option value="">Todos</option>
+                    {% for b in lista_bairros %}
+                        <option value="{{ b }}" {% if request.GET.bairro == b %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Fase da Obra</label>
+                <select name="fase" class="filter-select">
+                    <option value="">Todos</option>
+                    {% for f in lista_fases %}
+                        <option value="{{ f }}" {% if request.GET.fase == f %}selected{% endif %}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="sidebar-actions">
+                <button type="submit" class="btn-sidebar btn-sidebar-primary">Aplicar</button>
+                <a href="{% url 'evolucao' dash.id %}" class="btn-sidebar btn-sidebar-outline">Limpar</a>
+                <div class="sidebar-divider"></div>
+                <a href="{% url 'lista_dashboards' %}" class="btn-sidebar btn-sidebar-outline">← Voltar</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="main-area">
+
+        <!-- Tabs -->
+        <div class="view-tabs">
+            <a href="{% url 'dashboard' dash.id %}" class="view-tab active">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Mapa & KPIs
+            </a>
+            <a href="{% url 'tabela' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/>
+                </svg>
+                Tabela Analítica
+            </a>
+            <a href="{% url 'graficos' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/>
+                </svg>
+                Gráficos & Análise
+            </a>
+
+            <a href="{% url 'pricing' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+                Pricing
+            </a>
+
+            <a href="{% url 'share_estoque' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                    <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                </svg>
+                Share de Estoque
+            </a>
+
+            <a href="{% url 'mapa_calor' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                </svg>
+                Mapa de Calor
+            </a>
+
+            <a href="{% url 'comparativo' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Comparativo
+            </a>
+
+            <a href="{% url 'evolucao' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                Evolução
+            </a>
+
+            <a href="{% url 'analise_preco' dash.id %}" class="view-tab">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Análise de Preço
+            </a>
+
+                        
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+            {% with k=kpis_atual v=var_kpis %}
+            <div class="kpi-card">
+                <div class="kpi-label">Unidades Lançadas</div>
+                <div class="kpi-value">{{ k.total_u|stringformat:"d" }}</div>
+                {% if v %}
+                    <span class="kpi-delta {% if v.total_u > 0 %}delta-up{% elif v.total_u < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                        {% if v.total_u > 0 %}▲{% elif v.total_u < 0 %}▼{% else %}—{% endif %}
+                        {{ v.total_u|floatformat:2 }}%
+                    </span>
+                {% endif %}
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Estoque</div>
+                <div class="kpi-value">{{ k.total_e|stringformat:"d" }}</div>
+                {% if v %}
+                    <span class="kpi-delta {% if v.total_e > 0 %}delta-up{% elif v.total_e < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                        {% if v.total_e > 0 %}▲{% elif v.total_e < 0 %}▼{% else %}—{% endif %}
+                        {{ v.total_e|floatformat:2 }}%
+                    </span>
+                {% endif %}
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Unidades Vendidas</div>
+                <div class="kpi-value">{{ k.total_v|stringformat:"d" }}</div>
+                {% if v %}
+                    <span class="kpi-delta {% if v.total_v > 0 %}delta-up{% elif v.total_v < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                        {% if v.total_v > 0 %}▲{% elif v.total_v < 0 %}▼{% else %}—{% endif %}
+                        {{ v.total_v|floatformat:2 }}%
+                    </span>
+                {% endif %}
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Área da Unidade M²</div>
+                <div class="kpi-value">{{ k.avg_area }}</div>
+                {% if v %}
+                    <span class="kpi-delta {% if v.avg_area > 0 %}delta-up{% elif v.avg_area < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                        {% if v.avg_area > 0 %}▲{% elif v.avg_area < 0 %}▼{% else %}—{% endif %}
+                        {{ v.avg_area|floatformat:2 }}%
+                    </span>
+                {% endif %}
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Preço Médio M²</div>
+                <div class="kpi-value">R$ {{ k.avg_m2|floatformat:0 }}</div>
+                {% if v %}
+                    <span class="kpi-delta {% if v.avg_m2 > 0 %}delta-up{% elif v.avg_m2 < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                        {% if v.avg_m2 > 0 %}▲{% elif v.avg_m2 < 0 %}▼{% else %}—{% endif %}
+                        {{ v.avg_m2|floatformat:2 }}%
+                    </span>
+                {% endif %}
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label"># Empreendimentos</div>
+                <div class="kpi-value">{{ k.num_emp }}</div>
+                {% if v %}
+                    <span class="kpi-delta {% if v.num_emp > 0 %}delta-up{% elif v.num_emp < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                        {% if v.num_emp > 0 %}▲{% elif v.num_emp < 0 %}▼{% else %}—{% endif %}
+                        {{ v.num_emp|floatformat:2 }}%
+                    </span>
+                {% endif %}
+            </div>
+            {% endwith %}
+        </div>
+
+        <!-- 4 Gráficos -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">Estoque vs Unidades Vendidas</div>
+                <div class="canvas-wrap"><canvas id="chartEstoqueVendidas"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Preço Médio M²</div>
+                <div class="canvas-wrap"><canvas id="chartPrecoM2"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Nº Unidades por Fase da Obra</div>
+                <div class="canvas-wrap"><canvas id="chartFases"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Nº Unidades vs Empreendimentos</div>
+                <div class="canvas-wrap"><canvas id="chartUnidadesEmp"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Tabela de Variações -->
+        {% if tabela_var %}
+        <div class="table-card">
+            <div class="table-card-title">
+                📊 Tabela de Variações
+                {% if datas_corte|length >= 2 %}
+                    — {{ datas_corte|last }} vs {{ datas_corte|first }}
+                {% endif %}
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Faixa de Área</th>
+                            <th style="text-align:right;">Estoque</th>
+                            <th style="text-align:right;">Un. Vendidas</th>
+                            <th style="text-align:right;">Total Un.</th>
+                            <th style="text-align:center;">Var. Unidades</th>
+                            <th style="text-align:right;">Preço Unidade</th>
+                            <th style="text-align:center;">Var. Preço Un.</th>
+                            <th style="text-align:right;">Preço M²</th>
+                            <th style="text-align:center;">Var. Preço M²</th>
+                            <th style="text-align:right;">Área M²</th>
+                            <th style="text-align:center;">Var. Área</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in tabela_var %}
+                        <tr {% if row.is_total %}class="total-row"{% endif %}>
+                            <td>{{ row.label }}</td>
+                            <td style="text-align:right;">{{ row.total_e|stringformat:"d" }}</td>
+                            <td style="text-align:right;">{{ row.total_v|stringformat:"d" }}</td>
+                            <td style="text-align:right; font-weight:600;">{{ row.total_u|stringformat:"d" }}</td>
+                            <td style="text-align:center;">
+                                <span class="var-badge {% if row.var_u > 0 %}delta-up{% elif row.var_u < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                                    {% if row.var_u > 0 %}▲{% elif row.var_u < 0 %}▼{% else %}—{% endif %}
+                                    {{ row.var_u|floatformat:1 }}%
+                                </span>
+                            </td>
+                            <td style="text-align:right;">
+                                {% if not row.is_total %}R$ {{ row.avg_p|floatformat:0 }}{% else %}—{% endif %}
+                            </td>
+                            <td style="text-align:center;">
+                                {% if not row.is_total %}
+                                <span class="var-badge {% if row.var_p > 0 %}delta-up{% elif row.var_p < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                                    {% if row.var_p > 0 %}▲{% elif row.var_p < 0 %}▼{% else %}—{% endif %}
+                                    {{ row.var_p|floatformat:1 }}%
+                                </span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td style="text-align:right;">
+                                {% if not row.is_total %}R$ {{ row.avg_m2|floatformat:0 }}{% else %}—{% endif %}
+                            </td>
+                            <td style="text-align:center;">
+                                {% if not row.is_total %}
+                                <span class="var-badge {% if row.var_m2 > 0 %}delta-up{% elif row.var_m2 < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                                    {% if row.var_m2 > 0 %}▲{% elif row.var_m2 < 0 %}▼{% else %}—{% endif %}
+                                    {{ row.var_m2|floatformat:1 }}%
+                                </span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td style="text-align:right;">
+                                {% if not row.is_total %}{{ row.avg_a|floatformat:2 }}{% else %}—{% endif %}
+                            </td>
+                            <td style="text-align:center;">
+                                {% if not row.is_total %}
+                                <span class="var-badge {% if row.var_a > 0 %}delta-up{% elif row.var_a < 0 %}delta-down{% else %}delta-neu{% endif %}">
+                                    {% if row.var_a > 0 %}▲{% elif row.var_a < 0 %}▼{% else %}—{% endif %}
+                                    {{ row.var_a|floatformat:1 }}%
+                                </span>
+                                {% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const PERIODOS = {{ periodos_json|safe }};
+const CORES    = ['#1565c0', '#38bdf8', '#34d399'];
+const labels   = PERIODOS.map(p => p.label);
+
+function baseOpts(stacked) {
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 9 }, boxWidth: 10 } },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('pt-BR')}` } }
+        },
+        scales: {
+            x: { stacked: stacked || false, ticks: { font: { size: 9 } }, grid: { display: false } },
+            y: { stacked: stacked || false, ticks: { font: { size: 9 } }, grid: { color: '#f0f4ff' } }
+        }
+    };
+}
+
+// ── Estoque vs Vendidas ──
+new Chart(document.getElementById('chartEstoqueVendidas'), {
+    type: 'bar',
+    data: {
+        labels,
+        datasets: [
+            {
+                label: 'Estoque',
+                data: PERIODOS.map(p => p.kpis.total_e),
+                backgroundColor: CORES.map(c => c + '99'),
+                borderColor: CORES,
+                borderWidth: 1,
+            },
+            {
+                label: 'Un. Vendidas',
+                data: PERIODOS.map(p => p.kpis.total_v),
+                backgroundColor: CORES.map(c => c),
+                borderColor: CORES,
+                borderWidth: 1,
+            }
+        ]
+    },
+    options: baseOpts(false)
+});
+
+// ── Preço M² ──
+new Chart(document.getElementById('chartPrecoM2'), {
+    type: 'bar',
+    data: {
+        labels,
+        datasets: [{
+            label: 'Preço M²',
+            data: PERIODOS.map(p => p.kpis.avg_m2),
+            backgroundColor: CORES,
+            borderColor: CORES,
+            borderWidth: 1,
+        }]
+    },
+    options: baseOpts(false)
+});
+
+// ── Fases da Obra ──
+(function() {
+    const todasFases = [...new Set(PERIODOS.flatMap(p => Object.keys(p.kpis.fases)))];
+    const faseCores  = ['#1565c0','#38bdf8','#34d399','#f59e0b','#ef4444'];
+    new Chart(document.getElementById('chartFases'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: todasFases.map((fase, i) => ({
+                label: fase,
+                data: PERIODOS.map(p => p.kpis.fases[fase] || 0),
+                backgroundColor: faseCores[i % faseCores.length],
+                borderWidth: 1,
+            }))
+        },
+        options: baseOpts(true)
+    });
+})();
+
+// ── Unidades vs Empreendimentos ──
+new Chart(document.getElementById('chartUnidadesEmp'), {
+    data: {
+        labels,
+        datasets: [
+            {
+                type: 'bar',
+                label: 'Total Unidades',
+                data: PERIODOS.map(p => p.kpis.total_u),
+                backgroundColor: CORES.map(c => c + 'cc'),
+                yAxisID: 'y',
+            },
+            {
+                type: 'line',
+                label: '# Empreendimentos',
+                data: PERIODOS.map(p => p.kpis.num_emp),
+                borderColor: '#f59e0b',
+                backgroundColor: '#f59e0b22',
+                pointBackgroundColor: '#f59e0b',
+                pointRadius: 5,
+                borderWidth: 2,
+                tension: 0.3,
+                yAxisID: 'y2',
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 9 }, boxWidth: 10 } }
+        },
+        scales: {
+            x: { ticks: { font: { size: 9 } }, grid: { display: false } },
+            y:  { position: 'left',  ticks: { font: { size: 9 } }, grid: { color: '#f0f4ff' } },
+            y2: { position: 'right', ticks: { font: { size: 9 } }, grid: { display: false } }
+        }
+    }
+});
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isOpen  = sidebar.classList.contains('open');
+    sidebar.classList.toggle('open', !isOpen);
+    overlay.classList.toggle('active', !isOpen);
+    document.body.style.overflow = !isOpen ? 'hidden' : '';
+}
+</script>
+</body>
+</html>
