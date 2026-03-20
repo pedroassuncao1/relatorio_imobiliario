@@ -47,6 +47,41 @@ geocode = RateLimiter(
 # ==============================
 # FUNÇÕES
 # ==============================
+def coordenadas_validas(lat, lng, cidade):
+    """
+    Verifica se as coordenadas estão dentro do Brasil
+    e próximas da cidade informada.
+    Evita que o Google retorne resultados de outras cidades/estados.
+    """
+    # Bounding box do Brasil
+    if not (-33.75 <= lat <= 5.27 and -73.99 <= lng <= -28.85):
+        print(f"⚠️  COORDENADAS FORA DO BRASIL: {lat}, {lng}")
+        return False
+
+    # Geocoda a cidade para pegar o centro e comparar
+    try:
+        cidade_cache_key = f"__cidade__|{cidade}"
+        if cidade_cache_key in _cache_coordenadas:
+            cidade_lat, cidade_lng = _cache_coordenadas[cidade_cache_key]
+        else:
+            result = get_gmaps().geocode(cidade, language='pt-BR')
+            if not result:
+                return True  # sem referência, aceita
+            cidade_lat = result[0]['geometry']['location']['lat']
+            cidade_lng = result[0]['geometry']['location']['lng']
+            _cache_coordenadas[cidade_cache_key] = (cidade_lat, cidade_lng)
+
+        # Distância aproximada em graus (~111km por grau)
+        dist = ((lat - cidade_lat)**2 + (lng - cidade_lng)**2) ** 0.5
+        if dist > 1.0:  # mais de ~111km do centro da cidade
+            print(f"⚠️  COORDENADAS MUITO LONGE DA CIDADE ({dist:.2f}°): {lat}, {lng}")
+            return False
+
+    except Exception as e:
+        print(f"⚠️  Erro na validação de coordenadas: {e}")
+
+    return True
+
 
 _gmaps_client = None
 _cache_coordenadas = {}
@@ -90,23 +125,23 @@ def buscar_coordenadas(rua, bairro, cidade):
                 lat = result[0]['geometry']['location']['lat']
                 lng = result[0]['geometry']['location']['lng']
                 tipo = result[0]['geometry']['location_type']
+
+                # ← VALIDAÇÃO NOVA
+                if not coordenadas_validas(lat, lng, cidade):
+                    print(f"⚠️  Resultado inválido para {endereco} — tentando fallback")
+                    # Pula para o fallback de bairro+cidade
+                    result = get_gmaps().geocode(f"{bairro}, {cidade}", language='pt-BR')
+                    if result:
+                        lat = result[0]['geometry']['location']['lat']
+                        lng = result[0]['geometry']['location']['lng']
+                        if coordenadas_validas(lat, lng, cidade):
+                            print(f"✅ FALLBACK OK: {lat}, {lng}")
+                            _cache_coordenadas[cache_key] = (lat, lng)
+                            return lat, lng
+                    return None, None
+
                 print(f"✅ OK ({tipo}): {lat}, {lng}")
                 _cache_coordenadas[cache_key] = (lat, lng)
-                return lat, lng
-
-            # Fallback bairro+cidade
-            fallback_key = f"|{bairro}|{cidade}"
-            if fallback_key in _cache_coordenadas:
-                print(f"📦 CACHE HIT FALLBACK: {fallback_key}")
-                return _cache_coordenadas[fallback_key]
-
-            print(f"⚠️  GOOGLE sem resultado — tentando só bairro: {bairro}, {cidade}")
-            result = gmaps.geocode(f"{bairro}, {cidade}", language='pt-BR')
-            if result:
-                lat = result[0]['geometry']['location']['lat']
-                lng = result[0]['geometry']['location']['lng']
-                print(f"✅ FALLBACK OK: {lat}, {lng}")
-                _cache_coordenadas[fallback_key] = (lat, lng)
                 return lat, lng
 
             print(f"❌ GOOGLE: nenhum resultado para {endereco}")
