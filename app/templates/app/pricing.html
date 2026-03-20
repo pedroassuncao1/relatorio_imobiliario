@@ -241,6 +241,14 @@
                 </div>
             </div>
 
+            <div class="filter-group">
+                <label class="filter-label">Data de Comercialização</label>
+                <div class="filter-date-row">
+                    <input type="date" name="comerc_inicio" class="filter-date" value="{{ request.GET.comerc_inicio }}">
+                    <input type="date" name="comerc_fim"    class="filter-date" value="{{ request.GET.comerc_fim }}">
+                </div>
+            </div>
+
             <!-- Bairro — multiselect -->
             <div class="filter-group">
                 <label class="filter-label">Bairro</label>

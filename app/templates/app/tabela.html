@@ -103,12 +103,13 @@
         .filter-section-title { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.2px; color: rgba(255,255,255,0.3); font-weight: 600; margin-bottom: 8px; margin-top: 12px; padding: 0 2px; }
         .filter-group { margin-bottom: 10px; }
         .filter-label { font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; display: block; }
-        .filter-select, .filter-input {
+        .filter-select, .filter-input, .filter-date {
             width: 100%; padding: 7px 9px;
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 6px; color: rgba(255,255,255,0.85); font-size: 0.76rem;
             font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s;
         }
+        .filter-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .filter-select:focus, .filter-input:focus { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); }
         .filter-select option { background: var(--navy-mid); color: white; }
         .filter-range { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
@@ -340,6 +341,21 @@
                             <button type="button" class="ms-action-btn ms-btn-none">Limpar</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Data de Entrega</label>
+                <div class="filter-date-row">
+                    <input type="date" name="data_inicio" class="filter-date" value="{{ request.GET.data_inicio }}">
+                    <input type="date" name="data_fim"    class="filter-date" value="{{ request.GET.data_fim }}">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Data de Comercialização</label>
+                <div class="filter-date-row">
+                    <input type="date" name="comerc_inicio" class="filter-date" value="{{ request.GET.comerc_inicio }}">
+                    <input type="date" name="comerc_fim"    class="filter-date" value="{{ request.GET.comerc_fim }}">
                 </div>
             </div>
 
