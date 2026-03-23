@@ -13,20 +13,25 @@ import json
 
 
 def lista_dashboards(request):
-    dashboards = Dashboard.objects.all().order_by('-criado_em')
-    
+    # 1. Se for admin, pega todos os dashboards
+    if request.user.is_admin():
+        dashboards = Dashboard.objects.all().order_by('-criado_em')
+    else:
+        # 2. Se for viewer (como o Silvestre), filtra apenas os que ele tem acesso
+        ids_permitidos = AcessoDashboard.objects.filter(usuario=request.user).values_list('dashboard_id', flat=True)
+        dashboards = Dashboard.objects.filter(id__in=ids_permitidos).order_by('-criado_em')
+
     # ── DEFINIÇÃO EXATA CONFORME SEU PRINT ──
     abas_disponiveis = [
-        # O slug deve ser o 'name' que está no path do urls.py
-        {'slug': 'dashboard',    'label': 'Mapa & KPIs'},      # Name da URL principal
+        {'slug': 'dashboard',    'label': 'Mapa & KPIs'},
         {'slug': 'tabela',       'label': 'Tabela Analítica'},
         {'slug': 'graficos',     'label': 'Gráficos & Análise'},
         {'slug': 'pricing',      'label': 'Pricing'},
-        {'slug': 'share_estoque','label': 'Share de Estoque'}, # Ajustado de 'estoque'
-        {'slug': 'mapa_calor',   'label': 'Mapa de Calor'},    # Ajustado de 'mapa-calor' para bater com o slug
+        {'slug': 'share_estoque','label': 'Share de Estoque'},
+        {'slug': 'mapa_calor',   'label': 'Mapa de Calor'},
         {'slug': 'comparativo',  'label': 'Comparativo'},
         {'slug': 'evolucao',     'label': 'Evolução'},
-        {'slug': 'analise_preco','label': 'Análise de Preço'}, # Ajustado de 'analise-preco'
+        {'slug': 'analise_preco','label': 'Análise de Preço'},
     ]
 
     return render(request, 'app/lista_dashboards.html', {
