@@ -6,6 +6,15 @@ from .helpers import aplicar_filtros, get_listas_sidebar, get_ranges, FAIXAS_ARE
 import json
 
 
+def _validar_aba_ativa(dash, slug_procurado):
+    """
+    Retorna True se o slug da aba estiver na lista de abas ativas do dashboard.
+    """
+    abas_ativas = dash.get_abas_ativas()
+    # Debug temporário: imprima no console para ver o que o banco está retornando
+    print(f"DEBUG: Procurando {slug_procurado} em {abas_ativas}")
+    return slug_procurado in abas_ativas
+
 def _verificar_acesso(request, dash):
     if not request.user.is_admin():
         if not AcessoDashboard.objects.filter(usuario=request.user, dashboard=dash).exists():
@@ -72,11 +81,22 @@ def analise_preco(request, dashboard_id):
     dash = get_object_or_404(Dashboard, id=dashboard_id)
     if not _verificar_acesso(request, dash):
         return redirect('lista_dashboards')
-    return _render_pricing_view(request, dash, 'app/analise_preco.html')
 
+    # ADICIONE ESTA TRAVA:
+    if not _validar_aba_ativa(dash, 'analise_preco'):
+        messages.warning(request, "A aba 'Análise de Preço' não está ativa para este dashboard.")
+        return redirect('dashboard', dashboard_id=dash.id)
+
+    return _render_pricing_view(request, dash, 'app/analise_preco.html')
 
 def pricing(request, dashboard_id):
     dash = get_object_or_404(Dashboard, id=dashboard_id)
     if not _verificar_acesso(request, dash):
         return redirect('lista_dashboards')
+
+    # ADICIONE ESTA TRAVA:
+    if not _validar_aba_ativa(dash, 'pricing'):
+        messages.warning(request, "A aba 'Pricing' não está ativa para este dashboard.")
+        return redirect('dashboard', dashboard_id=dash.id)
+
     return _render_pricing_view(request, dash, 'app/pricing.html')

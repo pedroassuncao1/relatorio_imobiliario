@@ -7,9 +7,14 @@ from .helpers import aplicar_filtros, get_listas_sidebar, get_ranges, FAIXAS_ARE
 import json
 from django.http import JsonResponse
 
-# 1. FUNÇÃO DE VALIDAÇÃO (Coloque aqui para corrigir o erro de 'not defined')
 def _validar_aba_ativa(dash, slug_procurado):
-    return slug_procurado in dash.get_abas_ativas()
+    """
+    Retorna True se o slug da aba estiver na lista de abas ativas do dashboard.
+    """
+    abas_ativas = dash.get_abas_ativas()
+    # Debug temporário: imprima no console para ver o que o banco está retornando
+    print(f"DEBUG: Procurando {slug_procurado} em {abas_ativas}")
+    return slug_procurado in abas_ativas
 
 def _verificar_acesso(request, dash):
     if not request.user.is_admin():
@@ -25,7 +30,7 @@ def graficos(request, dashboard_id):
         return redirect('lista_dashboards')
     
         # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
-    if not _validar_aba_ativa(dash, 'evolucao'):
+    if not _validar_aba_ativa(dash, 'graficos'):
         messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
         return redirect('dashboard', dashboard_id=dash.id)
 
@@ -161,7 +166,7 @@ def share_estoque(request, dashboard_id):
         return redirect('lista_dashboards')
     
         # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
-    if not _validar_aba_ativa(dash, 'evolucao'):
+    if not _validar_aba_ativa(dash, 'share_estoque'):
         messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
         return redirect('dashboard', dashboard_id=dash.id)
 
@@ -201,7 +206,7 @@ def mapa_calor(request, dashboard_id):
         return redirect('lista_dashboards')
     
     # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
-    if not _validar_aba_ativa(dash, 'evolucao'):
+    if not _validar_aba_ativa(dash, 'mapa_calor'):
         messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
         return redirect('dashboard', dashboard_id=dash.id)
 
@@ -256,7 +261,7 @@ def comparativo(request, dashboard_id):
         return redirect('lista_dashboards')
     
         # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
-    if not _validar_aba_ativa(dash, 'evolucao'):
+    if not _validar_aba_ativa(dash, 'comparativo'):
         messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
         return redirect('dashboard', dashboard_id=dash.id)
 
