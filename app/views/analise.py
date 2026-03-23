@@ -5,7 +5,11 @@ from collections import defaultdict
 from ..models import Dashboard, AcessoDashboard, Empreendimento
 from .helpers import aplicar_filtros, get_listas_sidebar, get_ranges, FAIXAS_AREA
 import json
+from django.http import JsonResponse
 
+# 1. FUNÇÃO DE VALIDAÇÃO (Coloque aqui para corrigir o erro de 'not defined')
+def _validar_aba_ativa(dash, slug_procurado):
+    return slug_procurado in dash.get_abas_ativas()
 
 def _verificar_acesso(request, dash):
     if not request.user.is_admin():
@@ -19,6 +23,11 @@ def graficos(request, dashboard_id):
     dash = get_object_or_404(Dashboard, id=dashboard_id)
     if not _verificar_acesso(request, dash):
         return redirect('lista_dashboards')
+    
+        # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
+    if not _validar_aba_ativa(dash, 'evolucao'):
+        messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
+        return redirect('dashboard', dashboard_id=dash.id)
 
     dados_qs = aplicar_filtros(Empreendimento.objects.filter(dashboard=dash), request)
 
@@ -150,6 +159,11 @@ def share_estoque(request, dashboard_id):
     dash = get_object_or_404(Dashboard, id=dashboard_id)
     if not _verificar_acesso(request, dash):
         return redirect('lista_dashboards')
+    
+        # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
+    if not _validar_aba_ativa(dash, 'evolucao'):
+        messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
+        return redirect('dashboard', dashboard_id=dash.id)
 
     qs = aplicar_filtros(Empreendimento.objects.filter(dashboard=dash), request)
     construtoras_data = qs.values('construtora').annotate(
@@ -185,6 +199,11 @@ def mapa_calor(request, dashboard_id):
     dash = get_object_or_404(Dashboard, id=dashboard_id)
     if not _verificar_acesso(request, dash):
         return redirect('lista_dashboards')
+    
+    # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
+    if not _validar_aba_ativa(dash, 'evolucao'):
+        messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
+        return redirect('dashboard', dashboard_id=dash.id)
 
     qs = aplicar_filtros(Empreendimento.objects.filter(dashboard=dash), request)
 
@@ -235,6 +254,11 @@ def comparativo(request, dashboard_id):
     dash = get_object_or_404(Dashboard, id=dashboard_id)
     if not _verificar_acesso(request, dash):
         return redirect('lista_dashboards')
+    
+        # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
+    if not _validar_aba_ativa(dash, 'evolucao'):
+        messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
+        return redirect('dashboard', dashboard_id=dash.id)
 
     data_corte_a = request.GET.get('data_corte_a', '')
     data_corte_b = request.GET.get('data_corte_b', '')
@@ -297,6 +321,11 @@ def evolucao(request, dashboard_id):
     dash = get_object_or_404(Dashboard, id=dashboard_id)
     if not _verificar_acesso(request, dash):
         return redirect('lista_dashboards')
+    
+    # Bloqueio se a aba estiver desativada pelo "Editar Dashboard"
+    if not _validar_aba_ativa(dash, 'evolucao'):
+        messages.warning(request, 'Esta funcionalidade está desativada para este dashboard.')
+        return redirect('dashboard', dashboard_id=dash.id)
 
     datas_corte = [request.GET.get(f'data_{i}', '') for i in ['1','2','3'] if request.GET.get(f'data_{i}')]
     base = aplicar_filtros(Empreendimento.objects.filter(dashboard=dash), request)

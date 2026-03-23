@@ -9,20 +9,31 @@ from .helpers import (
 )
 from ..utils import mapear_colunas_com_ia, limpar_valor, buscar_coordenadas
 import pandas as pd
+import json
 
 
 def lista_dashboards(request):
-    if request.user.is_admin():
-        dashboards = Dashboard.objects.all().order_by('-criado_em')
-    else:
-        ids_liberados = AcessoDashboard.objects.filter(
-            usuario=request.user
-        ).values_list('dashboard_id', flat=True)
-        dashboards = Dashboard.objects.filter(id__in=ids_liberados).order_by('-criado_em')
-    return render(request, 'app/lista_dashboards.html', {
-        'dashboards': dashboards, 'usuario': request.user,
-    })
+    dashboards = Dashboard.objects.all().order_by('-criado_em')
+    
+    # ── DEFINIÇÃO EXATA CONFORME SEU PRINT ──
+    abas_disponiveis = [
+        {'slug': 'mapa',         'label': 'Mapa & KPIs'},
+        {'slug': 'tabela',       'label': 'Tabela Analítica'},
+        {'slug': 'graficos',     'label': 'Gráficos & Análise'},
+        {'slug': 'pricing',      'label': 'Pricing'},
+        {'slug': 'estoque',      'label': 'Share de Estoque'},
+        {'slug': 'mapa_calor',   'label': 'Mapa de Calor'},
+        {'slug': 'comparativo',  'label': 'Comparativo'},
+        {'slug': 'evolucao',     'label': 'Evolução'},
+        {'slug': 'analise_preco','label': 'Análise de Preço'},
+    ]
 
+    return render(request, 'app/lista_dashboards.html', {
+        'dashboards': dashboards,
+        'abas_disponiveis': abas_disponiveis,
+        'abas_disponiveis_json': json.dumps(abas_disponiveis),
+        'usuario': request.user
+    })
 
 def _verificar_acesso(request, dash):
     if not request.user.is_admin():

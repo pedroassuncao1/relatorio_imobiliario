@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path
 from app import views
+from app.views import admin_views
 
 urlpatterns = [
 
@@ -55,4 +56,7 @@ urlpatterns = [
 
     # Página de análise de estoque (exibe análise de estoque e vendas)
     path('dashboard/<int:dashboard_id>/pricing/', views.pricing, name='pricing'),
+
+    # Página de edição de abas (só admin)
+    path('dashboard/<int:dashboard_id>/editar-abas/', admin_views.editar_abas_dashboard, name='editar_abas_dashboard'),
 ]

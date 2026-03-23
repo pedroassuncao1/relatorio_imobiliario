@@ -226,52 +226,72 @@
 
         <!-- Tabs -->
         <div class="view-tabs">
-            {% url 'dashboard' dash.id as url_dashboard %}
-            {% url 'tabela' dash.id as url_tabela %}
-            {% url 'graficos' dash.id as url_graficos %}
-            {% url 'pricing' dash.id as url_pricing %}
-            {% url 'share_estoque' dash.id as url_share %}
-            {% url 'mapa_calor' dash.id as url_mapa_calor %}
-            {% url 'comparativo' dash.id as url_comparativo %}
-            {% url 'evolucao' dash.id as url_evolucao %}
-            {% url 'analise_preco' dash.id as url_analise %}
+            {% with abas=dash.get_abas_ativas %}
+                
+                {% if 'mapa' in abas %}
+                <a href="{% url 'dashboard' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Mapa & KPIs
+                </a>
+                {% endif %}
 
-            <a href="{{ url_dashboard }}" class="view-tab {% block tab_dashboard %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                Mapa & KPIs
-            </a>
-            <a href="{{ url_tabela }}" class="view-tab {% block tab_tabela %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/></svg>
-                Tabela Analítica
-            </a>
-            <a href="{{ url_graficos }}" class="view-tab {% block tab_graficos %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></svg>
-                Gráficos & Análise
-            </a>
-            <a href="{{ url_pricing }}" class="view-tab {% block tab_pricing %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
-                Pricing
-            </a>
-            <a href="{{ url_share }}" class="view-tab {% block tab_share %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
-                Share de Estoque
-            </a>
-            <a href="{{ url_mapa_calor }}" class="view-tab {% block tab_mapa_calor %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                Mapa de Calor
-            </a>
-            <a href="{{ url_comparativo }}" class="view-tab {% block tab_comparativo %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                Comparativo
-            </a>
-            <a href="{{ url_evolucao }}" class="view-tab {% block tab_evolucao %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                Evolução
-            </a>
-            <a href="{{ url_analise }}" class="view-tab {% block tab_analise %}{% endblock %}">
-                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Análise de Preço
-            </a>
+                {% if 'tabela' in abas %}
+                <a href="{% url 'tabela' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'tabela' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><path d="M3 6v12"/></svg>
+                    Tabela Analítica
+                </a>
+                {% endif %}
+
+                {% if 'graficos' in abas %}
+                <a href="{% url 'graficos' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'graficos' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 4-8"/></svg>
+                    Gráficos & Análise
+                </a>
+                {% endif %}
+
+                {% if 'pricing' in abas %}
+                <a href="{% url 'pricing' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'pricing' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>
+                    Pricing
+                </a>
+                {% endif %}
+
+                {% if 'estoque' in abas %}
+                <a href="{% url 'share_estoque' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'share_estoque' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
+                    Share de Estoque
+                </a>
+                {% endif %}
+
+                {% if 'mapa_calor' in abas %}
+                <a href="{% url 'mapa_calor' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'mapa_calor' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                    Mapa de Calor
+                </a>
+                {% endif %}
+
+                {% if 'comparativo' in abas %}
+                <a href="{% url 'comparativo' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'comparativo' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Comparativo
+                </a>
+                {% endif %}
+
+                {% if 'evolucao' in abas %}
+                <a href="{% url 'evolucao' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'evolucao' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    Evolução
+                </a>
+                {% endif %}
+
+                {% if 'analise_preco' in abas %}
+                <a href="{% url 'analise_preco' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'analise_preco' %}active{% endif %}">
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Análise de Preço
+                </a>
+                {% endif %}
+
+            {% endwith %}
         </div>
 
         {% block main_content %}{% endblock %}

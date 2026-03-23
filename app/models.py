@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import json
 
 
 # ==============================
@@ -27,16 +28,24 @@ class Usuario(AbstractUser):
 class Dashboard(models.Model):
     nome = models.CharField(max_length=255)
     descricao = models.TextField(null=True, blank=True)
-    criado_por = models.ForeignKey(
-        Usuario,
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name='dashboards_criados'
-    )
+    
+    # Agora o padrão inclui todos os 9 slugs definidos acima
+    DEFAULT_ABAS = '["mapa", "tabela", "graficos", "pricing", "estoque", "mapa_calor", "comparativo", "evolucao", "analise_preco"]'
+    abas_ativas = models.TextField(default=DEFAULT_ABAS)
+    
+    criado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
 
+    def get_abas_ativas(self):
+        try:
+            import json
+            return json.loads(self.abas_ativas)
+        except:
+            # Caso dê erro no JSON, retorna todas as abas como segurança
+            return json.loads(self.DEFAULT_ABAS)
+
     def __str__(self):
-        return f"{self.nome} — {self.criado_em.strftime('%d/%m/%Y')}"
+        return self.nome
 
 
 # ==============================

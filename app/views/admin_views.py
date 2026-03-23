@@ -1,8 +1,9 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from ..models import Usuario, Dashboard, AcessoDashboard
 from .helpers import admin_required
-
+import json
 
 @admin_required
 def gerenciar_usuarios(request):
@@ -76,3 +77,18 @@ def deletar_dashboard(request, dashboard_id):
         dash.delete()
         messages.success(request, f'Dashboard "{nome}" removido.')
     return redirect('lista_dashboards')
+
+@admin_required
+def editar_abas_dashboard(request, dashboard_id):  # Verifique se o nome aqui bate com o urls.py
+    if request.method == 'POST':
+        try:
+            import json
+            data = json.loads(request.body)
+            abas = data.get('abas', [])
+            dash = get_object_or_404(Dashboard, id=dashboard_id)
+            dash.abas_ativas = json.dumps(abas)
+            dash.save()
+            return JsonResponse({'ok': True, 'abas_ativas': abas})
+        except Exception as e:
+            return JsonResponse({'ok': False, 'erro': str(e)})
+    return JsonResponse({'ok': False, 'erro': 'Método inválido'})
