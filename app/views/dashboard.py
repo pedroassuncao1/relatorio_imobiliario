@@ -17,15 +17,16 @@ def lista_dashboards(request):
     
     # ── DEFINIÇÃO EXATA CONFORME SEU PRINT ──
     abas_disponiveis = [
-        {'slug': 'mapa',         'label': 'Mapa & KPIs'},
+        # O slug deve ser o 'name' que está no path do urls.py
+        {'slug': 'dashboard',    'label': 'Mapa & KPIs'},      # Name da URL principal
         {'slug': 'tabela',       'label': 'Tabela Analítica'},
         {'slug': 'graficos',     'label': 'Gráficos & Análise'},
         {'slug': 'pricing',      'label': 'Pricing'},
-        {'slug': 'estoque',      'label': 'Share de Estoque'},
-        {'slug': 'mapa_calor',   'label': 'Mapa de Calor'},
+        {'slug': 'share_estoque','label': 'Share de Estoque'}, # Ajustado de 'estoque'
+        {'slug': 'mapa_calor',   'label': 'Mapa de Calor'},    # Ajustado de 'mapa-calor' para bater com o slug
         {'slug': 'comparativo',  'label': 'Comparativo'},
         {'slug': 'evolucao',     'label': 'Evolução'},
-        {'slug': 'analise_preco','label': 'Análise de Preço'},
+        {'slug': 'analise_preco','label': 'Análise de Preço'}, # Ajustado de 'analise-preco'
     ]
 
     return render(request, 'app/lista_dashboards.html', {

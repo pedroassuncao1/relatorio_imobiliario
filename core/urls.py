@@ -40,10 +40,10 @@ urlpatterns = [
     path('dashboard/<int:dashboard_id>/graficos/', views.graficos, name='graficos'),
 
     # Página de insights (exibe insights gerados pela IA)
-    path('dashboard/<int:dashboard_id>/share-estoque/', views.share_estoque, name='share_estoque'),
+    path('dashboard/<int:dashboard_id>/share_estoque/', views.share_estoque, name='share_estoque'),
 
     # Página de mapa de calor (exibe mapa de calor geocodificado)
-    path('dashboard/<int:dashboard_id>/mapa-calor/', views.mapa_calor, name='mapa_calor'),
+    path('dashboard/<int:dashboard_id>/mapa_calor/', views.mapa_calor, name='mapa_calor'),
 
     # Página de comparativo (exibe comparação entre empreendimentos)
     path('dashboard/<int:dashboard_id>/comparativo/', views.comparativo, name='comparativo'),
@@ -52,7 +52,7 @@ urlpatterns = [
     path('dashboard/<int:dashboard_id>/evolucao/', views.evolucao, name='evolucao'),
 
     # Página de análise de preço (exibe análise de preço por m2 e unidade)
-    path('dashboard/<int:dashboard_id>/analise-preco/', views.analise_preco, name='analise_preco'),
+    path('dashboard/<int:dashboard_id>/analise_preco/', views.analise_preco, name='analise_preco'),
 
     # Página de análise de estoque (exibe análise de estoque e vendas)
     path('dashboard/<int:dashboard_id>/pricing/', views.pricing, name='pricing'),

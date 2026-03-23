@@ -272,7 +272,7 @@
         <div class="view-tabs">
             {% with abas=dash.get_abas_ativas %}
                 
-                {% if 'mapa' in abas %}
+                {% if 'dashboard' in abas %}
                 <a href="{% url 'dashboard' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                     Mapa & KPIs
@@ -300,7 +300,7 @@
                 </a>
                 {% endif %}
 
-                {% if 'estoque' in abas %}
+                {% if 'share_estoque' in abas %}
                 <a href="{% url 'share_estoque' dash.id %}" class="view-tab {% if request.resolver_match.url_name == 'share_estoque' %}active{% endif %}">
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
                     Share de Estoque
