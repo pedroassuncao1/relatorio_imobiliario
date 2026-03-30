@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from app import views
 from app.views import admin_views
+from app.views import logistico_views
 
 urlpatterns = [
 
@@ -59,4 +60,11 @@ urlpatterns = [
 
     # Página de edição de abas (só admin)
     path('dashboard/<int:dashboard_id>/editar-abas/', admin_views.editar_abas_dashboard, name='editar_abas_dashboard'),
+
+    # Logístico
+    path('dashboard/<int:dash_id>/logistico/',            logistico_views.dashboard_logistico, name='dashboard_logistico'),
+    path('dashboard/<int:dash_id>/logistico/abl/',        logistico_views.abl_estoque,         name='abl_estoque'),
+    path('dashboard/<int:dash_id>/logistico/precos/',     logistico_views.precos,              name='precos'),
+    path('dashboard/<int:dash_id>/logistico/distancias/', logistico_views.distancias,          name='distancias'),
+    path('dashboard/<int:dash_id>/logistico/share/',      logistico_views.share_logistico,     name='share_logistico'),
 ]
