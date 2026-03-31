@@ -1,0 +1,411 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE — ABL & Estoque: {{ dash.nome }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #0a0e27; --navy-mid: #0f1535; --blue-deep: #1a237e;
+            --blue-mid: #1565c0; --blue-bright: #1976d2; --blue-light: #42a5f5;
+            --gold: #fbbf24; --border: #e2e8f4; --text-primary: #0f1535;
+            --text-secondary: #64748b; --text-muted: #94a3b8;
+            --sidebar-w: 265px;
+        }
+        html, body { height: 100vh; width: 100vw; font-family: 'Inter', sans-serif; background: #eef2f9; overflow: hidden; }
+
+        .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1000; }
+        .navbar-brand img { height: 32px; width: auto; }
+        .navbar-badge { font-size: 0.65rem; background: rgba(251,191,36,0.15); color: var(--gold); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 800; text-transform: uppercase; margin-left: 15px; }
+        .navbar-right { display: flex; align-items: center; }
+        .navbar-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+        .btn-nav-outline { font-size: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 6px; transition: 0.2s; }
+        .btn-nav-outline:hover { color: white; border-color: rgba(255,255,255,0.5); }
+
+        .body-wrap { display: flex; height: calc(100vh - 56px); width: 100%; }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: #0f1535;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+        .filter-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); font-weight: 700; margin-bottom: 5px; }
+        .filter-label { font-size: 0.75rem; font-weight: 600; color: #fff; margin-bottom: 8px; display: block; }
+        .ms-list { background: #161c3d; border-radius: 10px; margin-top: 5px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .ms-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .ms-option:hover { background: rgba(255,255,255,0.05); }
+        .ms-option span { font-size: 0.8rem; color: rgba(255,255,255,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-apply { background: var(--gold); color: #0a0e27; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(251,191,36,0.2); margin-top: 10px; width: 100%; }
+        .btn-apply:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-sidebar-outline { display: block; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-decoration: none; margin-top: 6px; }
+        .btn-sidebar-outline:hover { color: rgba(255,255,255,0.7); }
+
+        .main-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* KPI Cards */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .kpi-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); position: relative; }
+        .kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: var(--blue-mid); border-radius: 0 0 12px 12px; }
+        .kpi-card.gold::after { background: var(--gold); }
+        .kpi-label { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.4rem; font-weight: 900; color: var(--navy); display: block; margin-top: 5px; }
+        .kpi-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* Tabs */
+        .view-tabs { display: flex; gap: 8px; margin-bottom: 5px; }
+        .view-tab { padding: 8px 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-decoration: none; background: white; color: var(--text-secondary); border: 1px solid var(--border); transition: 0.2s; }
+        .view-tab.active { background: var(--blue-deep); color: white; border-color: var(--blue-deep); box-shadow: 0 4px 10px rgba(26,35,126,0.2); }
+
+        /* Charts Grid */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .chart-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .chart-card.full { grid-column: 1 / -1; }
+        .chart-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+        .chart-wrap { position: relative; height: 260px; }
+        .chart-wrap.tall { height: 340px; }
+
+        /* Tabela */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+        thead th { background: var(--navy-mid); color: rgba(255,255,255,0.9); font-weight: 700; padding: 10px 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+        tbody tr { border-bottom: 1px solid #f0f4fb; transition: background 0.15s; }
+        tbody tr:hover { background: #f5f8ff; }
+        tbody td { padding: 9px 12px; color: var(--text-primary); }
+        .badge-fase { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; background: #e8f4fd; color: var(--blue-mid); }
+
+        /* Barra de ocupação inline */
+        .occ-bar { background: #e8f0fe; border-radius: 4px; height: 8px; width: 100%; margin-top: 4px; overflow: hidden; }
+        .occ-bar-fill { background: var(--blue-mid); height: 100%; border-radius: 4px; }
+        .occ-bar-fill.red { background: #ef4444; }
+
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .fw-bold { font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div style="display:flex; align-items:center;">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="{% static 'img/logo.png' %}" alt="CORE">
+        </a>
+        <span class="navbar-badge">Módulo Logístico</span>
+    </div>
+    <div class="navbar-right">
+        <span class="navbar-user">Usuário: <strong>{{ usuario.username }}</strong></span>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline" style="margin-left:15px;">← Voltar</a>
+    </div>
+</nav>
+
+<div class="body-wrap">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <form method="GET" action="{% url 'abl_estoque' dash.id %}">
+            <div class="filter-section-title">Filtros Ativos</div>
+
+            <div class="filter-group">
+                <label class="filter-label">Cidade</label>
+                <div class="ms-list">
+                    {% for c in lista_cidades %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="cidade" value="{{ c }}" {% if c in selected_cidades %}checked{% endif %}>
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Construtora</label>
+                <div class="ms-list">
+                    {% for c in lista_construtoras %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="construtora" value="{{ c }}" {% if c in selected_construtoras %}checked{% endif %}>
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Fase de Obra</label>
+                <div class="ms-list">
+                    {% for f in lista_fases %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="fase" value="{{ f }}" {% if f in selected_fases %}checked{% endif %}>
+                        <span>{{ f }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-apply">Filtrar Resultados</button>
+            <a href="{% url 'abl_estoque' dash.id %}" class="btn-sidebar-outline">Limpar Tudo</a>
+        </form>
+    </div>
+
+    <!-- Main -->
+    <div class="main-area">
+        <div class="view-tabs">
+            <a href="{% url 'dashboard_logistico' dash.id %}" class="view-tab">Mapa & KPIs</a>
+            <a href="{% url 'abl_estoque' dash.id %}" class="view-tab active">ABL & Estoque</a>
+            <a href="{% url 'precos' dash.id %}" class="view-tab">Preços</a>
+            <a href="{% url 'distancias' dash.id %}" class="view-tab">Distâncias</a>
+            <a href="{% url 'share_logistico' dash.id %}" class="view-tab">Market Share</a>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+            <div class="kpi-card gold">
+                <span class="kpi-label">ABL Total</span>
+                <span class="kpi-value">{{ kpis.total_abl|default:0|floatformat:"0"|intcomma }} m²</span>
+                <div class="kpi-sub">{{ kpis.num_empreendimentos }} empreendimento{{ kpis.num_empreendimentos|pluralize }}</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Módulos Totais</span>
+                <span class="kpi-value">{{ kpis.total_modulos|default:"0" }}</span>
+                <div class="kpi-sub">{{ kpis.modulos_ocupados|default:"0" }} ocupados · {{ kpis.modulos_disponiveis|default:"0" }} vagos</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Taxa de Ocupação</span>
+                <span class="kpi-value">{{ kpis.pct_vacancia|default:"0" }}% vago</span>
+                <div class="kpi-sub">{% widthratio kpis.modulos_ocupados kpis.total_modulos 100 %}% ocupado</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Estoque Disponível</span>
+                <span class="kpi-value">{{ kpis.modulos_disponiveis|default:"0" }} mód.</span>
+                <div class="kpi-sub">Módulos vagos para locação</div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">ABL por Empreendimento (m²)</div>
+                <div class="chart-wrap tall"><canvas id="chartABL"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Módulos: Ocupados vs Disponíveis</div>
+                <div class="chart-wrap tall"><canvas id="chartModulos"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">ABL por Cidade (m²)</div>
+                <div class="chart-wrap"><canvas id="chartCidade"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Vacância por Empreendimento (%)</div>
+                <div class="chart-wrap"><canvas id="chartVacancia"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <div class="chart-card">
+            <div class="chart-title">Detalhamento por Empreendimento</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Empreendimento</th>
+                            <th>Cidade</th>
+                            <th>Construtora</th>
+                            <th class="text-right">ABL (m²)</th>
+                            <th class="text-center">Módulos</th>
+                            <th class="text-center">Ocupados</th>
+                            <th class="text-center">Vagos</th>
+                            <th class="text-center">Ocupação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in empreendimentos %}
+                        <tr>
+                            <td style="color:var(--text-muted); font-size:0.7rem;">{{ forloop.counter }}</td>
+                            <td class="fw-bold">{{ emp.nome }}</td>
+                            <td>{{ emp.cidade|default:"—" }}</td>
+                            <td>{{ emp.construtora|default:"—" }}</td>
+                            <td class="text-right fw-bold">{{ emp.abl_m2|floatformat:"0" }}</td>
+                            <td class="text-center">{{ emp.num_modulos|default:"—" }}</td>
+                            <td class="text-center">{{ emp.modulos_ocupados|default:"—" }}</td>
+                            <td class="text-center">{{ emp.modulos_disponiveis|default:"—" }}</td>
+                            <td class="text-center" style="min-width:90px;">
+                                {% if emp.num_modulos %}
+                                <span style="font-size:0.72rem; font-weight:700;">{% widthratio emp.modulos_ocupados emp.num_modulos 100 %}%</span>
+                                <div class="occ-bar">
+                                    <div class="occ-bar-fill {% if emp.pct_vacancia > 30 %}red{% endif %}" style="width:{% widthratio emp.modulos_ocupados emp.num_modulos 100 %}%"></div>
+                                </div>
+                                {% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum empreendimento encontrado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /main-area -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const DADOS_ABL    = {{ dados_abl_json|safe }};
+    const DADOS_CIDADE = {{ por_cidade_json|safe }};
+
+    const AZUL   = '#1a237e';
+    const OURO   = '#fbbf24';
+    const VERDE  = '#22c55e';
+    const CINZA  = '#94a3b8';
+    const VERMELHO = '#ef4444';
+
+    // Trunca labels longas
+    const trunc = (s, n=22) => s.length > n ? s.slice(0, n) + '…' : s;
+    const fmtBR = (v) => new Intl.NumberFormat('pt-BR').format(Math.round(v));
+
+    const commonBar = {
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+            y: { grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 } } }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 1. ABL por Empreendimento (barras verticais)
+        new Chart(document.getElementById('chartABL'), {
+            type: 'bar',
+            data: {
+                labels: DADOS_ABL.map(d => trunc(d.nome)),
+                datasets: [{
+                    label: 'ABL (m²)',
+                    data: DADOS_ABL.map(d => d.abl),
+                    backgroundColor: AZUL,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + fmtBR(ctx.raw) + ' m²'
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 }, autoSkip: false, maxRotation: 45, minRotation: 10 } },
+                    y: { grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 }, callback: v => fmtBR(v) } }
+                }
+            }
+        });
+
+        // 2. Módulos: Ocupados vs Disponíveis (stacked)
+        new Chart(document.getElementById('chartModulos'), {
+            type: 'bar',
+            data: {
+                labels: DADOS_ABL.map(d => trunc(d.nome)),
+                datasets: [
+                    {
+                        label: 'Ocupados',
+                        data: DADOS_ABL.map(d => d.ocupados),
+                        backgroundColor: AZUL,
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Disponíveis',
+                        data: DADOS_ABL.map(d => d.disponiveis),
+                        backgroundColor: OURO,
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                },
+                scales: {
+                    x: { stacked: true, grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 }, autoSkip: false, maxRotation: 45, minRotation: 10 } },
+                    y: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+
+        // 3. ABL por Cidade
+        const cidadesLabels = DADOS_CIDADE.map(d => d.cidade || 'Não informado');
+        const cidadesABL    = DADOS_CIDADE.map(d => d.total_abl || 0);
+        const cores = cidadesLabels.map((_, i) => `hsl(${(i * 137 + 220) % 360}, 60%, 45%)`);
+
+        new Chart(document.getElementById('chartCidade'), {
+            type: 'bar',
+            data: {
+                labels: cidadesLabels,
+                datasets: [{
+                    label: 'ABL (m²)',
+                    data: cidadesABL,
+                    backgroundColor: cores,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                ...commonBar,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ' ' + fmtBR(ctx.raw) + ' m²' } }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                    y: { grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 }, callback: v => fmtBR(v) } }
+                }
+            }
+        });
+
+        // 4. Vacância por Empreendimento
+        const vacLabels = DADOS_ABL.map(d => trunc(d.nome));
+        const vacData   = DADOS_ABL.map(d => d.pct_vacancia);
+        const vacCores  = vacData.map(v => v > 30 ? VERMELHO : v > 10 ? OURO : VERDE);
+
+        new Chart(document.getElementById('chartVacancia'), {
+            type: 'bar',
+            data: {
+                labels: vacLabels,
+                datasets: [{
+                    label: 'Vacância (%)',
+                    data: vacData,
+                    backgroundColor: vacCores,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                ...commonBar,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ' ' + ctx.raw + '%' } }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 35 } },
+                    y: {
+                        grid: { color: '#f0f4fb' },
+                        ticks: { font: { size: 10 }, callback: v => v + '%' },
+                        max: 100
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

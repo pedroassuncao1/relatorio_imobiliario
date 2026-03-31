@@ -1,0 +1,648 @@
+{% load static humanize %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE — Logístico: {{ dash.nome }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #0a0e27; --navy-mid: #0f1535; --blue-deep: #1a237e;
+            --blue-mid: #1565c0; --gold: #fbbf24; --border: #e2e8f4;
+            --text-primary: #0f1535; --text-secondary: #64748b; --text-muted: #94a3b8;
+            --sidebar-w: 265px;
+        }
+        html, body { height: 100vh; width: 100vw; font-family: 'Inter', sans-serif; background: #eef2f9; overflow: hidden; }
+
+        /* Navbar */
+        .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1000; }
+        .navbar-brand img { height: 32px; width: auto; }
+        .navbar-badge { font-size: 0.65rem; background: rgba(251,191,36,0.15); color: var(--gold); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 800; text-transform: uppercase; margin-left: 15px; }
+        .navbar-right { display: flex; align-items: center; gap: 12px; }
+        .navbar-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+        .btn-nav-outline { font-size: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 6px; transition: 0.2s; }
+        .btn-nav-outline:hover { color: white; border-color: rgba(255,255,255,0.5); }
+
+        /* Layout */
+        .body-wrap { display: flex; height: calc(100vh - 56px); width: 100%; }
+
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-w); background: #0f1535; padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.05); }
+        .filter-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); font-weight: 700; }
+        .filter-label { font-size: 0.75rem; font-weight: 600; color: #fff; margin-bottom: 6px; display: block; }
+        .ms-list { background: #161c3d; border-radius: 10px; margin-top: 5px; max-height: 180px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .ms-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .ms-option:hover { background: rgba(255,255,255,0.05); }
+        .ms-option span { font-size: 0.8rem; color: rgba(255,255,255,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-apply { background: var(--gold); color: #0a0e27; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 4px; }
+        .btn-apply:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-clear { display: block; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-decoration: none; margin-top: 6px; }
+        .btn-clear:hover { color: rgba(255,255,255,0.7); }
+
+        /* Main */
+        .main-area { flex: 1; padding: 15px; overflow: hidden; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+        /* Tabs */
+        .view-tabs { display: flex; gap: 8px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+        .view-tabs::-webkit-scrollbar { display: none; }
+        .view-tab { padding: 8px 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-decoration: none; background: white; color: var(--text-secondary); border: 1px solid var(--border); transition: 0.2s; white-space: nowrap; }
+        .view-tab.active { background: var(--blue-deep); color: white; border-color: var(--blue-deep); box-shadow: 0 4px 10px rgba(26,35,126,0.2); }
+
+        /* Banner de seleção */
+        #selected-banner { display: none; background: var(--navy-mid); color: white; padding: 10px 15px; border-radius: 10px; border-left: 5px solid var(--gold); align-items: center; justify-content: space-between; flex-shrink: 0; }
+        #selected-banner.active { display: flex; }
+        #selected-construtora { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 3px; display: block; }
+        .share-badge { background: var(--gold); color: #0a0e27; font-weight: 800; font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; margin-left: 8px; }
+        .btn-reset { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 0.7rem; font-family: 'Inter', sans-serif; }
+        .btn-edit-loc { background: rgba(251,191,36,0.15); border: 1px solid var(--gold); color: var(--gold); border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 0.7rem; font-family: 'Inter', sans-serif; font-weight: 700; display: none; }
+        .btn-edit-loc:hover { background: rgba(251,191,36,0.25); }
+
+        /* Modal de alterar localização */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: white; border-radius: 16px; padding: 28px; width: 460px; max-width: 94vw; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal-title { font-size: 1rem; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+        .modal-sub { font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 20px; }
+        .modal-emp-name { color: var(--blue-deep); font-weight: 700; }
+        .modal-label { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+        .modal-input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-family: 'Inter', sans-serif; color: var(--text-primary); outline: none; transition: border-color 0.2s; }
+        .modal-input:focus { border-color: var(--blue-mid); }
+        .modal-hint { font-size: 0.68rem; color: var(--text-muted); margin-top: 5px; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+        .btn-modal-save { flex: 1; padding: 11px; background: linear-gradient(135deg, var(--blue-deep), var(--blue-mid)); color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 0.82rem; font-family: 'Inter', sans-serif; cursor: pointer; transition: opacity 0.2s; }
+        .btn-modal-save:hover { opacity: 0.9; }
+        .btn-modal-save:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-modal-cancel { padding: 11px 20px; background: #f1f5f9; color: var(--text-secondary); border: none; border-radius: 8px; font-weight: 700; font-size: 0.82rem; font-family: 'Inter', sans-serif; cursor: pointer; }
+        .btn-modal-cancel:hover { background: #e2e8f4; }
+        .modal-status { margin-top: 12px; font-size: 0.78rem; border-radius: 8px; padding: 8px 12px; display: none; }
+        .modal-status.loading { display: block; background: #eff6ff; color: var(--blue-mid); }
+        .modal-status.success { display: block; background: #f0fdf4; color: #16a34a; }
+        .modal-status.error   { display: block; background: #fef2f2; color: #dc2626; }
+
+        /* KPIs */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex-shrink: 0; }
+        .kpi-card { background: white; border-radius: 12px; padding: 14px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); position: relative; overflow: hidden; }
+        .kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: var(--blue-mid); border-radius: 0 0 12px 12px; }
+        .kpi-label { font-size: 0.62rem; text-transform: uppercase; font-weight: 800; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.35rem; font-weight: 900; color: var(--navy); display: block; margin-top: 5px; line-height: 1.1; }
+        .kpi-sub { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* Mapa + gráficos */
+        .charts-row { display: grid; grid-template-columns: 1fr 300px; gap: 10px; flex: 1; min-height: 0; }
+        .chart-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+        .chart-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+        #map { flex: 1; border-radius: 8px; border: 1px solid #eee; min-height: 200px; }
+        .side-charts { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+        .side-charts .chart-card { flex: 1; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div style="display:flex; align-items:center;">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="{% static 'img/logo.png' %}" alt="CORE">
+        </a>
+        <span class="navbar-badge">Módulo Logístico</span>
+    </div>
+    <div class="navbar-right">
+        <span class="navbar-user">Usuário: <strong>{{ usuario.username }}</strong></span>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline">← Voltar</a>
+    </div>
+</nav>
+
+<div class="body-wrap">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <form method="GET" action="{% url 'dashboard_logistico' dash.id %}">
+            <div class="filter-section-title">Filtros</div>
+
+            <div>
+                <label class="filter-label">Cidade</label>
+                <div class="ms-list">
+                    {% for c in lista_cidades %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="cidade" value="{{ c }}">
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="filter-label">Construtora</label>
+                <div class="ms-list">
+                    {% for c in lista_construtoras %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="construtora" value="{{ c }}">
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="filter-label">Fase</label>
+                <div class="ms-list">
+                    {% for f in lista_fases %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="fase" value="{{ f }}">
+                        <span>{{ f }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-apply">Filtrar Resultados</button>
+            <a href="{% url 'dashboard_logistico' dash.id %}" class="btn-clear">Limpar Tudo</a>
+        </form>
+    </div>
+
+    <!-- Main -->
+    <div class="main-area">
+        <!-- Tabs -->
+        <div class="view-tabs">
+            <a href="{% url 'dashboard_logistico' dash.id %}" class="view-tab active">Mapa & KPIs</a>
+            <a href="{% url 'abl_estoque' dash.id %}" class="view-tab">ABL & Estoque</a>
+            <a href="{% url 'precos' dash.id %}" class="view-tab">Preços</a>
+            <a href="{% url 'distancias' dash.id %}" class="view-tab">Distâncias</a>
+            <a href="{% url 'share_logistico' dash.id %}" class="view-tab">Market Share</a>
+        </div>
+
+        <!-- Banner de seleção (aparece ao clicar no mapa) -->
+        <div id="selected-banner">
+            <div>
+                <span>📍 Selecionado: <strong id="selected-name" style="color:var(--gold);">—</strong></span>
+                <span id="selected-construtora"></span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                {% if usuario.role == 'admin' %}
+                <button class="btn-edit-loc" id="btn-edit-loc" onclick="abrirModalLocalizacao()">
+                    📌 Alterar localização
+                </button>
+                {% endif %}
+                <button class="btn-reset" onclick="resetSelection()">✕ Ver todos</button>
+            </div>
+        </div>
+
+        <!-- Modal: Alterar Localização (somente admin) -->
+        {% if usuario.role == 'admin' %}
+        <div class="modal-overlay" id="modalLocalizacao">
+            <div class="modal-box">
+                <div class="modal-title">📌 Alterar Localização</div>
+                <div class="modal-sub">Empreendimento: <span class="modal-emp-name" id="modal-emp-nome">—</span></div>
+
+                <label class="modal-label">Endereço ou Coordenadas</label>
+                <input type="text" class="modal-input" id="modal-endereco"
+                    placeholder="Ex: Armazenna 1, Jaboatão dos Guararapes, PE"
+                    autocomplete="off">
+                <p class="modal-hint">
+                    💡 Digite o endereço <strong>ou</strong> cole as coordenadas diretamente do Google Maps.<br>
+                    Ex de coordenadas: <code style="background:#f1f5f9;padding:1px 4px;border-radius:3px;">-8.168764, -34.940679</code>
+                </p>
+
+                <div class="modal-status" id="modal-status"></div>
+
+                <div class="modal-actions">
+                    <button class="btn-modal-save" id="btn-modal-save" onclick="salvarLocalizacao()">
+                        🔍 Buscar e Salvar
+                    </button>
+                    <button class="btn-modal-cancel" onclick="fecharModalLocalizacao()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- KPIs — usando kpis.campo (dict passado pela view) -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <span class="kpi-label">ABL Total</span>
+                <span class="kpi-value" id="val-abl">{{ kpis.total_abl|default:0|floatformat:"0"|intcomma }} m²</span>
+                <div class="kpi-sub">{{ kpis.num_empreendimentos }} empreendimento{{ kpis.num_empreendimentos|pluralize }}</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Vacância Física</span>
+                <span class="kpi-value" id="val-vac">{{ kpis.pct_vacancia|default:"0" }}%</span>
+                <div class="kpi-sub">{{ kpis.modulos_disponiveis }} módulos vagos</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Módulos</span>
+                <span class="kpi-value" id="val-mod">{{ kpis.total_modulos|default:"0" }}</span>
+                <div class="kpi-sub">{{ kpis.modulos_ocupados }} ocupados</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Média Locação/m²</span>
+                <span class="kpi-value" id="val-preco">R$ {{ kpis.avg_m2_locacao|floatformat:2 }}</span>
+                <div class="kpi-sub">preço médio do mercado</div>
+            </div>
+        </div>
+
+        <!-- Mapa + Gráficos laterais -->
+        <div class="charts-row">
+            <div class="chart-card">
+                <div class="chart-title">Geolocalização dos Galpões</div>
+                <div id="map"></div>
+            </div>
+            <div class="side-charts">
+                <div class="chart-card">
+                    <div class="chart-title">Ocupação vs Vacância</div>
+                    <div style="flex:1; position:relative; min-height:0;">
+                        <canvas id="chartOcupacao"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Market Share (ABL)</div>
+                    <div style="flex:1; position:relative; min-height:0;">
+                        <canvas id="chartShare"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ── Dados do servidor ────────────────────────────────────────────────────────
+const DADOS_MAPA         = {{ dados_mapa_json|safe }};
+const CONSTRUTORAS_LIST  = {{ lista_construtoras_json|safe|default:"[]" }};
+
+// ── KPIs globais (para resetSelection) ──────────────────────────────────────
+const KPI_GLOBAL = {
+    abl:  '{{ kpis.total_abl|default:0|floatformat:"0" }} m²',
+    vac:  '{{ kpis.pct_vacancia|default:"0" }}%',
+    mod:  '{{ kpis.total_modulos|default:"0" }}',
+    preco: 'R$ {{ kpis.avg_m2_locacao|floatformat:2 }}',
+    ocupados:   {{ kpis.modulos_ocupados|default:0 }},
+    disponiveis: {{ kpis.modulos_disponiveis|default:0 }},
+};
+
+const totalABL_global = DADOS_MAPA.reduce((s, d) => s + (d.abl || 0), 0);
+
+const fmtBR   = v => new Intl.NumberFormat('pt-BR').format(Math.round(v));
+const fmtMoeda = v => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(v);
+
+// ── Estado ───────────────────────────────────────────────────────────────────
+let chartOcupacao, chartShare;
+let construtoras = [], cores = {}, allMarkers = [];
+let empIdSelecionado = null;  // id do empreendimento atualmente selecionado
+
+// ── Reset seleção ────────────────────────────────────────────────────────────
+function resetSelection() {
+    empIdSelecionado = null;
+    document.getElementById('selected-banner').classList.remove('active');
+    const btnEdit = document.getElementById('btn-edit-loc');
+    if (btnEdit) btnEdit.style.display = 'none';
+
+    document.getElementById('val-abl').textContent   = KPI_GLOBAL.abl;
+    document.getElementById('val-vac').textContent   = KPI_GLOBAL.vac;
+    document.getElementById('val-mod').textContent   = KPI_GLOBAL.mod;
+    document.getElementById('val-preco').textContent = KPI_GLOBAL.preco;
+
+    chartOcupacao.data.datasets[0].data = [KPI_GLOBAL.ocupados, KPI_GLOBAL.disponiveis];
+    chartOcupacao.update();
+    chartShare.data.datasets[0].backgroundColor = construtoras.map(c => cores[c] || '#aaa');
+    chartShare.update();
+    allMarkers.forEach(({ marker, originalStyle }) => marker.setStyle(originalStyle));
+}
+
+// ── Modal: Alterar Localização ───────────────────────────────────────────────
+function abrirModalLocalizacao() {
+    if (!empIdSelecionado) return;
+    const item = DADOS_MAPA.find(d => d.id === empIdSelecionado);
+    if (!item) return;
+
+    document.getElementById('modal-emp-nome').textContent = item.nome;
+    document.getElementById('modal-endereco').value = '';
+    // Sugestão de endereço no placeholder
+    document.getElementById('modal-endereco').placeholder =
+        `Ex: ${item.nome}, ${item.cidade}, PE`;
+
+    setModalStatus('', '');
+    document.getElementById('modalLocalizacao').classList.add('active');
+    setTimeout(() => document.getElementById('modal-endereco').focus(), 100);
+}
+
+function fecharModalLocalizacao() {
+    document.getElementById('modalLocalizacao').classList.remove('active');
+}
+
+function setModalStatus(tipo, msg) {
+    const el = document.getElementById('modal-status');
+    el.className = 'modal-status' + (tipo ? ' ' + tipo : '');
+    el.textContent = msg;
+}
+
+async function salvarLocalizacao() {
+    const input = document.getElementById('modal-endereco').value.trim();
+    if (!input) {
+        setModalStatus('error', '⚠️ Digite o endereço ou as coordenadas antes de salvar.');
+        return;
+    }
+    if (!empIdSelecionado) return;
+
+    const btn = document.getElementById('btn-modal-save');
+    btn.disabled = true;
+
+    // ── Detecta se o input são coordenadas (lat, lng) ────────────────────────
+    // Aceita formatos: "-8.168764, -34.940679" ou "-8.168764 -34.940679"
+    const coordRegex = /^\s*(-?\d+\.?\d*)\s*[,\s]\s*(-?\d+\.?\d*)\s*$/;
+    const match = input.match(coordRegex);
+
+    if (match) {
+        // São coordenadas — usa direto, sem chamar geocoding
+        const lat = parseFloat(match[1]);
+        const lng = parseFloat(match[2]);
+
+        // Valida range básico
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+            setModalStatus('error', '❌ Coordenadas fora do intervalo válido. Lat: -90 a 90, Lng: -180 a 180.');
+            btn.disabled = false;
+            return;
+        }
+
+        setModalStatus('loading', `📍 Usando coordenadas: ${lat.toFixed(6)}, ${lng.toFixed(6)}...`);
+
+        try {
+            const resp = await fetch(`/dashboard/{{ dash.id }}/logistico/atualizar-localizacao/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ emp_id: empIdSelecionado, lat_direta: lat, lng_direta: lng }),
+            });
+            const data = await resp.json();
+            if (data.ok) {
+                setModalStatus('success', `✅ Localização atualizada! Lat: ${data.lat.toFixed(6)}, Lng: ${data.lng.toFixed(6)}`);
+                _atualizarMarcador(data.lat, data.lng);
+                setTimeout(() => fecharModalLocalizacao(), 1800);
+            } else {
+                setModalStatus('error', '❌ ' + (data.erro || 'Erro ao salvar.'));
+            }
+        } catch (e) {
+            setModalStatus('error', '❌ Erro de conexão. Tente novamente.');
+        } finally {
+            btn.disabled = false;
+        }
+        return;
+    }
+
+    // ── É um endereço — chama geocoding ──────────────────────────────────────
+    setModalStatus('loading', '🔍 Buscando coordenadas...');
+
+    try {
+        const resp = await fetch(`/dashboard/{{ dash.id }}/logistico/atualizar-localizacao/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ emp_id: empIdSelecionado, endereco: input }),
+        });
+        const data = await resp.json();
+        if (data.ok) {
+            setModalStatus('success', `✅ Localização atualizada! Lat: ${data.lat.toFixed(6)}, Lng: ${data.lng.toFixed(6)}`);
+            _atualizarMarcador(data.lat, data.lng);
+            setTimeout(() => fecharModalLocalizacao(), 1800);
+        } else {
+            setModalStatus('error', '❌ ' + (data.erro || 'Endereço não encontrado. Tente ser mais específico.'));
+        }
+    } catch (e) {
+        setModalStatus('error', '❌ Erro de conexão. Tente novamente.');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+// Atualiza o marcador no mapa e o array DADOS_MAPA
+function _atualizarMarcador(lat, lng) {
+    const idx = DADOS_MAPA.findIndex(d => d.id === empIdSelecionado);
+    if (idx !== -1) { DADOS_MAPA[idx].lat = lat; DADOS_MAPA[idx].lng = lng; }
+    const markerObj = allMarkers.find(m => m.id === empIdSelecionado);
+    if (markerObj) markerObj.marker.setLatLng([lat, lng]);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(c => {
+            c = c.trim();
+            if (c.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(c.slice(name.length + 1));
+            }
+        });
+    }
+    return cookieValue;
+}
+
+// Fecha modal ao clicar fora
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('modalLocalizacao');
+    if (overlay) {
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) fecharModalLocalizacao();
+        });
+    }
+    // Enter no input dispara salvar
+    const input = document.getElementById('modal-endereco');
+    if (input) {
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') salvarLocalizacao();
+        });
+    }
+});
+
+// ── Aplicar seleção ao clicar no marcador ────────────────────────────────────
+function applySelection(item) {
+    empIdSelecionado = item.id;  // guarda o id para o modal
+    const cnome = (item.construtora || 'Outros').trim();
+
+    // ABL e share da construtora
+    const ablConst = DADOS_MAPA
+        .filter(d => (d.construtora || 'Outros').trim() === cnome)
+        .reduce((s, d) => s + (d.abl || 0), 0);
+    const share = totalABL_global > 0 ? (ablConst / totalABL_global * 100).toFixed(1) : 0;
+
+    // Banner
+    document.getElementById('selected-banner').classList.add('active');
+    document.getElementById('selected-name').textContent = item.nome;
+    document.getElementById('selected-construtora').innerHTML =
+        'Construtora: <strong style="color:#fff;">' + cnome + '</strong>' +
+        ' <span class="share-badge">' + share + '% do ABL</span>';
+
+    // Mostra botão alterar localização (só existe no DOM se for admin)
+    const btnEdit = document.getElementById('btn-edit-loc');
+    if (btnEdit) btnEdit.style.display = 'inline-block';
+
+    // KPIs do empreendimento clicado
+    document.getElementById('val-abl').textContent   = fmtBR(item.abl) + ' m²';
+    document.getElementById('val-vac').textContent   = item.pct_vacancia + '%';
+    document.getElementById('val-mod').textContent   = item.num_modulos;
+    document.getElementById('val-preco').textContent = item.preco_m2_locacao > 0
+        ? 'R$ ' + fmtMoeda(item.preco_m2_locacao) : 'NI';
+
+    // Donut: ocupação do empreendimento
+    chartOcupacao.data.datasets[0].data = [item.modulos_ocupados, item.modulos_disponiveis];
+    chartOcupacao.update();
+
+    // Pie: destaca a construtora
+    const selIdx = construtoras.indexOf(cnome);
+    chartShare.data.datasets[0].backgroundColor = construtoras.map((c, i) =>
+        i === selIdx ? (cores[c] || '#aaa') : 'rgba(180,180,180,0.2)'
+    );
+    chartShare.update();
+
+    // Marcadores: destaca construtora
+    allMarkers.forEach(({ marker, construtora: mc, originalStyle }) => {
+        if (mc === cnome) {
+            marker.setStyle({ ...originalStyle, fillOpacity: 0.95, weight: 3 });
+        } else {
+            marker.setStyle({ ...originalStyle, fillOpacity: 0.15, weight: 1 });
+        }
+    });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Cores por construtora
+    construtoras = CONSTRUTORAS_LIST;
+    cores = {};
+    construtoras.forEach((c, i) => {
+        cores[c] = `hsl(${(i * 137) % 360}, 65%, 48%)`;
+    });
+
+    // ── Mapa ─────────────────────────────────────────────────────────────────
+    const map = L.map('map').setView([-8.2, -34.98], 10);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // Agrupa marcadores na mesma coordenada para distribuir em volta
+    const locGroups = {};
+    DADOS_MAPA.forEach(item => {
+        if (!item.lat || !item.lng) return;
+        const k = `${item.lat}_${item.lng}`;
+        locGroups[k] = locGroups[k] || [];
+        locGroups[k].push(item);
+    });
+
+    const locIdx = {};
+    const featureGroup = L.featureGroup();
+
+    DADOS_MAPA.forEach(item => {
+        if (!item.lat || !item.lng) return;
+
+        const k = `${item.lat}_${item.lng}`;
+        const grupo = locGroups[k];
+        const idx   = locIdx[k] || 0;
+        locIdx[k]   = idx + 1;
+
+        let lat = item.lat, lng = item.lng;
+        if (grupo.length > 1) {
+            const angle  = (idx / grupo.length) * Math.PI * 2;
+            const offset = 0.0009;
+            lat = lat + Math.sin(angle) * offset;
+            lng = lng + Math.cos(angle) * offset;
+        }
+
+        const cnome  = (item.construtora || 'Outros').trim();
+        const radius = Math.min(8 + item.pct_vacancia * 0.18, 26);
+        const style  = {
+            radius,
+            fillColor:   cores[cnome] || '#888',
+            color:       '#fff',
+            weight:      2,
+            fillOpacity: 0.88,
+        };
+
+        const marker = L.circleMarker([lat, lng], style);
+        marker.bindPopup(
+            `<b>${item.nome}</b><br>` +
+            `${item.construtora || '—'}<br>` +
+            `ABL: <b>${fmtBR(item.abl)} m²</b><br>` +
+            `Módulos: ${item.num_modulos} | Vacância: ${item.pct_vacancia}%`
+        );
+        marker.on('click', () => applySelection(item));
+
+        allMarkers.push({ id: item.id, marker, construtora: cnome, originalStyle: { ...style } });
+        featureGroup.addLayer(marker);
+    });
+
+    featureGroup.addTo(map);
+    if (featureGroup.getLayers().length > 0) {
+        map.fitBounds(featureGroup.getBounds().pad(0.12));
+    }
+    setTimeout(() => map.invalidateSize(), 250);
+
+    // ── Donut: Ocupação vs Vacância (global inicial) ─────────────────────────
+    chartOcupacao = new Chart(document.getElementById('chartOcupacao'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Ocupados', 'Vagos'],
+            datasets: [{
+                data: [KPI_GLOBAL.ocupados, KPI_GLOBAL.disponiveis],
+                backgroundColor: ['#1a237e', '#fbbf24'],
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+            }
+        }
+    });
+
+    // ── Pie: Market Share por construtora ────────────────────────────────────
+    const ablPorConst = construtoras.map(c =>
+        DADOS_MAPA.filter(d => (d.construtora || 'Outros').trim() === c)
+                  .reduce((s, d) => s + (d.abl || 0), 0)
+    );
+
+    chartShare = new Chart(document.getElementById('chartShare'), {
+        type: 'pie',
+        data: {
+            labels: construtoras,
+            datasets: [{
+                data: ablPorConst,
+                backgroundColor: construtoras.map(c => cores[c] || '#aaa'),
+                borderWidth: 1,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const pct = totalABL_global > 0
+                                ? (ctx.parsed / totalABL_global * 100).toFixed(1) : 0;
+                            return ` ${ctx.label}: ${fmtBR(ctx.parsed)} m² (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Restaura checkboxes marcados com base nos parâmetros da URL
+    const params = new URLSearchParams(window.location.search);
+    document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        if (params.getAll(cb.name).includes(cb.value)) cb.checked = true;
+    });
+
+}); // fim DOMContentLoaded
+</script>
+</body>
+</html>

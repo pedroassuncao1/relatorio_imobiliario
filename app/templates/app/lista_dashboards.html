@@ -375,12 +375,21 @@
                     {% endif %}
 
                     <div class="dash-card-actions">
-                        <a href="{% url 'dashboard' dash.id %}" class="btn-open">
-                            Abrir Dashboard
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path d="M5 12h14M12 5l7 7-7 7"/>
-                            </svg>
-                        </a>
+                        {% if dash.tipo == 'logistico' %}
+                            <a href="{% url 'dashboard_logistico' dash.id %}" class="btn-open">
+                                Abrir Dashboard Logístico
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'dashboard' dash.id %}" class="btn-open">
+                                Abrir Dashboard
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        {% endif %}
 
                         {% if usuario.is_admin %}
                             {# Deletar #}

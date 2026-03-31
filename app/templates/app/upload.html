@@ -80,6 +80,8 @@
 
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--blue-deep); }
+        .form-help { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+        .form-error { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 12px 14px; border-radius: 10px; font-size: 0.84rem; margin-bottom: 10px; }
 
         .form-input, .form-select {
             padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px;
@@ -175,6 +177,10 @@
         <form method="post" enctype="multipart/form-data" class="upload-form">
             {% csrf_token %}
 
+            {% if erro %}
+            <div class="form-error">{{ erro }}</div>
+            {% endif %}
+
             <div class="form-group">
                 <label class="form-label">Nome do Dashboard</label>
                 <input type="text" name="nome_dashboard" class="form-input" required
@@ -197,14 +203,30 @@
                 <label>Tipo de Dashboard</label>
                 <div class="tipo-radio-group">
                     <label class="tipo-option">
-                        <input type="radio" name="tipo" value="residencial" checked>
+                        <input type="radio" name="tipo_dashboard" value="residencial" checked onchange="updateTipoDashboard()">
                         <span>🏠 Residencial</span>
                     </label>
                     <label class="tipo-option">
-                        <input type="radio" name="tipo" value="logistico">
+                        <input type="radio" name="tipo_dashboard" value="logistico" onchange="updateTipoDashboard()">
                         <span>🏭 Logístico</span>
                     </label>
                 </div>
+            </div>
+
+            <div class="form-group coords-section" id="coords-section" style="display:none;">
+                <label class="form-label">Área de Estudo</label>
+                <input type="text" id="ref_nome" name="ref_nome" class="form-input" placeholder="Área de Estudo" value="Área de Estudo">
+                <div class="city-row" style="margin-top: 8px;">
+                    <div class="form-group">
+                        <label class="form-label">Latitude</label>
+                        <input type="text" id="ref_latitude" name="ref_latitude" class="form-input" placeholder="Ex: -8.0552">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Longitude</label>
+                        <input type="text" id="ref_longitude" name="ref_longitude" class="form-input" placeholder="Ex: -34.9041">
+                    </div>
+                </div>
+                <p class="form-help">Essas coordenadas são usadas como ponto de referência no mapa de distâncias.</p>
             </div>
 
             <div class="form-group">
@@ -244,6 +266,24 @@ function updateFilename(input) {
         display.style.display = 'none';
     }
 }
+
+function updateTipoDashboard() {
+    const tipo = document.querySelector('input[name="tipo_dashboard"]:checked').value;
+    const coords = document.getElementById('coords-section');
+    const lat = document.getElementById('ref_latitude');
+    const lon = document.getElementById('ref_longitude');
+    if (tipo === 'logistico') {
+        coords.style.display = 'block';
+        lat.required = true;
+        lon.required = true;
+    } else {
+        coords.style.display = 'none';
+        lat.required = false;
+        lon.required = false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', updateTipoDashboard);
 
 const dropzone = document.getElementById('dropzone');
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });

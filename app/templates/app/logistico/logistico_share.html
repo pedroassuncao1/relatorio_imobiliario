@@ -1,0 +1,507 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE — Market Share: {{ dash.nome }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #0a0e27; --navy-mid: #0f1535; --blue-deep: #1a237e;
+            --blue-mid: #1565c0; --gold: #fbbf24; --border: #e2e8f4;
+            --text-primary: #0f1535; --text-secondary: #64748b; --text-muted: #94a3b8;
+            --sidebar-w: 265px;
+        }
+        html, body { height: 100vh; width: 100vw; font-family: 'Inter', sans-serif; background: #eef2f9; overflow: hidden; }
+
+        /* Navbar */
+        .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1000; }
+        .navbar-brand img { height: 32px; }
+        .navbar-badge { font-size: 0.65rem; background: rgba(251,191,36,0.15); color: var(--gold); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 800; text-transform: uppercase; margin-left: 15px; }
+        .navbar-right { display: flex; align-items: center; }
+        .navbar-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+        .btn-nav-outline { font-size: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 6px; }
+        .btn-nav-outline:hover { color: white; border-color: rgba(255,255,255,0.5); }
+
+        .body-wrap { display: flex; height: calc(100vh - 56px); width: 100%; }
+
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-w); background: #0f1535; padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.05); }
+        .filter-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); font-weight: 700; margin-bottom: 5px; }
+        .filter-label { font-size: 0.75rem; font-weight: 600; color: #fff; margin-bottom: 8px; display: block; }
+        .ms-list { background: #161c3d; border-radius: 10px; margin-top: 5px; max-height: 170px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .ms-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .ms-option:hover { background: rgba(255,255,255,0.05); }
+        .ms-option span { font-size: 0.8rem; color: rgba(255,255,255,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-apply { background: var(--gold); color: #0a0e27; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 10px; }
+        .btn-apply:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-sidebar-outline { display: block; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-decoration: none; margin-top: 6px; }
+
+        /* Main */
+        .main-area { flex: 1; padding: 15px; overflow: hidden; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+        .view-tabs { display: flex; gap: 8px; flex-shrink: 0; }
+        .view-tab { padding: 8px 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-decoration: none; background: white; color: var(--text-secondary); border: 1px solid var(--border); transition: 0.2s; }
+        .view-tab.active { background: var(--blue-deep); color: white; border-color: var(--blue-deep); box-shadow: 0 4px 10px rgba(26,35,126,0.2); }
+
+        /* Layout share: lista | painel */
+        .share-layout { display: grid; grid-template-columns: 260px 1fr; gap: 12px; flex: 1; min-height: 0; }
+
+        /* Lista de empresas */
+        .empresa-list { background: white; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        .empresa-list-header { padding: 11px 14px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); border-bottom: 1px solid #f0f0f0; letter-spacing: 0.5px; background: #f8faff; flex-shrink: 0; }
+        .empresa-list-body { overflow-y: auto; flex: 1; }
+        .empresa-card { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f6fb; transition: background 0.15s; border-left: 3px solid transparent; }
+        .empresa-card:hover { background: #f5f8ff; }
+        .empresa-card.active { background: #eef2fe; border-left-color: var(--blue-deep); }
+        .empresa-dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+        .empresa-info { flex: 1; min-width: 0; }
+        .empresa-nome { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .empresa-sub { font-size: 0.66rem; color: var(--text-muted); margin-top: 1px; }
+        .empresa-pct { font-size: 0.95rem; font-weight: 900; flex-shrink: 0; }
+
+        /* Painel detalhe */
+        .detalhe-panel { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: hidden; }
+
+        /* Estado vazio */
+        .empty-state { background: white; border-radius: 12px; border: 1px solid var(--border); flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); gap: 10px; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* KPIs */
+        .detalhe-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex-shrink: 0; }
+        .dk-card { background: white; border-radius: 10px; padding: 11px 13px; border: 1px solid var(--border); position: relative; overflow: hidden; }
+        .dk-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; border-radius: 0 0 10px 10px; background: var(--blue-mid); }
+        .dk-card.gold::after { background: var(--gold); }
+        .dk-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 800; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .dk-value { font-size: 1.2rem; font-weight: 900; color: var(--navy); display: block; margin-top: 3px; }
+        .dk-sub { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Linha do meio: mapa + donut */
+        .detalhe-mid { display: grid; grid-template-columns: 1fr 200px; gap: 10px; flex: 1; min-height: 0; }
+
+        .chart-card { background: white; border-radius: 12px; padding: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+        .chart-title { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); margin-bottom: 10px; padding-bottom: 7px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+
+        /* Mapa */
+        #map { flex: 1; border-radius: 8px; border: 1px solid #eee; min-height: 160px; z-index: 1; }
+
+        /* Donut */
+        .donut-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+        .donut-canvas-wrap { position: relative; width: 160px; height: 160px; }
+        .donut-label-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+        .donut-pct { font-size: 1.4rem; font-weight: 900; color: var(--navy); line-height: 1; }
+        .donut-pct-sub { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-top: 2px; }
+        .donut-caption { font-size: 0.65rem; color: var(--text-muted); text-align: center; padding: 0 4px; }
+
+        /* Tabela */
+        .detalhe-table-wrap { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; flex-shrink: 0; }
+        .detalhe-table-header { padding: 9px 14px; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); border-bottom: 1px solid #f0f0f0; background: #f8faff; }
+        .table-scroll { max-height: 180px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+        thead th { background: var(--navy-mid); color: rgba(255,255,255,0.9); font-weight: 700; padding: 8px 11px; text-align: left; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 2; }
+        tbody tr { border-bottom: 1px solid #f3f6fb; }
+        tbody tr:hover { background: #f8faff; }
+        tbody td { padding: 7px 11px; color: var(--text-primary); }
+        .text-right { text-align: right; }
+        .share-bar { background: #e8f0fe; border-radius: 3px; height: 5px; margin-top: 3px; }
+        .share-bar-fill { height: 100%; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div style="display:flex; align-items:center;">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="{% static 'img/logo.png' %}" alt="CORE">
+        </a>
+        <span class="navbar-badge">Módulo Logístico</span>
+    </div>
+    <div class="navbar-right">
+        <span class="navbar-user">Usuário: <strong>{{ usuario.username }}</strong></span>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline" style="margin-left:15px;">← Voltar</a>
+    </div>
+</nav>
+
+<div class="body-wrap">
+    <div class="sidebar">
+        <form method="GET" action="{% url 'share_logistico' dash.id %}">
+            <div class="filter-section-title">Filtros Ativos</div>
+            <div class="filter-group">
+                <label class="filter-label">Cidade</label>
+                <div class="ms-list">
+                    {% for c in lista_cidades %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="cidade" value="{{ c }}" {% if c in selected_cidades %}checked{% endif %}>
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Construtora</label>
+                <div class="ms-list">
+                    {% for c in lista_construtoras %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="construtora" value="{{ c }}" {% if c in selected_construtoras %}checked{% endif %}>
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Fase de Obra</label>
+                <div class="ms-list">
+                    {% for f in lista_fases %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="fase" value="{{ f }}" {% if f in selected_fases %}checked{% endif %}>
+                        <span>{{ f }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <button type="submit" class="btn-apply">Filtrar Resultados</button>
+            <a href="{% url 'share_logistico' dash.id %}" class="btn-sidebar-outline">Limpar Tudo</a>
+        </form>
+    </div>
+
+    <div class="main-area">
+        <div class="view-tabs">
+            <a href="{% url 'dashboard_logistico' dash.id %}" class="view-tab">Mapa & KPIs</a>
+            <a href="{% url 'abl_estoque' dash.id %}" class="view-tab">ABL & Estoque</a>
+            <a href="{% url 'precos' dash.id %}" class="view-tab">Preços</a>
+            <a href="{% url 'distancias' dash.id %}" class="view-tab">Distâncias</a>
+            <a href="{% url 'share_logistico' dash.id %}" class="view-tab active">Market Share</a>
+        </div>
+
+        <div class="share-layout">
+            <!-- Lista empresas -->
+            <div class="empresa-list">
+                <div class="empresa-list-header">Construtoras / Proprietários</div>
+                <div class="empresa-list-body" id="empresa-list-body"></div>
+            </div>
+
+            <!-- Painel detalhe -->
+            <div class="detalhe-panel" id="detalhe-panel">
+
+                <div class="empty-state" id="empty-state">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+                    </svg>
+                    <p>Selecione uma construtora para ver o market share</p>
+                </div>
+
+                <!-- KPIs -->
+                <div class="detalhe-kpis" id="detalhe-kpis" style="display:none;">
+                    <div class="dk-card gold">
+                        <div class="dk-label">Share ABL</div>
+                        <span class="dk-value" id="dk-val-pct">—</span>
+                        <div class="dk-sub" id="dk-val-pct-mod">—</div>
+                    </div>
+                    <div class="dk-card">
+                        <div class="dk-label">ABL Total</div>
+                        <span class="dk-value" id="dk-val-abl">—</span>
+                        <div class="dk-sub">área bruta locável</div>
+                    </div>
+                    <div class="dk-card">
+                        <div class="dk-label">Módulos</div>
+                        <span class="dk-value" id="dk-val-mod">—</span>
+                        <div class="dk-sub" id="dk-val-mod-sub">—</div>
+                    </div>
+                    <div class="dk-card">
+                        <div class="dk-label">Vacância</div>
+                        <span class="dk-value" id="dk-val-vac">—</span>
+                        <div class="dk-sub" id="dk-val-emp">—</div>
+                    </div>
+                </div>
+
+                <!-- Mapa + Donut -->
+                <div class="detalhe-mid" id="detalhe-mid" style="display:none;">
+                    <div class="chart-card">
+                        <div class="chart-title" id="map-title">Localização dos Empreendimentos</div>
+                        <div id="map"></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Share de ABL no Mercado</div>
+                        <div class="donut-wrap">
+                            <div class="donut-canvas-wrap">
+                                <canvas id="chartShareABL"></canvas>
+                                <div class="donut-label-center">
+                                    <span class="donut-pct" id="donut-pct-val">—</span>
+                                    <span class="donut-pct-sub">do ABL</span>
+                                </div>
+                            </div>
+                            <div class="donut-caption" id="donut-caption"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela -->
+                <div class="detalhe-table-wrap" id="detalhe-table" style="display:none;">
+                    <div class="detalhe-table-header" id="detalhe-table-title">Empreendimentos</div>
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Empreendimento</th>
+                                    <th>Cidade</th>
+                                    <th class="text-right">ABL (m²)</th>
+                                    <th class="text-right">% do mercado</th>
+                                    <th class="text-right">Módulos</th>
+                                    <th class="text-right">Ocupados</th>
+                                    <th class="text-right">Vacância</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detalhe-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const EMPRESAS = {{ share_empresas_json|safe }};
+    const EMPS     = {{ share_emps_json|safe }};
+
+    const fmtN   = v => new Intl.NumberFormat('pt-BR').format(Math.round(v));
+    const fmtPct = v => (v || 0).toFixed(1) + '%';
+    const trunc  = (s, n) => s && s.length > n ? s.slice(0, n) + '…' : (s || '—');
+
+    const CORES       = EMPRESAS.map((_, i) => `hsl(${(i * 137 + 200) % 360}, 60%, 42%)`);
+    const CORES_LIGHT = EMPRESAS.map((_, i) => `hsl(${(i * 137 + 200) % 360}, 40%, 82%)`);
+
+    let chartShareABL = null;
+    let leafletMap    = null;   // inicializado lazy
+    let allMarkers    = [];
+
+    // ── Inicializa mapa LAZY (só após container estar visível) ──
+    // ── Inicializa mapa LAZY ──
+    function initMapLazy() {
+        if (leafletMap) return;
+
+        leafletMap = L.map('map', { zoomControl: true }).setView([-8.1, -34.9], 9);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 18,
+        }).addTo(leafletMap);
+
+        EMPS.forEach((e, idx) => {
+            if (!e.lat || !e.lng) return;
+            const empresaIndex = EMPRESAS.findIndex(c => (c.construtora || '').trim() === (e.construtora || '').trim());
+            const baseColor = CORES[empresaIndex >= 0 ? empresaIndex : idx] || '#cbd5e1';
+            
+            // Aumentamos a base do raio: de 8-20 para 12-28
+            const radius = Math.max(12, Math.min(28, (e.pct_abl || 0) * 0.6 + 10));
+            
+            const marker = L.circleMarker([e.lat, e.lng], {
+                radius: radius,
+                fillColor: baseColor,
+                color: '#fff',
+                weight: 2,
+                fillOpacity: 0.8,
+            });
+
+            marker.bindPopup(`<b>${e.nome}</b><br>${e.construtora || ''}<br>ABL: ${fmtN(e.abl)} m²`);
+            
+            marker.on('click', function() {
+                const empresaIndex = EMPRESAS.findIndex(c => 
+                    (c.construtora || '').trim() === (e.construtora || '').trim()
+                );
+                if (empresaIndex >= 0) {
+                    selecionarEmpresa(empresaIndex);
+                    marker.openPopup();
+                }
+            });
+
+            marker.addTo(leafletMap);
+            // Guardamos a cor original no objeto para restaurar ou referenciar
+            allMarkers.push({ marker, construtora: (e.construtora || '').trim(), data: e, color: baseColor });
+        });
+    }
+
+    // ── Atualiza estilos: Destaca a selecionada e deixa as outras cinzas ──
+    function atualizarMapa(idx) {
+        const empSelecionada = EMPRESAS[idx];
+        // Normalizamos o nome da construtora selecionada para comparar
+        const nomeSelecionado = (empSelecionada.construtora || '').trim().toLowerCase();
+        
+        const corAtiva = CORES[idx];
+        const grupo = L.featureGroup();
+
+        allMarkers.forEach(m => {
+            // Normalizamos o nome da construtora do marcador
+            const nomeMarcador = (m.construtora || '').trim().toLowerCase();
+            const isPertenceAEmpresa = nomeMarcador === nomeSelecionado;
+            
+            if (isPertenceAEmpresa) {
+                // Bolinha Selecionada: Cor vibrante e maior
+                const sizeAtivo = Math.max(18, Math.min(35, (m.data.pct_abl || 0) * 0.8 + 15));
+                m.marker.setStyle({
+                    fillColor: corAtiva,
+                    fillOpacity: 1,
+                    radius: sizeAtivo,
+                    color: '#fff',
+                    weight: 3,
+                });
+                // Traz para a frente de todas as outras
+                if (m.marker.setZIndexOffset) m.marker.setZIndexOffset(1000);
+                grupo.addLayer(m.marker);
+            } else {
+                // Outras Empresas: Forçar Cinza e Transparência
+                m.marker.setStyle({
+                    fillColor: '#94a3b8', 
+                    fillOpacity: 0.80,    
+                    radius: 9,           
+                    color: '#cbd5e1',
+                    weight: 1,
+                });
+                if (m.marker.setZIndexOffset) m.marker.setZIndexOffset(0);
+            }
+        });
+
+        // Zoom automático apenas nos ativos da empresa selecionada
+        if (grupo.getLayers().length > 0) {
+            leafletMap.fitBounds(grupo.getBounds().pad(0.4));
+        }
+        
+        // Força o Leaflet a redesenhar as camadas
+        setTimeout(() => leafletMap.invalidateSize(), 100);
+    }
+
+    // ── Renderiza lista lateral ──
+    function renderLista() {
+        const body = document.getElementById('empresa-list-body');
+        body.innerHTML = '';
+        EMPRESAS.forEach((emp, i) => {
+            const card = document.createElement('div');
+            card.className = 'empresa-card';
+            card.innerHTML = `
+                <div class="empresa-dot" style="background:${CORES[i]};"></div>
+                <div class="empresa-info">
+                    <div class="empresa-nome">${trunc(emp.construtora, 22)}</div>
+                    <div class="empresa-sub">${emp.num_emp} emp. · ${fmtN(emp.abl)} m²</div>
+                </div>
+                <div class="empresa-pct" style="color:${CORES[i]};">${fmtPct(emp.pct_abl)}</div>
+            `;
+            card.addEventListener('click', () => selecionarEmpresa(i));
+            body.appendChild(card);
+        });
+    }
+
+    // ── Seleciona empresa ──
+    function selecionarEmpresa(idx) {
+        document.querySelectorAll('.empresa-card').forEach((c, i) => c.classList.toggle('active', i === idx));
+
+        const emp    = EMPRESAS[idx];
+        const cor    = CORES[idx];
+        const maxPct = EMPRESAS[0].pct_abl || 1;
+
+        // 1. Mostra painéis ANTES de renderizar mapa/gráfico
+        document.getElementById('empty-state').style.display  = 'none';
+        document.getElementById('detalhe-kpis').style.display = 'grid';
+        document.getElementById('detalhe-mid').style.display  = 'grid';
+        document.getElementById('detalhe-table').style.display = 'block';
+
+        // 2. KPIs (sem dependência de layout)
+        const vacCor = emp.pct_vacancia > 30 ? '#ef4444' : emp.pct_vacancia > 10 ? '#f59e0b' : '#22c55e';
+        document.getElementById('dk-val-pct').textContent     = fmtPct(emp.pct_abl);
+        document.getElementById('dk-val-pct').style.color     = cor;
+        document.getElementById('dk-val-pct-mod').textContent = fmtPct(emp.pct_modulos) + ' share módulos';
+        document.getElementById('dk-val-abl').textContent     = fmtN(emp.abl) + ' m²';
+        document.getElementById('dk-val-mod').textContent     = fmtN(emp.modulos);
+        document.getElementById('dk-val-mod-sub').textContent = fmtN(emp.ocupados) + ' ocupados';
+        document.getElementById('dk-val-vac').textContent     = fmtPct(emp.pct_vacancia);
+        document.getElementById('dk-val-vac').style.color     = vacCor;
+        document.getElementById('dk-val-emp').textContent     = emp.num_emp + ' empreendimento' + (emp.num_emp !== 1 ? 's' : '');
+        document.getElementById('map-title').textContent      = 'Empreendimentos — ' + emp.construtora;
+
+        // 3. Tabela (sem dependência de layout)
+        document.getElementById('detalhe-table-title').textContent = 'Empreendimentos — ' + emp.construtora;
+        const empsEmpresa = EMPS
+            .filter(e => (e.construtora || '').trim() === (emp.construtora || '').trim())
+            .sort((a, b) => b.abl - a.abl);
+        const tbody = document.getElementById('detalhe-tbody');
+        tbody.innerHTML = '';
+        empsEmpresa.forEach(e => {
+            const barW    = Math.min(e.pct_abl / maxPct * 100, 100);
+            const eVacCor = e.pct_vacancia > 30 ? '#ef4444' : e.pct_vacancia > 10 ? '#f59e0b' : '#22c55e';
+            tbody.innerHTML += `
+                <tr>
+                    <td style="font-weight:600;">${e.nome}</td>
+                    <td style="color:var(--text-secondary); font-size:0.73rem;">${e.cidade || '—'}</td>
+                    <td class="text-right" style="font-weight:700;">${fmtN(e.abl)}</td>
+                    <td class="text-right" style="min-width:90px;">
+                        <span style="font-size:0.7rem; font-weight:700; color:${cor};">${fmtPct(e.pct_abl)}</span>
+                        <div class="share-bar"><div class="share-bar-fill" style="width:${barW}%; background:${cor};"></div></div>
+                    </td>
+                    <td class="text-right">${e.modulos || '—'}</td>
+                    <td class="text-right">${e.ocupados || '—'}</td>
+                    <td class="text-right" style="font-weight:700; color:${eVacCor};">${fmtPct(e.pct_vacancia)}</td>
+                </tr>
+            `;
+        });
+
+        // 4. Labels do donut imediatamente (sem depender do chart)
+        document.getElementById('donut-pct-val').textContent = fmtPct(emp.pct_abl);
+        document.getElementById('donut-pct-val').style.color  = cor;
+        document.getElementById('donut-caption').textContent  = emp.construtora + ' detém ' + fmtPct(emp.pct_abl) + ' do ABL total';
+
+        // 5. Mapa e chart DEPOIS de um tick de layout — container já está visível
+        requestAnimationFrame(() => {
+            // Mapa lazy
+            initMapLazy();
+            atualizarMapa(idx);
+
+            // Donut
+            const outrasEmpresas = EMPRESAS.filter((_, i) => i !== idx);
+            const labelsDonut = [emp.construtora, ...outrasEmpresas.map(e => trunc(e.construtora, 18))];
+            const dataDonut   = [emp.pct_abl,     ...outrasEmpresas.map(e => e.pct_abl)];
+            const coresDonut  = [cor, ...outrasEmpresas.map(e => {
+                const ri = EMPRESAS.findIndex(x => x.construtora === e.construtora);
+                return CORES_LIGHT[ri] || '#e2e8f4';
+            })];
+
+            if (chartShareABL) { chartShareABL.destroy(); chartShareABL = null; }
+            chartShareABL = new Chart(document.getElementById('chartShareABL'), {
+                type: 'doughnut',
+                data: {
+                    labels: labelsDonut,
+                    datasets: [{ data: dataDonut, backgroundColor: coresDonut, borderWidth: 2, borderColor: '#fff', hoverOffset: 5 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + fmtPct(ctx.raw) } }
+                    },
+                    animation: { duration: 400 }
+                }
+            });
+        });
+
+        const listaLateral = document.getElementById('empresa-list-body');
+        const cardSelecionado = listaLateral.children[idx];
+        
+        if (cardSelecionado) {
+            cardSelecionado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', function () {
+        renderLista();
+        if (EMPRESAS.length > 0) selecionarEmpresa(0);
+    });
+</script>
+</body>
+</html>

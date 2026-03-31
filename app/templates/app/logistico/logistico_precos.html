@@ -1,0 +1,379 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE — Preços: {{ dash.nome }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #0a0e27; --navy-mid: #0f1535; --blue-deep: #1a237e;
+            --blue-mid: #1565c0; --blue-bright: #1976d2; --blue-light: #42a5f5;
+            --gold: #fbbf24; --border: #e2e8f4; --text-primary: #0f1535;
+            --text-secondary: #64748b; --text-muted: #94a3b8;
+            --sidebar-w: 265px;
+        }
+        html, body { height: 100vh; width: 100vw; font-family: 'Inter', sans-serif; background: #eef2f9; overflow: hidden; }
+
+        .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1000; }
+        .navbar-brand img { height: 32px; width: auto; }
+        .navbar-badge { font-size: 0.65rem; background: rgba(251,191,36,0.15); color: var(--gold); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 800; text-transform: uppercase; margin-left: 15px; }
+        .navbar-right { display: flex; align-items: center; }
+        .navbar-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+        .btn-nav-outline { font-size: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 6px; transition: 0.2s; }
+        .btn-nav-outline:hover { color: white; border-color: rgba(255,255,255,0.5); }
+
+        .body-wrap { display: flex; height: calc(100vh - 56px); width: 100%; }
+
+        .sidebar { width: var(--sidebar-w); background: #0f1535; padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.05); }
+        .filter-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); font-weight: 700; margin-bottom: 5px; }
+        .filter-label { font-size: 0.75rem; font-weight: 600; color: #fff; margin-bottom: 8px; display: block; }
+        .ms-list { background: #161c3d; border-radius: 10px; margin-top: 5px; max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .ms-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .ms-option:hover { background: rgba(255,255,255,0.05); }
+        .ms-option span { font-size: 0.8rem; color: rgba(255,255,255,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-apply { background: var(--gold); color: #0a0e27; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(251,191,36,0.2); margin-top: 10px; width: 100%; }
+        .btn-apply:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-sidebar-outline { display: block; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-decoration: none; margin-top: 6px; }
+        .btn-sidebar-outline:hover { color: rgba(255,255,255,0.7); }
+
+        .main-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* KPI Cards */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .kpi-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); position: relative; }
+        .kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: var(--blue-mid); border-radius: 0 0 12px 12px; }
+        .kpi-card.gold::after { background: var(--gold); }
+        .kpi-label { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.4rem; font-weight: 900; color: var(--navy); display: block; margin-top: 5px; }
+        .kpi-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* Tabs */
+        .view-tabs { display: flex; gap: 8px; margin-bottom: 5px; }
+        .view-tab { padding: 8px 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-decoration: none; background: white; color: var(--text-secondary); border: 1px solid var(--border); transition: 0.2s; }
+        .view-tab.active { background: var(--blue-deep); color: white; border-color: var(--blue-deep); box-shadow: 0 4px 10px rgba(26,35,126,0.2); }
+
+        /* Charts */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .chart-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; }
+        .chart-card.full { grid-column: 1 / -1; }
+        .chart-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+        .chart-wrap { position: relative; height: 300px; }
+
+        /* Tabela hierárquica */
+        .table-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+        thead th { background: var(--navy-mid); color: rgba(255,255,255,0.9); font-weight: 700; padding: 10px 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 2; }
+        tbody tr.row-emp { border-bottom: 1px solid #e2e8f4; background: #f8faff; }
+        tbody tr.row-emp td { padding: 10px 12px; font-weight: 700; color: var(--blue-deep); }
+        tbody tr.row-tip { border-bottom: 1px solid #f3f6fb; }
+        tbody tr.row-tip td { padding: 7px 12px; color: var(--text-primary); background: white; }
+        tbody tr.row-tip:hover td { background: #f5f8ff; }
+        td.indent { padding-left: 28px !important; color: var(--text-secondary) !important; font-size: 0.75rem; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .chip { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; }
+        .chip-area { background: #e8f4fd; color: var(--blue-mid); }
+        .price-col { font-variant-numeric: tabular-nums; }
+
+        /* Legenda */
+        .legend-bar { display: flex; gap: 16px; margin-bottom: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: var(--text-secondary); }
+        .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div style="display:flex; align-items:center;">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="{% static 'img/logo.png' %}" alt="CORE">
+        </a>
+        <span class="navbar-badge">Módulo Logístico</span>
+    </div>
+    <div class="navbar-right">
+        <span class="navbar-user">Usuário: <strong>{{ usuario.username }}</strong></span>
+        <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline" style="margin-left:15px;">← Voltar</a>
+    </div>
+</nav>
+
+<div class="body-wrap">
+    <div class="sidebar">
+        <form method="GET" action="{% url 'precos' dash.id %}">
+            <div class="filter-section-title">Filtros Ativos</div>
+
+            <div class="filter-group">
+                <label class="filter-label">Cidade</label>
+                <div class="ms-list">
+                    {% for c in lista_cidades %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="cidade" value="{{ c }}" {% if c in selected_cidades %}checked{% endif %}>
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Construtora</label>
+                <div class="ms-list">
+                    {% for c in lista_construtoras %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="construtora" value="{{ c }}" {% if c in selected_construtoras %}checked{% endif %}>
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Fase de Obra</label>
+                <div class="ms-list">
+                    {% for f in lista_fases %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="fase" value="{{ f }}" {% if f in selected_fases %}checked{% endif %}>
+                        <span>{{ f }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-apply">Filtrar Resultados</button>
+            <a href="{% url 'precos' dash.id %}" class="btn-sidebar-outline">Limpar Tudo</a>
+        </form>
+    </div>
+
+    <div class="main-area">
+        <div class="view-tabs">
+            <a href="{% url 'dashboard_logistico' dash.id %}" class="view-tab">Mapa & KPIs</a>
+            <a href="{% url 'abl_estoque' dash.id %}" class="view-tab">ABL & Estoque</a>
+            <a href="{% url 'precos' dash.id %}" class="view-tab active">Preços</a>
+            <a href="{% url 'distancias' dash.id %}" class="view-tab">Distâncias</a>
+            <a href="{% url 'share_logistico' dash.id %}" class="view-tab">Market Share</a>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+            <div class="kpi-card gold">
+                <span class="kpi-label">Média Locação/m²</span>
+                <span class="kpi-value">R$ {{ kpis.avg_m2_locacao|floatformat:2 }}</span>
+                <div class="kpi-sub">Preço médio de locação</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Média Condomínio/m²</span>
+                <span class="kpi-value">R$ {{ kpis.avg_m2_condominio|floatformat:2 }}</span>
+                <div class="kpi-sub">Condomínio médio</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Custo Total Médio/m²</span>
+                <span class="kpi-value" id="val-total">—</span>
+                <div class="kpi-sub">Locação + Cond. + IPTU</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Empreendimentos</span>
+                <span class="kpi-value">{{ kpis.num_empreendimentos }}</span>
+                <div class="kpi-sub">com dados de preço</div>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-title">Preço de Locação por Empreendimento (R$/m²)</div>
+                <div class="chart-wrap"><canvas id="chartLocacao"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Composição do Custo Total por Empreendimento (R$/m²)</div>
+                <div class="legend-bar">
+                    <div class="legend-item"><div class="legend-dot" style="background:#1a237e;"></div> Locação</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24;"></div> Condomínio</div>
+                    <div class="legend-item"><div class="legend-dot" style="background:#94a3b8;"></div> IPTU</div>
+                </div>
+                <div class="chart-wrap"><canvas id="chartComposicao"></canvas></div>
+            </div>
+        </div>
+
+        <!-- Tabela hierárquica Empreendimento → Tipologias -->
+        <div class="chart-card">
+            <div class="chart-title">Preços por Empreendimento e Tipologia</div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:35%">Empreendimento / Tipologia</th>
+                            <th>Cidade</th>
+                            <th class="text-right">Área (m²)</th>
+                            <th class="text-right">Locação/m²</th>
+                            <th class="text-right">Cond./m²</th>
+                            <th class="text-right">IPTU/m²</th>
+                            <th class="text-right">Total/m²</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in tabela %}
+                        <tr class="row-emp">
+                            <td>{{ item.emp.nome }}</td>
+                            <td>{{ item.emp.cidade|default:"—" }}</td>
+                            <td class="text-right">{{ item.emp.area_modulo_m2|floatformat:"0"|default:"—" }}</td>
+                            <td class="text-right price-col">
+                                {% if item.emp.preco_m2_locacao %}R$ {{ item.emp.preco_m2_locacao|floatformat:2 }}{% else %}—{% endif %}
+                            </td>
+                            <td class="text-right price-col">
+                                {% if item.emp.preco_m2_condominio %}R$ {{ item.emp.preco_m2_condominio|floatformat:2 }}{% else %}—{% endif %}
+                            </td>
+                            <td class="text-right price-col">
+                                {% if item.emp.preco_m2_iptu %}R$ {{ item.emp.preco_m2_iptu|floatformat:2 }}{% else %}—{% endif %}
+                            </td>
+                            <td class="text-right price-col" style="color:var(--blue-deep); font-weight:800;">
+                                {% if item.emp.preco_m2_locacao %}
+                                    R$ {% with loc=item.emp.preco_m2_locacao|default:0 cnd=item.emp.preco_m2_condominio|default:0 ipt=item.emp.preco_m2_iptu|default:0 %}
+                                        {{ loc|add:cnd|add:ipt|floatformat:2 }}
+                                    {% endwith %}
+                                {% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% for tip in item.tipologias %}
+                        <tr class="row-tip">
+                            <td class="indent">
+                                └ <span class="chip chip-area">{{ tip.area_modulo_m2|floatformat:"0" }} m²</span>
+                                &nbsp;{{ tip.num_modulos|default:"" }}{% if tip.num_modulos %} módulo{{ tip.num_modulos|pluralize }}{% endif %}
+                            </td>
+                            <td style="color:var(--text-muted); font-size:0.72rem;">tipologia</td>
+                            <td class="text-right" style="font-size:0.75rem;">{{ tip.area_modulo_m2|floatformat:"0" }}</td>
+                            <td class="text-right price-col" style="font-size:0.75rem;">
+                                {% if tip.preco_m2_locacao %}R$ {{ tip.preco_m2_locacao|floatformat:2 }}{% else %}—{% endif %}
+                            </td>
+                            <td class="text-right price-col" style="font-size:0.75rem;">
+                                {% if tip.preco_m2_condominio %}R$ {{ tip.preco_m2_condominio|floatformat:2 }}{% else %}—{% endif %}
+                            </td>
+                            <td class="text-right price-col" style="font-size:0.75rem;">
+                                {% if tip.preco_m2_iptu %}R$ {{ tip.preco_m2_iptu|floatformat:2 }}{% else %}—{% endif %}
+                            </td>
+                            <td class="text-right price-col" style="font-size:0.75rem; color:var(--blue-mid); font-weight:600;">
+                                {% if tip.preco_m2_locacao %}
+                                    R$ {{ tip.preco_m2_locacao|add:tip.preco_m2_condominio|add:tip.preco_m2_iptu|floatformat:2 }}
+                                {% else %}—{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% empty %}
+                        <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">Nenhum dado de preço encontrado.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const DADOS = {{ dados_precos_json|safe }};
+
+    const trunc = (s, n=20) => s.length > n ? s.slice(0, n) + '…' : s;
+    const fmtR  = (v) => 'R$ ' + new Intl.NumberFormat('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}).format(v);
+
+    // KPI Custo Total Médio
+    if (DADOS.length > 0) {
+        const avgTotal = DADOS.reduce((s, d) => s + d.pm2_total, 0) / DADOS.length;
+        document.getElementById('val-total').textContent = fmtR(avgTotal);
+    } else {
+        document.getElementById('val-total').textContent = '—';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const labels = DADOS.map(d => trunc(d.nome));
+
+        // 1. Locação por empreendimento (horizontal, gradiente por valor)
+        const maxLoc = Math.max(...DADOS.map(d => d.pm2_locacao), 1);
+        const coresLoc = DADOS.map(d => {
+            const pct = d.pm2_locacao / maxLoc;
+            const r = Math.round(26 + pct * 0);
+            const g = Math.round(35 + pct * 30);
+            const b = Math.round(126 + pct * 100);
+            return `rgba(${r}, ${g}, ${b}, ${0.5 + pct * 0.5})`;
+        });
+
+        new Chart(document.getElementById('chartLocacao'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Locação (R$/m²)',
+                    data: DADOS.map(d => d.pm2_locacao),
+                    backgroundColor: '#1a237e',
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ' ' + fmtR(ctx.raw) } }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#f0f4fb' },
+                        ticks: { font: { size: 10 }, callback: v => 'R$ ' + v }
+                    },
+                    y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+
+        // 2. Composição do custo (stacked horizontal)
+        new Chart(document.getElementById('chartComposicao'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Locação',
+                        data: DADOS.map(d => d.pm2_locacao),
+                        backgroundColor: '#1a237e',
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Condomínio',
+                        data: DADOS.map(d => d.pm2_condominio),
+                        backgroundColor: '#fbbf24',
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'IPTU',
+                        data: DADOS.map(d => d.pm2_iptu),
+                        backgroundColor: '#94a3b8',
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + ctx.dataset.label + ': ' + fmtR(ctx.raw)
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { color: '#f0f4fb' },
+                        ticks: { font: { size: 10 }, callback: v => 'R$ ' + v }
+                    },
+                    y: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
