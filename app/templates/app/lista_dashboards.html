@@ -361,8 +361,8 @@
                         <div class="dash-card-desc">{{ dash.descricao }}</div>
                     {% endif %}
 
-                    {# ── Pílulas mostrando abas ativas/inativas ── #}
-                    {% if usuario.is_admin %}
+                    {# ── Pílulas mostrando abas ativas/inativas (só residencial) ── #}
+                    {% if usuario.is_admin and dash.tipo != 'logistico' %}
                     <div class="abas-pills">
                         {% for aba in abas_disponiveis %}
                             {% if aba.slug in dash.get_abas_ativas %}
@@ -403,7 +403,8 @@
                                 </button>
                             </form>
 
-                            {# Editar Abas ── abre modal #}
+                            {# Editar Abas ── abre modal (só residencial) #}
+                            {% if dash.tipo != 'logistico' %}
                             <button
                                 class="btn-editar-abas"
                                 onclick="abrirModal({{ dash.id }}, '{{ dash.nome|escapejs }}', {{ dash.get_abas_ativas|safe }})"
@@ -414,6 +415,7 @@
                                 </svg>
                                 Abas
                             </button>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
