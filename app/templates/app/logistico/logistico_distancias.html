@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CORE — Distâncias: {{ dash.nome }}</title>
+        <link rel="icon" href="{% static 'img/o_core.png' %}" type="image/png">
+<title>CORE — Distâncias: {{ dash.nome }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -87,6 +88,20 @@
 
         /* Ref marker badge in legend */
         .ref-dot { display: inline-block; width: 11px; height: 11px; background: #e53e3e; border: 2px solid white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.35); vertical-align: middle; }
+
+        /* ── Mobile ── */
+        .btn-filter-toggle { display: none; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: white; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; }
+        @media (max-width: 767px) { .btn-filter-toggle { display: flex; } }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1500; }
+        .sidebar-overlay.active { display: block; }
+        @media (max-width: 767px) {
+            html, body { overflow: auto; }
+            .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: min(var(--sidebar-w), 88vw); transform: translateX(-110%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow: 4px 0 24px rgba(0,0,0,0.3); z-index: 1600; }
+            .sidebar.open { transform: translateX(0); }
+            .main-area { overflow-y: auto; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr) !important; }
+            .content-row { grid-template-columns: 1fr !important; }
+        }
     </style>
 </head>
 <body>
@@ -100,14 +115,20 @@
     </div>
     <div class="navbar-right">
         <span class="navbar-user">Usuário: <strong>{{ usuario.username }}</strong></span>
+        <button class="btn-filter-toggle" onclick="toggleSidebar()">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M3 4h18M7 10h10M10 16h4"/></svg>
+            Filtros
+        </button>
         <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline">← Voltar</a>
     </div>
 </nav>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
 <div class="body-wrap">
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
         <form method="GET" action="{% url 'distancias' dash.id %}">
             <div class="filter-section-title">Filtros</div>
 
@@ -375,6 +396,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 }); // fim DOMContentLoaded
+</script>
+<script>
+function toggleSidebar() {
+    const s = document.getElementById('sidebar'), o = document.getElementById('sidebarOverlay');
+    const open = s.classList.contains('open');
+    s.classList.toggle('open', !open); o.classList.toggle('active', !open);
+    document.body.style.overflow = !open ? 'hidden' : '';
+}
 </script>
 </body>
 </html>
