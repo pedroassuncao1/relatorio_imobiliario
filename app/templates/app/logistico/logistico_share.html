@@ -224,7 +224,7 @@
                         <div class="chart-title" id="map-title">Localização dos Empreendimentos</div>
                         <div id="map"></div>
                     </div>
-                    <div class="chart-card">
+                    <div class="chart-card" id="donut-card">
                         <div class="chart-title">Share de ABL no Mercado</div>
                         <div class="donut-wrap">
                             <div class="donut-canvas-wrap">
@@ -376,6 +376,43 @@
         setTimeout(() => leafletMap.invalidateSize(), 100);
     }
 
+    function showMapOnly() {
+        document.getElementById('empty-state').style.display  = 'none';
+        document.getElementById('detalhe-kpis').style.display = 'none';
+        document.getElementById('detalhe-mid').style.display  = 'grid';
+        document.getElementById('detalhe-table').style.display = 'none';
+        const donutCard = document.getElementById('donut-card');
+        if (donutCard) donutCard.style.display = 'none';
+        document.getElementById('map-title').textContent = 'Localização dos Empreendimentos';
+
+        initMapLazy();
+
+        allMarkers.forEach(m => {
+            m.marker.setStyle({
+                fillColor: m.color,
+                fillOpacity: 0.8,
+                radius: Math.max(12, Math.min(28, (m.data.pct_abl || 0) * 0.6 + 10)),
+                color: '#fff',
+                weight: 2,
+            });
+            if (m.marker.setZIndexOffset) m.marker.setZIndexOffset(0);
+        });
+
+        const grupo = L.featureGroup(allMarkers.map(m => m.marker));
+        if (grupo.getLayers().length > 0) {
+            leafletMap.invalidateSize();
+            const bounds = grupo.getBounds();
+            if (bounds && bounds.isValid && bounds.isValid()) {
+                if (bounds.getSouthWest().equals(bounds.getNorthEast())) {
+                    leafletMap.setView(bounds.getCenter(), 12);
+                } else {
+                    leafletMap.fitBounds(bounds.pad(0.18));
+                }
+            }
+        }
+        setTimeout(() => leafletMap.invalidateSize(), 100);
+    }
+
     // ── Renderiza lista lateral ──
     function renderLista() {
         const body = document.getElementById('empresa-list-body');
@@ -409,6 +446,8 @@
         document.getElementById('detalhe-kpis').style.display = 'grid';
         document.getElementById('detalhe-mid').style.display  = 'grid';
         document.getElementById('detalhe-table').style.display = 'block';
+        const donutCard = document.getElementById('donut-card');
+        if (donutCard) donutCard.style.display = 'block';
 
         // 2. KPIs (sem dependência de layout)
         const vacCor = emp.pct_vacancia > 30 ? '#ef4444' : emp.pct_vacancia > 10 ? '#f59e0b' : '#22c55e';
@@ -500,7 +539,9 @@
     // Init
     document.addEventListener('DOMContentLoaded', function () {
         renderLista();
-        if (EMPRESAS.length > 0) selecionarEmpresa(0);
+        if (EMPRESAS.length > 0) {
+            showMapOnly();
+        }
     });
 </script>
 </body>

@@ -1,4 +1,4 @@
-{% load static humanize %}
+{% load static humanize fmt_filters %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -222,7 +222,7 @@
         <div class="kpi-row">
             <div class="kpi-card">
                 <span class="kpi-label">ABL Total</span>
-                <span class="kpi-value" id="val-abl">{{ kpis.total_abl|default:0|floatformat:"0"|intcomma }} m²</span>
+                <span class="kpi-value" id="val-abl">{{ kpis.total_abl|default:0|fmt_m2 }} m²</span>
                 <div class="kpi-sub">{{ kpis.num_empreendimentos }} empreendimento{{ kpis.num_empreendimentos|pluralize }}</div>
             </div>
             <div class="kpi-card">
@@ -275,7 +275,7 @@ const CONSTRUTORAS_LIST  = {{ lista_construtoras_json|safe|default:"[]" }};
 
 // ── KPIs globais (para resetSelection) ──────────────────────────────────────
 const KPI_GLOBAL = {
-    abl:  '{{ kpis.total_abl|default:0|floatformat:"0" }} m²',
+    abl:  '{{ kpis.total_abl|default:0|fmt_m2 }} m²',
     vac:  '{{ kpis.pct_vacancia|default:"0" }}%',
     mod:  '{{ kpis.total_modulos|default:"0" }}',
     preco: 'R$ {{ kpis.avg_m2_locacao|floatformat:2 }}',
@@ -287,6 +287,24 @@ const totalABL_global = DADOS_MAPA.reduce((s, d) => s + (d.abl || 0), 0);
 
 const fmtBR   = v => new Intl.NumberFormat('pt-BR').format(Math.round(v));
 const fmtMoeda = v => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(v);
+
+function wrapTooltipLines(text, maxLength = 28) {
+    const words = text.split(' ');
+    const lines = [];
+    let current = '';
+
+    words.forEach(word => {
+        const next = current ? `${current} ${word}` : word;
+        if (next.length > maxLength) {
+            if (current) lines.push(current);
+            current = word;
+        } else {
+            current = next;
+        }
+    });
+    if (current) lines.push(current);
+    return lines;
+}
 
 // ── Estado ───────────────────────────────────────────────────────────────────
 let chartOcupacao, chartShare;
@@ -597,7 +615,15 @@ document.addEventListener('DOMContentLoaded', function () {
             maintainAspectRatio: false,
             plugins: {
                 legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
-                tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const total = ctx.dataset.data.reduce((sum, value) => sum + value, 0);
+                            const percent = total ? ((ctx.parsed / total) * 100).toFixed(1) : '0.0';
+                            return ` ${ctx.label}: ${ctx.parsed} (${percent}%)`;
+                        }
+                    }
+                }
             }
         }
     });
@@ -628,7 +654,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         label: ctx => {
                             const pct = totalABL_global > 0
                                 ? (ctx.parsed / totalABL_global * 100).toFixed(1) : 0;
-                            return ` ${ctx.label}: ${fmtBR(ctx.parsed)} m² (${pct}%)`;
+                            const lines = wrapTooltipLines(ctx.label, 26);
+                            lines.push(`${fmtBR(ctx.parsed)} m² (${pct}%)`);
+                            return lines;
                         }
                     }
                 }

@@ -286,7 +286,7 @@ def distancias(request, dashboard_id):
 
     # Pegamos apenas quem tem coordenada
     emps_dist = list(qs.filter(latitude__isnull=False, longitude__isnull=False))
-    
+
     if dash.ref_latitude is not None and dash.ref_longitude is not None:
         for emp in emps_dist:
             emp.distancia_ref_km = round(
@@ -303,21 +303,33 @@ def distancias(request, dashboard_id):
         dados_dist.append({
             'nome': emp.nome,
             'cidade': emp.cidade or '',
-            'distancia_km': emp.distancia_ref_km,
+            'construtora': (emp.construtora or 'Não informado').strip(),
+            'distancia_km': float(emp.distancia_ref_km or 0),
             'lat': float(emp.latitude),
             'lng': float(emp.longitude),
+            'abl': round(float(emp.abl_m2 or 0), 0),
+            'fase': emp.fase_obra or '',
+            'preco_m2_locacao': float(emp.preco_m2_locacao or 0),
+            'num_modulos': emp.num_modulos or 0,
+            'modulos_ocupados': emp.modulos_ocupados or 0,
         })
 
     ctx = {
         'dash': dash,
         'usuario': request.user,
+        'lista_cidades': cidades,
+        'lista_construtoras': construtoras,
+        'lista_construtoras_json': json.dumps(list(construtoras)),
+        'lista_fases': fases,
         'kpis': kpis,
         'dados_dist_json': json.dumps(dados_dist),
         'emps_dist': emps_dist,
-        'emps_dist_count': len(emps_dist), # Variável que faltava
+        'emps_dist_count': len(emps_dist),
         'ref_nome': dash.ref_nome or 'Área de Estudo',
         'ref_lat': dash.ref_latitude,
         'ref_lon': dash.ref_longitude,
+        'ref_lat_json': json.dumps(float(dash.ref_latitude) if dash.ref_latitude is not None else None),
+        'ref_lon_json': json.dumps(float(dash.ref_longitude) if dash.ref_longitude is not None else None),
         'aba_atual': 'distancias',
     }
     response = render(request, 'app/logistico/logistico_distancias.html', ctx)

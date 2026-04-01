@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
+from django.core.exceptions import ImproperlyConfigured
 import dj_database_url
 
 load_dotenv()
@@ -89,9 +90,29 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # BANCO DE DADOS
 # ==============================
 DATABASE_URL = os.environ.get('DATABASE_URL')
+SUPABASE_PASSWORD = os.environ.get('SUPABASE_PASSWORD')
+SUPABASE_USER = os.environ.get('SUPABASE_USER', 'postgres.snxlbiidrgiribgmdjiz')
+SUPABASE_HOST = os.environ.get('SUPABASE_HOST', 'aws-1-us-east-2.pooler.supabase.com')
+SUPABASE_DB = os.environ.get('SUPABASE_DB', 'postgres')
+SUPABASE_PORT = os.environ.get('SUPABASE_PORT', '5432')
 
-if DATABASE_URL:
-    # Railway — usa a variável DATABASE_URL
+if SUPABASE_PASSWORD:
+    # Força conexão ao Supabase quando a senha estiver configurada.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': SUPABASE_DB,
+            'USER': SUPABASE_USER,
+            'PASSWORD': SUPABASE_PASSWORD,
+            'HOST': SUPABASE_HOST,
+            'PORT': SUPABASE_PORT,
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
+elif DATABASE_URL:
+    # Railway ou outro serviço compatível com DATABASE_URL
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
@@ -100,20 +121,9 @@ if DATABASE_URL:
         )
     }
 else:
-    # Local — usa as variáveis do .env
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'postgres',
-            'USER': 'postgres.snxlbiidrgiribgmdjiz',
-            'PASSWORD': os.getenv('SUPABASE_PASSWORD'),
-            'HOST': 'aws-1-us-east-2.pooler.supabase.com',
-            'PORT': '5432',
-            'OPTIONS': {
-                'sslmode': 'require',
-            },
-        }
-    }
+    raise ImproperlyConfigured(
+        'Database configuration is missing: set SUPABASE_PASSWORD to connect to Supabase, or DATABASE_URL for another service.'
+    )
 
 # ==============================
 # AUTH

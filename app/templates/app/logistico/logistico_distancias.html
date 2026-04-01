@@ -1,4 +1,4 @@
-{% load static humanize %}
+{% load static humanize fmt_filters %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -8,71 +8,94 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --navy: #0a0e27; --blue-deep: #1a237e; --blue-mid: #1565c0;
-            --gold: #fbbf24; --border: #e2e8f4; --text-primary: #0f1535;
-            --text-secondary: #64748b; --text-muted: #94a3b8; --bg: #eef2f9;
+            --navy: #0a0e27; --navy-mid: #0f1535; --blue-deep: #1a237e;
+            --blue-mid: #1565c0; --gold: #fbbf24; --border: #e2e8f4;
+            --text-primary: #0f1535; --text-secondary: #64748b; --text-muted: #94a3b8;
+            --sidebar-w: 265px;
         }
-        html, body { min-height: 100vh; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); }
-        body { overflow-x: hidden; }
-        .navbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 20px; height: 58px; background: linear-gradient(135deg, var(--navy), var(--blue-deep)); color: white; }
-        .navbar-brand img { height: 32px; }
-        .navbar-badge { font-size: 0.72rem; background: rgba(251,191,36,0.18); color: var(--gold); border: 1px solid rgba(251,191,36,0.3); padding: 4px 10px; border-radius: 999px; font-weight: 700; }
+        html, body { height: 100vh; width: 100vw; font-family: 'Inter', sans-serif; background: #eef2f9; overflow: hidden; }
+
+        /* Navbar */
+        .navbar { background: linear-gradient(135deg, var(--navy) 0%, var(--blue-deep) 100%); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 1000; }
+        .navbar-brand img { height: 32px; width: auto; }
+        .navbar-badge { font-size: 0.65rem; background: rgba(251,191,36,0.15); color: var(--gold); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--gold); font-weight: 800; text-transform: uppercase; margin-left: 15px; }
         .navbar-right { display: flex; align-items: center; gap: 12px; }
-        .navbar-user { font-size: 0.82rem; color: rgba(255,255,255,0.85); }
-        .btn-nav-outline { font-size: 0.78rem; color: rgba(255,255,255,0.88); text-decoration: none; border: 1px solid rgba(255,255,255,0.22); padding: 7px 12px; border-radius: 8px; }
-        .btn-nav-outline:hover { background: rgba(255,255,255,0.08); }
-        .body-wrap { display: flex; flex-direction: column; gap: 12px; padding: 16px; max-width: 1400px; margin: 0 auto; }
-        .view-tabs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-        .view-tab { padding: 9px 16px; border-radius: 10px; background: white; color: var(--text-secondary); text-decoration: none; border: 1px solid var(--border); font-weight: 700; font-size: 0.8rem; }
-        .view-tab.active { background: var(--blue-deep); color: white; border-color: var(--blue-deep); }
-        .page-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 14px; align-items: start; min-height: auto; }
-        .panel { background: white; border-radius: 18px; border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(15,23,42,0.06); overflow: hidden; display: flex; flex-direction: column; }
-        .panel-header { padding: 18px 22px; border-bottom: 1px solid #f2f6fb; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-        .panel-title { font-size: 1rem; font-weight: 800; color: var(--navy); }
-        .panel-subtitle { font-size: 0.83rem; color: var(--text-secondary); }
-        .panel-body { padding: 20px 20px 24px; display: flex; flex-direction: column; gap: 18px; min-height: 0; }
-        .map-card { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-        #map { flex: 1; min-height: 420px; height: 100%; width: 100%; border-radius: 16px; border: 1px solid var(--border); }
-        .stats-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
-        .stat-card { background: #f8fafc; border-radius: 14px; padding: 14px 16px; border: 1px solid #e2e8f0; }
-        .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 6px; }
-        .stat-value { font-size: 1.2rem; font-weight: 800; color: var(--navy); }
-        .list-header { font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; color: var(--navy); }
-        .distance-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; width: 100%; }
-        .distance-table th, .distance-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f2f6fb; }
-        .distance-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-secondary); background: #f8fafc; position: sticky; top: 0; z-index: 1; }
-        .distance-table td { color: var(--text-primary); vertical-align: middle; }
-        .distance-table .text-right { text-align: right; }
-        .badge-point { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; font-size: 0.72rem; background: #eef2ff; color: #1e3a8a; border: 1px solid #c7d2fe; }
-        .badge-ref { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
-        .btn-action { background: #1d4ed8; color: white; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
-        .btn-action:hover { background: #2563eb; }
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.48); z-index: 9999; align-items: center; justify-content: center; padding: 16px; }
-        .modal-overlay.active { display: flex; }
-        .modal-box { width: min(520px, 100%); background: white; border-radius: 20px; padding: 24px; box-shadow: 0 20px 60px rgba(15,23,42,0.18); }
-        .modal-title { font-size: 1rem; font-weight: 800; color: var(--navy); margin-bottom: 6px; }
-        .modal-text { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5; }
-        .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-        .modal-input { width: 100%; padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 0.9rem; color: var(--text-primary); }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
-        .modal-actions .btn-secondary { background: #f3f4f6; color: var(--text-primary); border: none; }
-        .modal-actions .btn-secondary:hover { background: #e5e7eb; }
-        .modal-status { font-size: 0.86rem; color: var(--text-secondary); min-height: 18px; }
-        .marker-swatch { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
-        .alert-panel { padding: 16px; border-radius: 14px; background: #fff7ed; border: 1px solid #ffedd5; color: #9a3412; }
-        .legend { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
-        .legend-item { display: flex; align-items: center; gap: 10px; font-size: 0.78rem; color: var(--text-secondary); }
-        .legend-swatch { width: 12px; height: 12px; border-radius: 999px; display: inline-block; }
-        @media (max-width: 1024px) { .page-grid { grid-template-columns: 1fr; min-height: auto; } }
+        .navbar-user { font-size: 0.8rem; color: rgba(255,255,255,0.7); }
+        .btn-nav-outline { font-size: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; border: 1px solid rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 6px; transition: 0.2s; }
+        .btn-nav-outline:hover { color: white; border-color: rgba(255,255,255,0.5); }
+
+        /* Layout */
+        .body-wrap { display: flex; height: calc(100vh - 56px); width: 100%; }
+
+        /* Sidebar */
+        .sidebar { width: var(--sidebar-w); background: #0f1535; padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.05); }
+        .filter-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); font-weight: 700; }
+        .filter-label { font-size: 0.75rem; font-weight: 600; color: #fff; margin-bottom: 6px; display: block; }
+        .ms-list { background: #161c3d; border-radius: 10px; margin-top: 5px; max-height: 180px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); }
+        .ms-option { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .ms-option:hover { background: rgba(255,255,255,0.05); }
+        .ms-option span { font-size: 0.8rem; color: rgba(255,255,255,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-apply { background: var(--gold); color: #0a0e27; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 4px; }
+        .btn-apply:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn-clear { display: block; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.4); text-decoration: none; margin-top: 6px; }
+        .btn-clear:hover { color: rgba(255,255,255,0.7); }
+
+        /* Main */
+        .main-area { flex: 1; padding: 15px; overflow: hidden; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+        /* Tabs */
+        .view-tabs { display: flex; gap: 8px; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+        .view-tabs::-webkit-scrollbar { display: none; }
+        .view-tab { padding: 8px 16px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; text-decoration: none; background: white; color: var(--text-secondary); border: 1px solid var(--border); transition: 0.2s; white-space: nowrap; }
+        .view-tab.active { background: var(--blue-deep); color: white; border-color: var(--blue-deep); box-shadow: 0 4px 10px rgba(26,35,126,0.2); }
+
+        /* KPIs */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; flex-shrink: 0; }
+        .kpi-card { background: white; border-radius: 12px; padding: 14px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.02); position: relative; overflow: hidden; }
+        .kpi-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: var(--blue-mid); border-radius: 0 0 12px 12px; }
+        .kpi-card.gold::after { background: var(--gold); }
+        .kpi-label { font-size: 0.62rem; text-transform: uppercase; font-weight: 800; color: var(--text-secondary); letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.35rem; font-weight: 900; color: var(--navy); display: block; margin-top: 5px; line-height: 1.1; }
+        .kpi-sub { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* Content row: map + table */
+        .content-row { display: grid; grid-template-columns: 3fr 2fr; grid-template-rows: 1fr; gap: 10px; flex: 1; min-height: 0; }
+        .chart-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0; }
+        .chart-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+        #map { flex: 1; border-radius: 8px; border: 1px solid #eee; min-height: 200px; }
+
+        /* Table */
+        .table-wrap { flex: 1; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+        thead th { background: var(--navy-mid); color: rgba(255,255,255,0.9); font-weight: 700; padding: 10px 12px; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; z-index: 2; }
+        thead th.text-right { text-align: right; }
+        thead th.text-center { text-align: center; }
+        tbody tr { border-bottom: 1px solid #f0f4fb; transition: background 0.15s; cursor: pointer; }
+        tbody tr:hover { background: #f5f8ff; }
+        tbody tr.highlighted { background: #dbeafe; }
+        tbody td { padding: 9px 12px; color: var(--text-primary); }
+        .td-num { color: var(--text-muted); font-size: 0.7rem; font-weight: 700; text-align: center; }
+        .td-dist { font-weight: 700; color: var(--blue-deep); white-space: nowrap; }
+        .td-abl { text-align: right; white-space: nowrap; }
+
+        /* Colored dot for construtora */
+        .dot-color { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; flex-shrink: 0; vertical-align: middle; }
+
+        /* Ref marker badge in legend */
+        .ref-dot { display: inline-block; width: 11px; height: 11px; background: #e53e3e; border: 2px solid white; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.35); vertical-align: middle; }
     </style>
 </head>
 <body>
+
 <nav class="navbar">
-    <div style="display:flex; align-items:center; gap:12px;">
-        <a href="{% url 'lista_dashboards' %}"><img src="{% static 'img/logo.png' %}" alt="CORE"></a>
+    <div style="display:flex; align-items:center;">
+        <a class="navbar-brand" href="{% url 'lista_dashboards' %}">
+            <img src="{% static 'img/logo.png' %}" alt="CORE">
+        </a>
         <span class="navbar-badge">Módulo Logístico</span>
     </div>
     <div class="navbar-right">
@@ -80,261 +103,278 @@
         <a href="{% url 'lista_dashboards' %}" class="btn-nav-outline">← Voltar</a>
     </div>
 </nav>
+
 <div class="body-wrap">
-    <div class="view-tabs">
-        <a href="{% url 'dashboard_logistico' dash.id %}" class="view-tab">Mapa & KPIs</a>
-        <a href="{% url 'abl_estoque' dash.id %}" class="view-tab">ABL & Estoque</a>
-        <a href="{% url 'precos' dash.id %}" class="view-tab">Preços</a>
-        <a href="{% url 'distancias' dash.id %}" class="view-tab active">Distâncias</a>
-        <a href="{% url 'share_logistico' dash.id %}" class="view-tab">Market Share</a>
-    </div>
-    <div class="page-grid">
-        <section class="panel map-card">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">Área de Estudo & Empreendimentos</div>
-                    <div class="panel-sub">Clique nos marcadores para abrir detalhes e manter a área de estudo visível.</div>
-                </div>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    {% if usuario.role == 'admin' %}
-                    <button type="button" class="btn-action" onclick="abrirModalAreaEstudo()">Alterar Localização da Área de Estudo</button>
-                    {% endif %}
-                    <div class="badge-point badge-ref">Área de Estudo</div>
-                </div>
-            </div>
-            <div class="panel-body">
-                {% if ref_lat is not None and ref_lon is not None %}
-                    <div id="map"></div>
-                {% else %}
-                    <div class="alert-panel">
-                        Coordenadas de Área de Estudo não foram definidas. Faça upload de um dashboard logístico com latitude e longitude válidas para ver o mapa de distâncias.
-                    </div>
-                {% endif %}
-                <div class="legend" id="marker-legend"></div>
-            </div>
-        </section>
 
-        <section class="panel">
-            <div class="panel-header">
-                <div>
-                    <div class="panel-title">Empreendimentos por distância</div>
-                    <div class="panel-sub">Os pontos estão ordenados pelo menor deslocamento até a área de estudo.</div>
-                </div>
-                <div class="badge-point">{{ emps_dist_count }} pontos</div>
-            </div>
-            <div class="panel-body">
-                <div class="stats-row">
-                    <div class="stat-card">
-                        <div class="stat-label">Área de Estudo</div>
-                        <div class="stat-value">{{ ref_nome }}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Empreendimentos listados</div>
-                        <div class="stat-value">{{ emps_dist_count }}</div>
-                    </div>
-                </div>
-                <div>
-                    <div class="list-header">Tabela de distâncias</div>
-                    <div style="overflow:auto; max-height: 52vh;">
-                        <table class="distance-table">
-                            <thead>
-                                <tr>
-                                    <th>Empreendimento</th>
-                                    <th>Cidade</th>
-                                    <th class="text-right">Distância</th>
-                                    <th class="text-right">ABL</th>
-                                </tr>
-                            </thead>
-                            <tbody id="distance-body">
-                                {% for emp in emps_dist %}
-                                <tr>
-                                    <td>{{ emp.nome }}</td>
-                                    <td>{{ emp.cidade|default:'–' }}</td>
-                                    <td class="text-right">{{ emp.distancia_ref_km|floatformat:1 }} km</td>
-                                    <td class="text-right">{{ emp.abl_m2|default:0|floatformat:'0'|intcomma }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-</div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <form method="GET" action="{% url 'distancias' dash.id %}">
+            <div class="filter-section-title">Filtros</div>
 
-<div class="modal-overlay" id="modalAreaEstudo">
-    <div class="modal-box">
-        <div class="modal-title">Alterar Localização da Área de Estudo</div>
-        <div class="modal-text">Atualize o nome, as coordenadas ou informe um endereço para reposicionar o ponto de referência no mapa.</div>
-        <label class="modal-row">
-            <input type="text" id="input-ref-nome" class="modal-input" placeholder="Nome da Área de Estudo">
-        </label>
-        <div class="modal-row">
-            <input type="text" id="input-ref-lat" class="modal-input" placeholder="Latitude">
-            <input type="text" id="input-ref-lon" class="modal-input" placeholder="Longitude">
-        </div>
-        <label class="modal-row" style="grid-template-columns: 1fr; gap: 0;">
-            <input type="text" id="input-ref-endereco" class="modal-input" placeholder="Ou endereço completo para geocoding">
-        </label>
-        <div class="modal-status" id="modal-status"></div>
-        <div class="modal-actions">
-            <button type="button" class="btn-secondary" onclick="fecharModalAreaEstudo()">Cancelar</button>
-            <button type="button" class="btn-action" onclick="salvarAreaEstudo()">Salvar</button>
-        </div>
+            <div>
+                <label class="filter-label">Cidade</label>
+                <div class="ms-list">
+                    {% for c in lista_cidades %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="cidade" value="{{ c }}">
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="filter-label">Construtora</label>
+                <div class="ms-list">
+                    {% for c in lista_construtoras %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="construtora" value="{{ c }}">
+                        <span>{{ c }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="filter-label">Fase</label>
+                <div class="ms-list">
+                    {% for f in lista_fases %}
+                    <label class="ms-option">
+                        <input type="checkbox" name="fase" value="{{ f }}">
+                        <span>{{ f }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-apply">Filtrar Resultados</button>
+            <a href="{% url 'distancias' dash.id %}" class="btn-clear">Limpar Tudo</a>
+        </form>
     </div>
-</div>
+
+    <!-- Main -->
+    <div class="main-area">
+
+        <!-- Tabs -->
+        <div class="view-tabs">
+            <a href="{% url 'dashboard_logistico' dash.id %}" class="view-tab">Mapa & KPIs</a>
+            <a href="{% url 'abl_estoque' dash.id %}" class="view-tab">ABL & Estoque</a>
+            <a href="{% url 'precos' dash.id %}" class="view-tab">Preços</a>
+            <a href="{% url 'distancias' dash.id %}" class="view-tab active">Distâncias</a>
+            <a href="{% url 'share_logistico' dash.id %}" class="view-tab">Market Share</a>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-row">
+            <div class="kpi-card gold">
+                <span class="kpi-label">Área de Estudo</span>
+                <span class="kpi-value" style="font-size: 0.88rem; line-height: 1.3;">{{ ref_nome }}</span>
+                <div class="kpi-sub">ponto de referência</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">No Mapa</span>
+                <span class="kpi-value">{{ emps_dist_count }}</span>
+                <div class="kpi-sub">empreendimento{{ emps_dist_count|pluralize }} com coordenadas</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">ABL Total</span>
+                <span class="kpi-value">{{ kpis.total_abl|default:0|fmt_m2 }} m²</span>
+                <div class="kpi-sub">{{ kpis.num_empreendimentos }} empreendimento{{ kpis.num_empreendimentos|pluralize }}</div>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Vacância Física</span>
+                <span class="kpi-value">{{ kpis.pct_vacancia|default:"0" }}%</span>
+                <div class="kpi-sub">{{ kpis.modulos_disponiveis }} módulos vagos</div>
+            </div>
+        </div>
+
+        <!-- Mapa + Tabela -->
+        <div class="content-row">
+
+            <!-- Mapa -->
+            <div class="chart-card">
+                <div class="chart-title">
+                    Distâncias — {{ ref_nome }}
+                    <span style="float:right; font-size:0.63rem; color:var(--text-muted); font-weight:500; text-transform:none; margin-top:1px;">
+                        <span class="ref-dot"></span> Área de Estudo &nbsp;·&nbsp; ● Cor por construtora
+                    </span>
+                </div>
+                <div id="map"></div>
+            </div>
+
+            <!-- Tabela -->
+            <div class="chart-card">
+                <div class="chart-title">Empreendimentos por Distância</div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>Nome Empreendimento</th>
+                                <th>Cidade</th>
+                                <th>Distância</th>
+                                <th class="text-right">ABL m²</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-body">
+                            {% for emp in emps_dist %}
+                            <tr data-idx="{{ forloop.counter0 }}" onclick="focarEmpreendimento({{ forloop.counter0 }})" title="{% if emp.distancia_ref_km %}Distância: {{ emp.distancia_ref_km|floatformat:1 }} km da área de estudo{% else %}Distância não calculada{% endif %}">
+                                <td class="td-num">{{ forloop.counter }}</td>
+                                <td><span class="dot-color" id="dot-{{ forloop.counter0 }}"></span>{{ emp.nome }}</td>
+                                <td>{{ emp.cidade|default:"—" }}</td>
+                                <td class="td-dist">
+                                    {% if emp.distancia_ref_km %}{{ emp.distancia_ref_km|floatformat:1 }} km{% else %}—{% endif %}
+                                </td>
+                                <td class="td-abl">{{ emp.abl_m2|default:0|fmt_m2 }} m²</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" style="text-align:center; color:var(--text-muted); padding:40px 12px;">
+                                    Nenhum empreendimento com coordenadas cadastradas.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div><!-- .content-row -->
+    </div><!-- .main-area -->
+</div><!-- .body-wrap -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const refLat = {{ ref_lat|default:'null' }};
-    const refLon = {{ ref_lon|default:'null' }};
-    let refNome = '{{ ref_nome|escapejs }}';
-    const empreendimentos = JSON.parse('{{ dados_dist_json|escapejs }}');
-    const atualizarReferenciaUrl = '{% url "atualizar_referencia_logistico" dash.id %}';
+const DADOS_DIST        = {{ dados_dist_json|safe }};
+const CONSTRUTORAS_LIST = {{ lista_construtoras_json|safe }};
+const REF_LAT  = {{ ref_lat_json|safe }};
+const REF_LON  = {{ ref_lon_json|safe }};
+const REF_NOME = "{{ ref_nome|escapejs }}";
 
-    const markerColors = [
-        '#1d4ed8', '#059669', '#d97706', '#c026d3', '#b91c1c', '#0f766e', '#7c2d12', '#0c4a6e', '#15803d', '#7c3aed', '#0f172a', '#f97316'
-    ];
+// Mesma paleta de cores do dashboard (hsl por índice)
+const cores = {};
+CONSTRUTORAS_LIST.forEach((c, i) => {
+    cores[c] = `hsl(${(i * 137) % 360}, 65%, 48%)`;
+});
 
-    function getColor(name) {
-        const hash = [...name].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        return markerColors[hash % markerColors.length];
+function getCorConstrutora(construtora) {
+    return cores[(construtora || 'Não informado').trim()] || '#888';
+}
+
+const fmtBR    = v => new Intl.NumberFormat('pt-BR').format(Math.round(v));
+const fmtMoeda = v => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(v);
+
+const allMarkers = [];
+
+function focarEmpreendimento(idx) {
+    document.querySelectorAll('#tabela-body tr').forEach(tr => tr.classList.remove('highlighted'));
+    const row = document.querySelector(`#tabela-body tr[data-idx="${idx}"]`);
+    if (row) {
+        row.classList.add('highlighted');
+        row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+    if (allMarkers[idx]) {
+        allMarkers[idx].openPopup();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Pinta os dots da tabela com a cor da construtora correspondente
+    DADOS_DIST.forEach((item, idx) => {
+        const dot = document.getElementById(`dot-${idx}`);
+        if (dot) dot.style.background = getCorConstrutora(item.construtora);
+    });
+
+    // ── Mapa ─────────────────────────────────────────────────────────────────
+    const mapCenter = (REF_LAT && REF_LON) ? [REF_LAT, REF_LON] : [-15.78, -47.93];
+    const map = L.map('map').setView(mapCenter, 9);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const featureGroup = L.featureGroup();
+
+    // Marcador da Área de Estudo (bolinha vermelha)
+    if (REF_LAT && REF_LON) {
+        const refIcon = L.divIcon({
+            html: `<div style="
+                width: 18px; height: 18px;
+                background: #e53e3e; border: 3px solid white;
+                border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            "></div>`,
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+            className: '',
+        });
+        const refMarker = L.marker([REF_LAT, REF_LON], { icon: refIcon, zIndexOffset: 1000 });
+        refMarker.bindPopup(
+            `<b style="color:#c53030;">&#128205; ${REF_NOME}</b><br>` +
+            `<small style="color:#718096;">&#193;rea de Estudo (Refer&#234;ncia)</small>`
+        );
+        featureGroup.addLayer(refMarker);
     }
 
-    function getCookie(name) {
-        const cookieValue = document.cookie.split('; ').find(row => row.startsWith(name + '='));
-        return cookieValue ? decodeURIComponent(cookieValue.split('=')[1]) : null;
-    }
+    // Linhas e marcadores dos empreendimentos
+    DADOS_DIST.forEach((item, idx) => {
+        if (!item.lat || !item.lng) return;
 
-    function abrirModalAreaEstudo() {
-        const modal = document.getElementById('modalAreaEstudo');
-        if (!modal) return;
+        const cor = getCorConstrutora(item.construtora);
 
-        document.getElementById('input-ref-nome').value = refNome;
-        document.getElementById('input-ref-lat').value = refLat !== null ? refLat : '';
-        document.getElementById('input-ref-lon').value = refLon !== null ? refLon : '';
-        document.getElementById('input-ref-endereco').value = '';
-        document.getElementById('modal-status').textContent = '';
-        modal.classList.add('active');
-    }
-
-    function fecharModalAreaEstudo() {
-        const modal = document.getElementById('modalAreaEstudo');
-        if (!modal) return;
-        modal.classList.remove('active');
-    }
-
-    async function salvarAreaEstudo() {
-        const nome = document.getElementById('input-ref-nome').value.trim() || 'Área de Estudo';
-        const lat = document.getElementById('input-ref-lat').value.trim();
-        const lon = document.getElementById('input-ref-lon').value.trim();
-        const endereco = document.getElementById('input-ref-endereco').value.trim();
-        const status = document.getElementById('modal-status');
-
-        if (!endereco && (!lat || !lon)) {
-            status.textContent = 'Informe coordenadas ou um endereço para atualizar a Área de Estudo.';
-            return;
+        // Linha tracejada da referência ao empreendimento
+        if (REF_LAT && REF_LON) {
+            const line = L.polyline(
+                [[REF_LAT, REF_LON], [item.lat, item.lng]],
+                { color: cor, weight: 1.5, opacity: 0.40, dashArray: '5, 7' }
+            );
+            featureGroup.addLayer(line);
         }
 
-        const payload = { ref_nome: nome };
-        if (lat && lon) {
-            payload.ref_lat_direta = lat;
-            payload.ref_lon_direta = lon;
-        } else {
-            payload.ref_endereco = endereco;
-        }
-
-        status.textContent = 'Salvando...';
-
-        try {
-            const response = await fetch(atualizarReferenciaUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body: JSON.stringify(payload),
-            });
-            const data = await response.json();
-
-            if (!data.ok) {
-                status.textContent = data.erro || 'Falha ao atualizar a Área de Estudo.';
-                return;
-            }
-
-            refNome = data.ref_nome;
-            if (data.ref_lat !== undefined) {
-                window.location.reload();
-            }
-        } catch (err) {
-            status.textContent = 'Erro de conexão. Tente novamente.';
-        }
-    }
-
-    if (refLat !== null && refLon !== null && !Number.isNaN(refLat) && !Number.isNaN(refLon)) {
-        const map = L.map('map', { zoomControl: false }).setView([refLat, refLon], 9);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors',
-            maxZoom: 18,
-        }).addTo(map);
-
-        const refMarker = L.circleMarker([refLat, refLon], {
-            radius: 14,
-            color: '#b91c1c',
-            fillColor: '#f87171',
-            fillOpacity: 0.9,
+        // Marcador circular colorido pela construtora
+        const style = {
+            radius: 9,
+            fillColor: cor,
+            color: '#fff',
             weight: 2,
-        }).addTo(map).bindPopup(`<strong>${refNome}</strong>`);
+            fillOpacity: 0.88,
+        };
+        const marker = L.circleMarker([item.lat, item.lng], style);
 
-        const group = L.featureGroup([refMarker]);
-        const legend = document.getElementById('marker-legend');
-        const legendItems = new Map();
+        let popup = `<b>${item.nome}</b><br>`;
+        popup += `<span style="color:#64748b; font-size:0.85em;">${item.construtora || '&#8212;'}</span><br>`;
+        popup += `Cidade: <b>${item.cidade || '&#8212;'}</b><br>`;
+        popup += `Dist&#226;ncia: <b>${item.distancia_km.toFixed(1)} km</b><br>`;
+        popup += `ABL: <b>${fmtBR(item.abl)} m&#178;</b>`;
+        if (item.fase) popup += `<br>Fase: ${item.fase}`;
+        if (item.preco_m2_locacao > 0) popup += `<br>Loca&#231;&#227;o/m&#178;: R$ ${fmtMoeda(item.preco_m2_locacao)}`;
 
-        empreendimentos.forEach(emp => {
-            if (emp.lat == null || emp.lng == null) {
-                return;
-            }
-            const color = getColor(emp.nome || emp.cidade || String(emp.distancia_km || ''));
-            const marker = L.circleMarker([emp.lat, emp.lng], {
-                radius: 8,
-                color,
-                fillColor: color,
-                fillOpacity: 0.85,
-                weight: 1,
-            }).addTo(map);
-            marker.bindPopup(`
-                <strong>${emp.nome}</strong><br>
-                ${emp.cidade || 'Localização não definida'}<br>
-                ${emp.distancia_km.toFixed(1)} km
-            `);
-            group.addLayer(marker);
-            if (!legendItems.has(emp.nome)) {
-                legendItems.set(emp.nome, color);
+        marker.bindPopup(popup);
+        marker.on('click', () => {
+            document.querySelectorAll('#tabela-body tr').forEach(tr => tr.classList.remove('highlighted'));
+            const row = document.querySelector(`#tabela-body tr[data-idx="${idx}"]`);
+            if (row) {
+                row.classList.add('highlighted');
+                row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         });
 
-        if (group.getLayers().length > 1) {
-            map.fitBounds(group.getBounds(), { padding: [40, 40] });
-        }
+        allMarkers[idx] = marker;
+        featureGroup.addLayer(marker);
+    });
 
-        map.whenReady(() => {
-            setTimeout(() => map.invalidateSize(), 250);
-        });
-        window.setTimeout(() => map.invalidateSize(), 500);
-
-        legendItems.forEach((name, color) => {
-            const item = document.createElement('div');
-            item.className = 'legend-item';
-            item.innerHTML = `<span class="legend-swatch" style="background:${color}"></span> ${name}`;
-            legend.appendChild(item);
-        });
-
-        const refLegend = document.createElement('div');
-        refLegend.className = 'legend-item';
-        refLegend.innerHTML = `<span class="legend-swatch" style="background:#f87171"></span> ${refNome}`;
-        legend.prepend(refLegend);
+    featureGroup.addTo(map);
+    if (featureGroup.getLayers().length > 0) {
+        map.fitBounds(featureGroup.getBounds().pad(0.12));
     }
+    setTimeout(() => map.invalidateSize(), 250);
+
+    // Restaura checkboxes marcados com base nos parâmetros da URL
+    const params = new URLSearchParams(window.location.search);
+    document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+        if (params.getAll(cb.name).includes(cb.value)) cb.checked = true;
+    });
+
+}); // fim DOMContentLoaded
 </script>
 </body>
 </html>

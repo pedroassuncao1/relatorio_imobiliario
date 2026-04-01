@@ -1,4 +1,4 @@
-{% load static humanize %}
+{% load static humanize fmt_filters %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -168,7 +168,7 @@
         <div class="kpi-row">
             <div class="kpi-card gold">
                 <span class="kpi-label">ABL Total</span>
-                <span class="kpi-value">{{ kpis.total_abl|default:0|floatformat:"0"|intcomma }} m²</span>
+                <span class="kpi-value">{{ kpis.total_abl|default:0|fmt_m2 }} m²</span>
                 <div class="kpi-sub">{{ kpis.num_empreendimentos }} empreendimento{{ kpis.num_empreendimentos|pluralize }}</div>
             </div>
             <div class="kpi-card">
@@ -233,7 +233,7 @@
                             <td class="fw-bold">{{ emp.nome }}</td>
                             <td>{{ emp.cidade|default:"—" }}</td>
                             <td>{{ emp.construtora|default:"—" }}</td>
-                            <td class="text-right fw-bold">{{ emp.abl_m2|floatformat:"0" }}</td>
+                            <td class="text-right fw-bold">{{ emp.abl_m2|fmt_m2|default:"—" }}</td>
                             <td class="text-center">{{ emp.num_modulos|default:"—" }}</td>
                             <td class="text-center">{{ emp.modulos_ocupados|default:"—" }}</td>
                             <td class="text-center">{{ emp.modulos_disponiveis|default:"—" }}</td>
@@ -283,7 +283,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-        // 1. ABL por Empreendimento (barras verticais)
+        // 1. ABL por Empreendimento (barras horizontais)
         new Chart(document.getElementById('chartABL'), {
             type: 'bar',
             data: {
@@ -296,6 +296,7 @@
                 }]
             },
             options: {
+                indexAxis: 'y',
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
@@ -306,13 +307,13 @@
                     }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 10 }, autoSkip: false, maxRotation: 45, minRotation: 10 } },
-                    y: { grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 }, callback: v => fmtBR(v) } }
+                    x: { grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 }, callback: v => fmtBR(v) } },
+                    y: { grid: { display: false }, ticks: { font: { size: 10 }, autoSkip: false } }
                 }
             }
         });
 
-        // 2. Módulos: Ocupados vs Disponíveis (stacked)
+        // 2. Módulos: Ocupados vs Disponíveis (stacked horizontal)
         new Chart(document.getElementById('chartModulos'), {
             type: 'bar',
             data: {
@@ -333,13 +334,14 @@
                 ]
             },
             options: {
+                indexAxis: 'y',
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
                 },
                 scales: {
-                    x: { stacked: true, grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 }, autoSkip: false, maxRotation: 45, minRotation: 10 } },
-                    y: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } }
+                    x: { stacked: true, grid: { color: '#f0f4fb' }, ticks: { font: { size: 10 } } },
+                    y: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 }, autoSkip: false } }
                 }
             }
         });

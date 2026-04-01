@@ -1,4 +1,4 @@
-{% load static %}
+{% load static fmt_filters %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -217,7 +217,7 @@
                         <tr class="row-emp">
                             <td>{{ item.emp.nome }}</td>
                             <td>{{ item.emp.cidade|default:"—" }}</td>
-                            <td class="text-right">{{ item.emp.area_modulo_m2|floatformat:"0"|default:"—" }}</td>
+                            <td class="text-right">{{ item.emp.area_modulo_m2|fmt_m2|default:"—" }}</td>
                             <td class="text-right price-col">
                                 {% if item.emp.preco_m2_locacao %}R$ {{ item.emp.preco_m2_locacao|floatformat:2 }}{% else %}—{% endif %}
                             </td>
@@ -238,11 +238,11 @@
                         {% for tip in item.tipologias %}
                         <tr class="row-tip">
                             <td class="indent">
-                                └ <span class="chip chip-area">{{ tip.area_modulo_m2|floatformat:"0" }} m²</span>
+                                └ <span class="chip chip-area">{{ tip.area_modulo_m2|fmt_m2|default:"—" }} m²</span>
                                 &nbsp;{{ tip.num_modulos|default:"" }}{% if tip.num_modulos %} módulo{{ tip.num_modulos|pluralize }}{% endif %}
                             </td>
                             <td style="color:var(--text-muted); font-size:0.72rem;">tipologia</td>
-                            <td class="text-right" style="font-size:0.75rem;">{{ tip.area_modulo_m2|floatformat:"0" }}</td>
+                            <td class="text-right" style="font-size:0.75rem;">{{ tip.area_modulo_m2|fmt_m2|default:"—" }}</td>
                             <td class="text-right price-col" style="font-size:0.75rem;">
                                 {% if tip.preco_m2_locacao %}R$ {{ tip.preco_m2_locacao|floatformat:2 }}{% else %}—{% endif %}
                             </td>
