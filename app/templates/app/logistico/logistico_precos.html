@@ -62,7 +62,7 @@
         .chart-card { background: white; border-radius: 12px; padding: 15px; border: 1px solid var(--border); display: flex; flex-direction: column; }
         .chart-card.full { grid-column: 1 / -1; }
         .chart-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--blue-deep); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
-        .chart-wrap { position: relative; height: 300px; }
+        .chart-wrap { position: relative; min-height: 300px; overflow-y: auto; }
 
         /* Tabela hierárquica */
         .table-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; }
@@ -297,7 +297,7 @@
 <script>
     const DADOS = {{ dados_precos_json|safe }};
 
-    const trunc = (s, n=20) => s.length > n ? s.slice(0, n) + '…' : s;
+    const trunc = (s, n=28) => s.length > n ? s.slice(0, n) + '…' : s;
     const fmtR  = (v) => 'R$ ' + new Intl.NumberFormat('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}).format(v);
 
     // KPI Custo Total Médio
@@ -308,19 +308,19 @@
         document.getElementById('val-total').textContent = '—';
     }
 
+    function setChartHeight(canvasId, numItems) {
+        const h = Math.max(300, numItems * 32);
+        const wrap = document.getElementById(canvasId).parentElement;
+        wrap.style.height = h + 'px';
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const labels = DADOS.map(d => trunc(d.nome));
 
-        // 1. Locação por empreendimento (horizontal, gradiente por valor)
-        const maxLoc = Math.max(...DADOS.map(d => d.pm2_locacao), 1);
-        const coresLoc = DADOS.map(d => {
-            const pct = d.pm2_locacao / maxLoc;
-            const r = Math.round(26 + pct * 0);
-            const g = Math.round(35 + pct * 30);
-            const b = Math.round(126 + pct * 100);
-            return `rgba(${r}, ${g}, ${b}, ${0.5 + pct * 0.5})`;
-        });
+        setChartHeight('chartLocacao', DADOS.length);
+        setChartHeight('chartComposicao', DADOS.length);
 
+        // 1. Locação por empreendimento (horizontal, gradiente por valor)
         new Chart(document.getElementById('chartLocacao'), {
             type: 'bar',
             data: {
@@ -337,7 +337,12 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { callbacks: { label: ctx => ' ' + fmtR(ctx.raw) } }
+                    tooltip: {
+                        callbacks: {
+                            title: ctx => DADOS[ctx[0].dataIndex].nome,
+                            label: ctx => ' ' + fmtR(ctx.raw)
+                        }
+                    }
                 },
                 scales: {
                     x: {
@@ -382,6 +387,7 @@
                     legend: { display: false },
                     tooltip: {
                         callbacks: {
+                            title: ctx => DADOS[ctx[0].dataIndex].nome,
                             label: ctx => ' ' + ctx.dataset.label + ': ' + fmtR(ctx.raw)
                         }
                     }
